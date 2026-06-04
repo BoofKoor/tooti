@@ -1,10 +1,12 @@
+import { Text } from '@/components/ui';
+
 export default function GuidePage() {
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-3 px-6 text-center">
-      <h1 className="text-2xl font-extrabold text-text-1">Guide</h1>
-      <p className="text-text-2">
-        Browse the grammar reference any time. Content lands in Phase 5.
-      </p>
-    </main>
+    <div className="flex flex-1 flex-col items-center justify-center gap-2 px-6 text-center">
+      <Text variant="section" as="h1">
+        Guide
+      </Text>
+      <Text variant="body">Browse the grammar reference any time. Content lands in Phase 5.</Text>
+    </div>
   );
 }

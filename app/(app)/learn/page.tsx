@@ -1,10 +1,14 @@
+import { Text } from '@/components/ui';
+
 export default function LearnPage() {
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-3 px-6 text-center">
-      <h1 className="text-2xl font-extrabold text-text-1">Learn</h1>
-      <p className="text-text-2">
-        The Tenses lesson path (with future topics as locked “soon” nodes) lands in Phase 2.
-      </p>
-    </main>
+    <div className="flex flex-1 flex-col items-center justify-center gap-2 px-6 text-center">
+      <Text variant="section" as="h1">
+        Learn
+      </Text>
+      <Text variant="body">
+        The Tenses lesson path (future topics as locked “soon” nodes) lands in Batch 2B.
+      </Text>
+    </div>
   );
 }

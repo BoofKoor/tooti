@@ -103,6 +103,10 @@ const config: Config = {
         streak: 'var(--grad-streak)',
         unit: 'var(--grad-unit)',
       },
+      maxWidth: {
+        // Mobile app column width (Phase 2 app shell).
+        app: 'var(--app-max-w)',
+      },
       fontFamily: {
         en: ['var(--font-en)'],
         'fa-display': ['var(--font-display-fa)'],
