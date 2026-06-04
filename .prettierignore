@@ -1,0 +1,11 @@
+node_modules
+.next
+out
+build
+coverage
+next-env.d.ts
+package-lock.json
+pnpm-lock.yaml
+
+# Reference material — committed as-is, not ours to format.
+design
