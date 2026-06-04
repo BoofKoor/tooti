@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, Toast } from '@/components/ui';
+import { Button, TabBar, Toast } from '@/components/ui';
 import { icons } from './_icons';
 
 /** Interactive toast demo — verifies the onClose path + the drop-in animation. */
@@ -26,4 +26,10 @@ export function ToastDemo() {
       )}
     </div>
   );
+}
+
+/** Interactive TabBar — clicking a tab moves the dot + notch. */
+export function TabBarDemo() {
+  const [active, setActive] = useState('learn');
+  return <TabBar activeId={active} onTabChange={setActive} />;
 }

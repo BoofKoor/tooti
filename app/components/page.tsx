@@ -6,13 +6,14 @@ import {
   Card,
   EmptyState,
   ErrorState,
+  Mascot,
   Skeleton,
   Spinner,
   Text,
   Toast,
 } from '@/components/ui';
-import { icons, placeholderArt } from './_icons';
-import { ToastDemo } from './_demos';
+import { icons } from './_icons';
+import { TabBarDemo, ToastDemo } from './_demos';
 
 export const metadata: Metadata = {
   title: 'Tooti · Components',
@@ -41,6 +42,8 @@ function Row({ children }: { children: ReactNode }) {
   return <div className="flex flex-wrap items-center gap-4">{children}</div>;
 }
 
+const mascotPoses = ['encourage', 'celebrate', 'think', 'reassure'] as const;
+
 export default function ComponentsPage() {
   return (
     <main className="mx-auto flex max-w-3xl flex-col gap-12 px-6 py-12">
@@ -48,7 +51,7 @@ export default function ComponentsPage() {
         <Text variant="display" as="h1">
           Component library
         </Text>
-        <Text variant="caption">Phase 1 · Batch A + B</Text>
+        <Text variant="caption">Phase 1 · Batch A + B + C1</Text>
       </header>
 
       <Section title="Button" hint="Hover & press to feel the tactile press-edge.">
@@ -233,14 +236,14 @@ export default function ComponentsPage() {
       <Section title="Empty & Error states" hint="Reusable StateView presets.">
         <div className="grid gap-6 sm:grid-cols-2">
           <EmptyState
-            illustration={placeholderArt}
+            illustration={<Mascot pose="encourage" />}
             title="No lessons yet"
             description="Start your first Tenses lesson to begin building your streak."
             primaryAction={<Button>Start learning</Button>}
             tag="Empty"
           />
           <ErrorState
-            illustration={placeholderArt}
+            illustration={<Mascot pose="reassure" />}
             title="Something went wrong"
             description="We could not load your progress. Check your connection and try again."
             primaryAction={<Button variant="secondary">Try again</Button>}
@@ -248,6 +251,29 @@ export default function ComponentsPage() {
             tag="Error"
           />
         </div>
+      </Section>
+
+      <Section title="TabBar" hint="Notched floating-active — click a tab to move the dot + notch.">
+        <TabBarDemo />
+      </Section>
+
+      <Section
+        title="Mascot"
+        hint="Four brand poses · SVG copied verbatim, gradient ids namespaced per instance."
+      >
+        <div className="flex flex-wrap items-end gap-8">
+          {mascotPoses.map((pose) => (
+            <div key={pose} className="flex flex-col items-center gap-2">
+              <Mascot pose={pose} size={120} title={pose} />
+              <Text variant="caption">{pose}</Text>
+            </div>
+          ))}
+        </div>
+        <Row>
+          {mascotPoses.map((pose) => (
+            <Mascot key={pose} pose={pose} size={64} title={pose} />
+          ))}
+        </Row>
       </Section>
     </main>
   );
