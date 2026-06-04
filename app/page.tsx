@@ -1,38 +1,44 @@
-import Link from 'next/link';
-import { fa } from '@/lib/i18n/fa';
+'use client';
 
-export default function HomePage() {
+import { useRouter } from 'next/navigation';
+import { Button, Mascot, Text } from '@/components/ui';
+
+export default function WelcomePage() {
+  const router = useRouter();
+
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-6 px-6 py-12 text-center">
-      <span
-        aria-hidden
-        className="inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-primary-tint text-4xl shadow-2"
-      >
-        🦜
-      </span>
+    <main className="mx-auto flex min-h-dvh max-w-app flex-col items-center justify-center gap-8 px-6 py-12 text-center">
+      <Mascot pose="encourage" size={140} />
 
-      <div className="flex flex-col gap-2">
-        <h1 className="text-4xl font-extrabold text-text-1">Tooti</h1>
-        <p className="text-text-2">Learn English, the playful way.</p>
-        {/* Persian island (onboarding/welcome is comprehension-critical — §2). */}
-        <p dir="rtl" className="fa text-text-3">
-          {fa.welcome.tagline}
-        </p>
+      {/* Wordmark — welcome is a Persian-allowed island (handoff §2). */}
+      <div className="flex flex-col items-center gap-1">
+        <Text variant="display" as="h1">
+          Tooti
+        </Text>
+        <Text variant="display" fa as="p">
+          طوطی
+        </Text>
       </div>
 
-      <div className="flex w-full flex-col gap-3">
-        <Link
-          href="/learn"
-          className="rounded-pill bg-primary px-6 py-3 font-bold text-text-inverse shadow-2 transition-transform duration-fast ease-playful hover:-translate-y-0.5"
+      <div className="flex flex-col items-center gap-2">
+        <Text variant="body">Learn English, the playful way.</Text>
+        <Text variant="body" fa>
+          انگلیسی را بازی‌گونه یاد بگیر.
+        </Text>
+      </div>
+
+      <div className="flex w-full max-w-xs flex-col items-center gap-3">
+        <Button className="w-full" onClick={() => router.push('/learn')}>
+          Get started
+        </Button>
+        {/* Auth lands in Phase 3 — placeholder route for now. */}
+        <button
+          type="button"
+          onClick={() => router.push('/learn')}
+          className="text-sm font-bold text-text-3 transition-colors duration-fast ease-out hover:text-text-1"
         >
-          Start learning
-        </Link>
-        <Link
-          href="/tokens"
-          className="rounded-pill bg-surface px-6 py-3 font-bold text-text-2 shadow-1 ring-1 ring-border transition-colors duration-fast hover:bg-surface-2"
-        >
-          View design tokens
-        </Link>
+          I already have an account
+        </button>
       </div>
     </main>
   );
