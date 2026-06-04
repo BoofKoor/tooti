@@ -29,10 +29,11 @@ const functionalColors = [
   '--color-error-tint',
 ];
 
-const gradients = ['--grad-xp'];
+const gradients = ['--grad-xp', '--grad-streak', '--grad-unit'];
 
 const playfulColors = [
   '--color-purple',
+  '--color-purple-ink',
   '--color-pink',
   '--color-pink-ink',
   '--color-pink-tint',

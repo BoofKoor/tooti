@@ -98,8 +98,10 @@ const config: Config = {
         '4': 'var(--shadow-4)',
       },
       backgroundImage: {
-        // Gradient token (--grad-xp); usable as `bg-xp`.
+        // Gradient tokens; usable as `bg-xp` / `bg-streak` / `bg-unit`.
         xp: 'var(--grad-xp)',
+        streak: 'var(--grad-streak)',
+        unit: 'var(--grad-unit)',
       },
       fontFamily: {
         en: ['var(--font-en)'],

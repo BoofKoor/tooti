@@ -103,6 +103,82 @@
     --dur-base: 240ms;
     --dur-slow: 360ms;
     --dur-celebrate: 600ms;
+
+    /* ───────────────────────────────────────────────────────────────
+       Phase 1 · Batch A — component tokens (primitives).
+       The .tsx component files reference these only; no raw hex/px/ms
+       lives outside this token block.
+       ─────────────────────────────────────────────────────────────── */
+
+    /* Badge gradients + inks */
+    --grad-streak: linear-gradient(180deg, #ffb459, var(--color-streak));
+    --grad-unit: linear-gradient(180deg, #d27ef7, var(--color-purple));
+    --color-purple-ink: #9134cc;
+
+    /* Focus ring */
+    --focus-ring: 3px;
+
+    /* Type scale — English (Nunito) */
+    --text-display: 52px;
+    --text-section: 26px;
+    --text-body: 17px;
+    --text-caption: 13px;
+
+    /* Type scale — Persian (Lalezar display / Vazirmatn body) */
+    --text-display-fa: 56px;
+    --text-section-fa: 28px;
+    --text-body-fa: 17px;
+    --text-caption-fa: 13px;
+
+    /* Button — tactile lift + border width */
+    --btn-lift: 1px;
+    --btn-border: 2px;
+
+    /* Button sizes — height / font-size / padding-y / padding-x */
+    --btn-h-sm: 48px;
+    --btn-fs-sm: 14.5px;
+    --btn-py-sm: 12px;
+    --btn-px-sm: 14px;
+    --btn-h-md: 54px;
+    --btn-fs-md: 16px;
+    --btn-py-md: 14px;
+    --btn-px-md: 26px;
+    --btn-h-lg: 60px;
+    --btn-fs-lg: 17px;
+    --btn-py-lg: 16px;
+    --btn-px-lg: 28px;
+
+    /* Button — secondary insets (compensate the 2px border) */
+    --btn-sec-py: 12px;
+    --btn-sec-px: 24px;
+
+    /* Button — loading dots */
+    --btn-dot-size: 11px;
+    --btn-dot-gap: 9px;
+    --btn-dot-jump: 6px;
+    --btn-dot-dur: 1s;
+    --btn-dot-delay-2: 0.14s;
+    --btn-dot-delay-3: 0.28s;
+
+    /* Badge — gap, edge, label */
+    --badge-edge: 3px;
+    --badge-gap: 6px;
+    --badge-label-fs: 12.5px;
+
+    /* Badge sizes — padding-y / padding-x / font-size / icon / num */
+    --badge-py-sm: 4px;
+    --badge-px-sm: 9px;
+    --badge-fs-sm: 12px;
+    --badge-icon-sm: 13px;
+    --badge-py-md: 7px;
+    --badge-px-md: 12px;
+    --badge-fs-md: 14px;
+    --badge-icon-md: 16px;
+    --badge-py-lg: 9px;
+    --badge-px-lg: 14px;
+    --badge-fs-lg: 15px;
+    --badge-icon-lg: 18px;
+    --badge-num-lg: 16px;
   }
 
   /* English-first / LTR default. */
@@ -119,4 +195,314 @@
 }
 .fa-display {
   font-family: var(--font-display-fa);
+}
+
+/*
+ * Phase 1 · Batch A — primitive component classes.
+ * Every value comes from a token above; these rules reference only
+ * var(--token), so the .tsx files stay free of raw hex/px/ms. Class names
+ * are applied as literal strings in the components so Tailwind keeps them.
+ */
+@layer components {
+  /* Button ----------------------------------------------------------- */
+  .btn {
+    --btn-bg: var(--color-primary);
+    --btn-fg: var(--color-text-inverse);
+    --btn-ink: var(--color-primary-ink);
+    --btn-bg-hover: color-mix(in srgb, var(--color-primary), white 10%);
+    --btn-bg-active: var(--color-primary-ink);
+    --btn-h: var(--btn-h-md);
+    --btn-fs: var(--btn-fs-md);
+    --btn-py: var(--btn-py-md);
+    --btn-px: var(--btn-px-md);
+
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: var(--btn-h);
+    padding: var(--btn-py) var(--btn-px);
+    border: 0;
+    border-radius: var(--radius-lg);
+    font-family: var(--font-en);
+    font-size: var(--btn-fs);
+    font-weight: 800;
+    line-height: 1;
+    color: var(--btn-fg);
+    background: var(--btn-bg);
+    box-shadow:
+      0 var(--press-edge) 0 var(--btn-ink),
+      var(--shadow-2);
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      transform var(--dur-fast) var(--ease-out),
+      box-shadow var(--dur-fast) var(--ease-out),
+      background-color var(--dur-base) var(--ease-out),
+      border-color var(--dur-base) var(--ease-out);
+  }
+
+  .btn:focus-visible {
+    outline: var(--focus-ring) solid var(--color-primary);
+    outline-offset: var(--focus-ring);
+  }
+
+  .btn:not(:disabled):hover {
+    background: var(--btn-bg-hover);
+    transform: translateY(calc(-1 * var(--btn-lift)));
+    box-shadow:
+      0 calc(var(--press-edge) + var(--btn-lift)) 0 var(--btn-ink),
+      var(--shadow-3);
+  }
+
+  .btn:not(:disabled):active {
+    background: var(--btn-bg-active);
+    transform: translateY(var(--press-edge));
+    box-shadow:
+      0 0 0 var(--btn-ink),
+      var(--shadow-1);
+  }
+
+  /* Variants */
+  .btn--primary {
+    --btn-bg: var(--color-primary);
+    --btn-ink: var(--color-primary-ink);
+    --btn-bg-hover: color-mix(in srgb, var(--color-primary), white 10%);
+    --btn-bg-active: var(--color-primary-ink);
+  }
+  .btn--confirm {
+    --btn-bg: var(--color-correct);
+    --btn-ink: var(--color-correct-ink);
+    --btn-bg-hover: color-mix(in srgb, var(--color-correct), white 10%);
+    --btn-bg-active: var(--color-correct-ink);
+  }
+  .btn--secondary {
+    --btn-bg: var(--color-surface);
+    --btn-fg: var(--color-text-1);
+    --btn-ink: var(--color-border-strong);
+    --btn-bg-hover: var(--color-surface-2);
+    --btn-bg-active: var(--color-surface-3);
+    border: var(--btn-border) solid var(--color-border-strong);
+    padding: var(--btn-sec-py) var(--btn-sec-px);
+  }
+  .btn--secondary:not(:disabled):hover {
+    border-color: var(--color-text-3);
+  }
+
+  /* Sizes */
+  .btn--sm {
+    --btn-h: var(--btn-h-sm);
+    --btn-fs: var(--btn-fs-sm);
+    --btn-py: var(--btn-py-sm);
+    --btn-px: var(--btn-px-sm);
+  }
+  .btn--md {
+    --btn-h: var(--btn-h-md);
+    --btn-fs: var(--btn-fs-md);
+    --btn-py: var(--btn-py-md);
+    --btn-px: var(--btn-px-md);
+  }
+  .btn--lg {
+    --btn-h: var(--btn-h-lg);
+    --btn-fs: var(--btn-fs-lg);
+    --btn-py: var(--btn-py-lg);
+    --btn-px: var(--btn-px-lg);
+  }
+
+  /* Disabled (not loading) */
+  .btn:disabled {
+    cursor: not-allowed;
+  }
+  .btn:disabled:not(.btn--loading) {
+    --btn-bg: var(--color-surface-3);
+    --btn-fg: var(--color-text-3);
+    border-color: transparent;
+    box-shadow: 0 var(--press-edge) 0 var(--color-border-strong);
+  }
+
+  /* Loading — keep variant colours, hide the label, animate the dots */
+  .btn--loading {
+    pointer-events: none;
+  }
+  .btn--loading:disabled {
+    cursor: wait;
+  }
+  .btn--loading .btn__label {
+    visibility: hidden;
+  }
+  .btn__label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .btn__dots {
+    position: absolute;
+    inset: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--btn-dot-gap);
+  }
+  .btn__dot {
+    width: var(--btn-dot-size);
+    height: var(--btn-dot-size);
+    border-radius: var(--radius-pill);
+    background: currentColor;
+    animation: btn-dot var(--btn-dot-dur) var(--ease-out) infinite;
+  }
+  .btn__dot:nth-child(2) {
+    animation-delay: var(--btn-dot-delay-2);
+  }
+  .btn__dot:nth-child(3) {
+    animation-delay: var(--btn-dot-delay-3);
+  }
+
+  /* Badge ------------------------------------------------------------ */
+  .badge {
+    --badge-py: var(--badge-py-md);
+    --badge-px: var(--badge-px-md);
+    --badge-fs: var(--badge-fs-md);
+    --badge-icon: var(--badge-icon-md);
+    --badge-num: var(--badge-fs-md);
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--badge-gap);
+    padding: var(--badge-py) var(--badge-px);
+    border-radius: var(--radius-pill);
+    font-family: var(--font-en);
+    font-size: var(--badge-fs);
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--color-text-inverse);
+  }
+  .badge__icon {
+    display: inline-flex;
+    align-items: center;
+    font-size: var(--badge-icon);
+  }
+  .badge__num {
+    font-variant-numeric: tabular-nums;
+    font-size: var(--badge-num);
+    font-weight: 800;
+  }
+  .badge__label {
+    font-size: var(--badge-label-fs);
+    opacity: 0.9;
+  }
+  .badge--sm {
+    --badge-py: var(--badge-py-sm);
+    --badge-px: var(--badge-px-sm);
+    --badge-fs: var(--badge-fs-sm);
+    --badge-icon: var(--badge-icon-sm);
+    --badge-num: var(--badge-fs-sm);
+  }
+  .badge--md {
+    --badge-py: var(--badge-py-md);
+    --badge-px: var(--badge-px-md);
+    --badge-fs: var(--badge-fs-md);
+    --badge-icon: var(--badge-icon-md);
+    --badge-num: var(--badge-fs-md);
+  }
+  .badge--lg {
+    --badge-py: var(--badge-py-lg);
+    --badge-px: var(--badge-px-lg);
+    --badge-fs: var(--badge-fs-lg);
+    --badge-icon: var(--badge-icon-lg);
+    --badge-num: var(--badge-num-lg);
+  }
+  .badge--streak {
+    background: var(--grad-streak);
+    box-shadow:
+      0 var(--badge-edge) 0 var(--color-streak-ink),
+      var(--shadow-1);
+  }
+  .badge--xp {
+    background: var(--grad-xp);
+    box-shadow:
+      0 var(--badge-edge) 0 var(--color-xp-ink),
+      var(--shadow-1);
+  }
+  .badge--unit {
+    background: var(--grad-unit);
+    box-shadow:
+      0 var(--badge-edge) 0 var(--color-purple-ink),
+      var(--shadow-1);
+  }
+
+  /* Typography ------------------------------------------------------- */
+  .t-display {
+    font-family: var(--font-en);
+    font-size: var(--text-display);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+  }
+  .t-section {
+    font-family: var(--font-en);
+    font-size: var(--text-section);
+    font-weight: 800;
+    line-height: 1.3;
+    letter-spacing: -0.005em;
+  }
+  .t-body {
+    font-family: var(--font-en);
+    font-size: var(--text-body);
+    font-weight: 500;
+    line-height: 1.6;
+  }
+  .t-caption {
+    font-family: var(--font-en);
+    font-size: var(--text-caption);
+    font-weight: 700;
+    line-height: 1.45;
+    color: var(--color-text-2);
+  }
+  .t-display-fa {
+    font-family: var(--font-display-fa);
+    font-size: var(--text-display-fa);
+    font-weight: 400;
+    line-height: 1.08;
+  }
+  .t-section-fa {
+    font-family: var(--font-body-fa);
+    font-size: var(--text-section-fa);
+    font-weight: 700;
+    line-height: 1.35;
+  }
+  .t-body-fa {
+    font-family: var(--font-body-fa);
+    font-size: var(--text-body-fa);
+    font-weight: 400;
+    line-height: 1.75;
+  }
+  .t-caption-fa {
+    font-family: var(--font-body-fa);
+    font-size: var(--text-caption-fa);
+    font-weight: 500;
+    line-height: 1.55;
+    color: var(--color-text-2);
+  }
+}
+
+@keyframes btn-dot {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.35;
+  }
+  40% {
+    transform: translateY(calc(-1 * var(--btn-dot-jump)));
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn__dot {
+    animation: none;
+  }
 }
