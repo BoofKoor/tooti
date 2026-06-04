@@ -27,3 +27,6 @@ export type { TabBarProps, TabItem } from './TabBar';
 
 export { Mascot } from './Mascot';
 export type { MascotProps, MascotPose } from './Mascot';
+
+export { Medal } from './Medal';
+export type { MedalProps, MedalType, MedalState } from './Medal';
