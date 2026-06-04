@@ -1,0 +1,15 @@
+// Tooti — Prisma schema (placeholder).
+//
+// The real data model (User, Progress, Unit / Lesson / Exercise,
+// LessonCompletion, Medal / Achievement) is specced and built in Phase 3.
+// This stub only reserves the file from handoff §3; the datasource/generator
+// are pre-wired so Phase 3 can add models and run the first migration.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}

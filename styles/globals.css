@@ -1,0 +1,122 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Design tokens — single source of truth (handoff §5).
+ * Values are copied verbatim from the handoff. Do not invent or alter them;
+ * everything else (Tailwind utilities, inline styles) references these via
+ * `var(--token)` so no raw hex/px/ms is hardcoded anywhere else.
+ */
+@layer base {
+  :root {
+    /* Color · functional */
+    --color-primary: #0a84ff;
+    --color-primary-ink: #0066d6;
+    --color-primary-tint: #e5f1ff;
+    --color-correct: #34c759;
+    --color-correct-ink: #1f9d45;
+    --color-correct-tint: #e3f8e9;
+    --color-streak: #ff9500;
+    --color-streak-ink: #d97700;
+    --color-streak-tint: #fff1dd;
+    --color-xp: #f2a81c;
+    --color-xp-ink: #c9820a;
+    --color-xp-tint: #fff3d6;
+    --grad-xp: linear-gradient(180deg, #ffc93d, #e09a12);
+    --color-error: #ff3b30;
+    --color-error-ink: #d7271d;
+    --color-error-tint: #ffe5e3;
+
+    /* Color · playful (categories, medals, accents) */
+    --color-purple: #bf5af2;
+    --color-pink: #ff375f;
+    --color-pink-ink: #c71f40;
+    --color-pink-tint: #ffe4eb;
+    --color-teal: #64d2ff;
+    --color-yellow: #ffd60a;
+    --color-parrot: #2bb7a3;
+    --color-parrot-ink: #1f9c8b;
+    --color-parrot-tint: #dcf3ee;
+
+    /* Color · neutrals (light theme only) */
+    --color-bg: #f6f8fb;
+    --color-surface: #ffffff;
+    --color-surface-2: #f1f4f9;
+    --color-surface-3: #e7ecf3;
+    --color-border: #e2e7ee;
+    --color-border-strong: #c9d0dc;
+    --color-text-1: #14171d;
+    --color-text-2: #4b5260;
+    --color-text-3: #8a909c;
+    --color-text-inverse: #ffffff;
+
+    /* Spacing (4-base) */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+    --space-16: 64px;
+    --space-20: 80px;
+
+    /* Radius */
+    --radius-xs: 6px;
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: 18px;
+    --radius-xl: 22px;
+    --radius-2xl: 28px;
+    --radius-pill: 9999px;
+
+    /* Elevation (cool-slate tinted) */
+    --shadow-1: 0 1px 2px rgba(20, 28, 50, 0.05), 0 1px 1px rgba(20, 28, 50, 0.04);
+    --shadow-2: 0 2px 4px rgba(20, 28, 50, 0.05), 0 6px 14px rgba(20, 28, 50, 0.06);
+    --shadow-3: 0 4px 8px rgba(20, 28, 50, 0.06), 0 14px 30px rgba(20, 28, 50, 0.09);
+    --shadow-4: 0 10px 20px rgba(20, 28, 50, 0.09), 0 28px 60px rgba(20, 28, 50, 0.15);
+
+    /* Tactile press edge (button's darker bottom lip) */
+    --press-edge: 4px;
+    --press-edge-color: rgba(0, 0, 0, 0.22);
+    --press-edge-soft: rgba(0, 0, 0, 0.12);
+
+    /*
+     * Type families. Nunito / Lalezar / Vazirmatn are loaded via next/font
+     * (lib/fonts.ts) and exposed on <html> as --font-nunito / --font-lalezar /
+     * --font-vazirmatn. These public tokens keep the §5 names + fallbacks while
+     * pointing at the actually-loaded faces.
+     */
+    --font-en: var(--font-nunito), system-ui, sans-serif;
+    --font-display-fa: var(--font-lalezar), system-ui, sans-serif;
+    --font-body-fa: var(--font-vazirmatn), system-ui, sans-serif;
+
+    /* Motion */
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* entrance: fades, slide-ins */
+    --ease-playful: cubic-bezier(0.34, 1.4, 0.64, 1); /* buttons, tab bar, toasts (overshoot) */
+    --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1); /* alias -> playful */
+    --dur-instant: 100ms;
+    --dur-fast: 160ms;
+    --dur-base: 240ms;
+    --dur-slow: 360ms;
+    --dur-celebrate: 600ms;
+  }
+
+  /* English-first / LTR default. */
+  html {
+    background: var(--color-bg);
+    color: var(--color-text-1);
+    font-family: var(--font-en);
+  }
+}
+
+/* Persian islands opt in (handoff §2). */
+.fa {
+  font-family: var(--font-body-fa);
+}
+.fa-display {
+  font-family: var(--font-display-fa);
+}
