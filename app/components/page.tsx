@@ -1,6 +1,18 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
-import { Badge, Button, Card, Text } from '@/components/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  EmptyState,
+  ErrorState,
+  Skeleton,
+  Spinner,
+  Text,
+  Toast,
+} from '@/components/ui';
+import { icons, placeholderArt } from './_icons';
+import { ToastDemo } from './_demos';
 
 export const metadata: Metadata = {
   title: 'Tooti · Components',
@@ -36,7 +48,7 @@ export default function ComponentsPage() {
         <Text variant="display" as="h1">
           Component library
         </Text>
-        <Text variant="caption">Phase 1 · Batch A — primitives</Text>
+        <Text variant="caption">Phase 1 · Batch A + B</Text>
       </header>
 
       <Section title="Button" hint="Hover & press to feel the tactile press-edge.">
@@ -167,6 +179,74 @@ export default function ComponentsPage() {
               <Badge variant="xp" size="lg" icon="⭐" value={250} label="XP" />
             </Row>
           </div>
+        </div>
+      </Section>
+
+      <Section
+        title="Toast"
+        hint="Presentational — 4 types. Queue / auto-dismiss arrives with screen wiring."
+      >
+        <div className="flex max-w-md flex-col gap-3">
+          <Toast type="success" title="Correct!" sub="Nice work." icon={icons.success} />
+          <Toast
+            type="reward"
+            title="+20 XP earned"
+            sub="Daily goal in sight."
+            icon={icons.reward}
+          />
+          <Toast type="error" title="Not quite" sub="Give it another try." icon={icons.error} />
+          <Toast type="info" title="New lesson unlocked" icon={icons.info} />
+          <ToastDemo />
+        </div>
+      </Section>
+
+      <Section title="Spinner" hint="Sizes sm / lg. PageLoader centers the lg spinner full-screen.">
+        <Row>
+          <Spinner size="sm" />
+          <Spinner size="lg" />
+        </Row>
+      </Section>
+
+      <Section
+        title="Skeleton"
+        hint="Shimmering placeholders; shimmer is dropped under reduced-motion."
+      >
+        <div className="flex max-w-md flex-col gap-5">
+          <Skeleton shape="line" className="w-2/3" />
+          <div className="flex flex-col gap-2">
+            <Skeleton shape="line" className="w-full" />
+            <Skeleton shape="line" className="w-full" />
+            <Skeleton shape="line" className="w-4/5" />
+          </div>
+          <Card>
+            <div className="flex items-center gap-4">
+              <Skeleton shape="circle" className="h-12 w-12" />
+              <div className="flex flex-1 flex-col gap-2">
+                <Skeleton shape="line" className="w-1/2" />
+                <Skeleton shape="line" className="w-3/4" />
+              </div>
+            </div>
+          </Card>
+        </div>
+      </Section>
+
+      <Section title="Empty & Error states" hint="Reusable StateView presets.">
+        <div className="grid gap-6 sm:grid-cols-2">
+          <EmptyState
+            illustration={placeholderArt}
+            title="No lessons yet"
+            description="Start your first Tenses lesson to begin building your streak."
+            primaryAction={<Button>Start learning</Button>}
+            tag="Empty"
+          />
+          <ErrorState
+            illustration={placeholderArt}
+            title="Something went wrong"
+            description="We could not load your progress. Check your connection and try again."
+            primaryAction={<Button variant="secondary">Try again</Button>}
+            secondaryAction={{ label: 'Go home' }}
+            tag="Error"
+          />
         </div>
       </Section>
     </main>
