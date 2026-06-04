@@ -961,3 +961,642 @@
     transition: none;
   }
 }
+
+/*
+ * Phase 1 · Batch C2 — Medals.
+ * Medal chrome / tier / symbol / state CSS copied VERBATIM from
+ * design/styleguide.html (lines 5112–5445). This is artwork chrome: it carries
+ * raw hex/px on purpose and is NOT tokenized (the var(--…) tokens it already
+ * used are kept). Class names are applied as literal strings in Medal.tsx so
+ * Tailwind keeps them. Keyframes live at top level below; the reduced-motion
+ * block disables the shimmer / sparkle / halo / bounce.
+ */
+@layer components {
+  .medal-piece {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    position: relative;
+    display: grid;
+    place-items: center;
+    margin: 8px auto;
+    flex-shrink: 0;
+  }
+  .medal-piece .base {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    z-index: 1;
+  }
+  .medal-piece .sym {
+    position: relative;
+    z-index: 3;
+    width: 36px;
+    height: 36px;
+  }
+  .medal-piece .sym svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ── Layered materiality: base + rim + reflex + shade ── */
+  .medal-piece .rim {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .medal-piece .reflex {
+    position: absolute;
+    left: 14%;
+    right: 14%;
+    top: 8%;
+    height: 42%;
+    border-radius: 50%;
+    background: radial-gradient(
+      120% 100% at 50% 0%,
+      rgba(255, 255, 255, 0.75),
+      rgba(255, 255, 255, 0) 70%
+    );
+    z-index: 4;
+    pointer-events: none;
+  }
+  .medal-piece .shade {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(90% 70% at 50% 118%, rgba(0, 0, 0, 0.34), transparent 60%);
+    z-index: 2;
+    pointer-events: none;
+  }
+  .medal-piece .sym {
+    z-index: 5;
+  }
+
+  .medal-piece.bronze .base {
+    background: radial-gradient(85% 80% at 50% 30%, #f7d3a4 0%, #dd9a56 50%, #a05c20 100%);
+    box-shadow:
+      0 4px 0 #6e3f16,
+      inset 0 -3px 5px rgba(95, 55, 20, 0.45);
+  }
+  .medal-piece.bronze .rim {
+    box-shadow:
+      inset 0 0 0 3px rgba(128, 73, 26, 0.5),
+      inset 0 0 0 4px rgba(251, 227, 198, 0.45);
+  }
+
+  .medal-piece.silver .base {
+    background: radial-gradient(
+      85% 80% at 50% 28%,
+      #ffffff 0%,
+      #dbe2eb 42%,
+      #aeb9c7 72%,
+      #7e8a99 100%
+    );
+    box-shadow:
+      0 4px 0 #5f6a78,
+      inset 0 -3px 5px rgba(70, 80, 95, 0.45);
+  }
+  .medal-piece.silver .rim {
+    box-shadow:
+      inset 0 0 0 3px rgba(110, 123, 137, 0.5),
+      inset 0 0 0 4px rgba(255, 255, 255, 0.4);
+  }
+  .medal-piece.silver .rim::after {
+    content: '';
+    position: absolute;
+    inset: 7px;
+    border-radius: 50%;
+    border: 1.5px dotted rgba(95, 106, 120, 0.45);
+  }
+
+  .medal-piece.gold .base {
+    background: radial-gradient(
+      85% 80% at 50% 26%,
+      #fff1b8 0%,
+      #ffd964 40%,
+      #e0ae32 72%,
+      #a9760a 100%
+    );
+    box-shadow:
+      0 4px 0 #7e5b00,
+      inset 0 -3px 5px rgba(120, 80, 0, 0.45);
+  }
+  .medal-piece.gold .rim {
+    box-shadow:
+      inset 0 0 0 3px rgba(140, 100, 0, 0.45),
+      inset 0 0 0 4px rgba(255, 240, 180, 0.5);
+  }
+  .medal-piece.gold::before {
+    content: '';
+    position: absolute;
+    inset: -11px;
+    border-radius: 50%;
+    background: conic-gradient(
+      from 22.5deg,
+      rgba(255, 216, 100, 0.7) 0deg 10deg,
+      transparent 10deg 45deg,
+      rgba(255, 216, 100, 0.7) 45deg 55deg,
+      transparent 55deg 90deg,
+      rgba(255, 216, 100, 0.7) 90deg 100deg,
+      transparent 100deg 135deg,
+      rgba(255, 216, 100, 0.7) 135deg 145deg,
+      transparent 145deg 180deg,
+      rgba(255, 216, 100, 0.7) 180deg 190deg,
+      transparent 190deg 225deg,
+      rgba(255, 216, 100, 0.7) 225deg 235deg,
+      transparent 235deg 270deg,
+      rgba(255, 216, 100, 0.7) 270deg 280deg,
+      transparent 280deg 315deg,
+      rgba(255, 216, 100, 0.7) 315deg 325deg,
+      transparent 325deg 360deg
+    );
+    mask: radial-gradient(closest-side, transparent 42%, #000 47%, #000 60%, transparent 76%);
+    -webkit-mask: radial-gradient(
+      closest-side,
+      transparent 42%,
+      #000 47%,
+      #000 60%,
+      transparent 76%
+    );
+    z-index: 0;
+  }
+  .medal-piece.special .base {
+    background:
+      radial-gradient(70% 65% at 32% 26%, rgba(255, 255, 255, 0.7), transparent 46%),
+      conic-gradient(from 210deg, #8e54e9, #ff4d8d, #ffd54a, #2bd4c4, #4a8cff, #8e54e9);
+    box-shadow:
+      0 4px 0 #2a2150,
+      inset 0 -3px 6px rgba(20, 10, 50, 0.4);
+  }
+  .medal-piece.special .rim {
+    box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.55);
+  }
+  .medal-piece.special::before {
+    content: '';
+    position: absolute;
+    inset: -9px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.4), transparent 64%);
+    z-index: 0;
+    animation: medal-halo 3s ease-in-out infinite;
+  }
+
+  .medal-piece.gold .sym {
+    color: #6a4a00;
+  }
+  .medal-piece.silver .sym {
+    color: #38424f;
+  }
+  .medal-piece.bronze .sym {
+    color: #4a2c0f;
+  }
+  .medal-piece.special .sym {
+    color: #ffffff;
+  }
+  /* Tooti's-favourite medal carries the real mascot, full colour */
+  .medal-piece .sym.mascot {
+    width: 52px;
+    height: 52px;
+  }
+  .medal-piece .sym.mascot svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ── Phosphor-based medal symbols (white glyph + crafted FX overlay) ── */
+  .medal-piece .sym > i {
+    font-size: 31px;
+    line-height: 1;
+    color: #fff;
+    filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.3));
+  }
+  .medal-piece .sym.lg > i {
+    font-size: 37px;
+  }
+  .medal-piece .sym .streak-flame {
+    width: 34px;
+    height: 34px;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.28));
+    position: relative;
+    z-index: 1;
+  }
+  .medal-piece .sym .sym-fx {
+    position: absolute;
+    inset: -7px;
+    width: auto;
+    height: auto;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .medal-piece .sym .sym-fx {
+    display: block;
+  }
+  /* Week-champ stack: flame backdrop · calendar · number */
+  .medal-piece .wc-stack {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+  }
+  /* Layer 2 · brand flame as a warm backdrop behind the calendar */
+  .medal-piece .sym svg.wc-flame {
+    position: absolute;
+    z-index: 0;
+    width: 38px;
+    height: 38px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -62%);
+    opacity: 0.85;
+    filter: drop-shadow(0 1px 2px rgba(120, 50, 0, 0.28));
+  }
+  .medal-piece .wc-flame .fb {
+    fill: #ff8a1e;
+  }
+  .medal-piece .wc-flame .fi {
+    fill: #ffd60a;
+  }
+  /* Layer 3 · crafted calendar (spiral binding · 7 · date rows) */
+  .medal-piece .sym svg.wc-cal {
+    position: relative;
+    z-index: 1;
+    width: 27px;
+    height: 27px;
+    transform: translateY(2px);
+    filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.28));
+  }
+  .medal-piece .wc-cal .cal-body {
+    fill: #fff;
+  }
+  .medal-piece .wc-cal .cal-head {
+    fill: currentColor;
+    opacity: 0.42;
+  }
+  .medal-piece .wc-cal .cal-ring {
+    fill: #fff;
+  }
+  .medal-piece .wc-cal .cal-line {
+    stroke: currentColor;
+    opacity: 0.4;
+    stroke-width: 1.4;
+    stroke-linecap: round;
+  }
+  .medal-piece .wc-cal .cal-seven {
+    fill: currentColor;
+    font-family: var(--font-en);
+    font-weight: 900;
+    font-size: 11px;
+  }
+  /* Layer 4 · small playful crown above the calendar */
+  .medal-piece .wc-art {
+    position: absolute;
+    inset: 1px;
+    width: calc(100% - 2px);
+    height: calc(100% - 2px);
+    z-index: 3;
+    filter: drop-shadow(0 2px 3px rgba(120, 80, 0, 0.22));
+  }
+  .medal-piece.in-progress .wc-art {
+    filter: saturate(0.35) brightness(0.97);
+  }
+  .medal-piece .deco-rings {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .medal-piece.locked .deco-rings {
+    opacity: 0.3;
+  }
+  .medal-piece.locked .wc-art {
+    filter: none;
+  }
+  .medal-piece .sym svg.wc-crown {
+    position: absolute;
+    z-index: 3;
+    width: 17px;
+    height: 12px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -150%);
+    fill: #fff;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.22));
+  }
+  /* Locked: flatten all three layers into a pale silhouette */
+  .medal-piece.locked .wc-flame {
+    opacity: 0.14;
+    filter: none;
+  }
+  .medal-piece.locked .wc-flame .fb,
+  .medal-piece.locked .wc-flame .fi {
+    fill: rgba(255, 255, 255, 0.5);
+  }
+  .medal-piece.locked .wc-cal {
+    filter: none;
+  }
+  .medal-piece.locked .wc-cal .cal-body,
+  .medal-piece.locked .wc-cal .cal-ring {
+    fill: rgba(255, 255, 255, 0.16);
+  }
+  .medal-piece.locked .wc-cal .cal-head {
+    opacity: 0;
+  }
+  .medal-piece.locked .wc-cal .cal-line {
+    stroke: rgba(255, 255, 255, 0.18);
+  }
+  .medal-piece.locked .wc-cal .cal-seven {
+    fill: rgba(255, 255, 255, 0.2);
+  }
+  .medal-piece.locked .wc-crown {
+    fill: rgba(255, 255, 255, 0.18);
+    filter: none;
+  }
+  /* Locked: dim the Phosphor glyphs into a silhouette, hide FX */
+  .medal-piece.locked .sym > i {
+    color: rgba(255, 255, 255, 0.16) !important;
+    filter: none;
+  }
+  .medal-piece.locked .sym .sym-fx {
+    opacity: 0.1;
+  }
+
+  /* ── Locked: dark silhouette of the real medal + small lock ── */
+  .medal-piece.locked .base {
+    background: radial-gradient(85% 80% at 50% 30%, #3a4452, #222932);
+    box-shadow:
+      0 3px 0 rgba(0, 0, 0, 0.25),
+      inset 0 -2px 4px rgba(0, 0, 0, 0.4);
+  }
+  .medal-piece.locked .rim {
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.08);
+  }
+  .medal-piece.locked .reflex {
+    opacity: 0.12;
+  }
+  .medal-piece.locked::before {
+    display: none;
+  }
+  .medal-piece.locked .sym {
+    color: rgba(255, 255, 255, 0.16) !important;
+  }
+  .medal-piece.locked .sym.mascot {
+    opacity: 0.14;
+    filter: grayscale(1) brightness(0.4);
+  }
+  .medal-piece.locked .lock-pip {
+    position: absolute;
+    bottom: -3px;
+    inset-inline-end: -3px;
+    width: 22px;
+    height: 22px;
+    background: var(--color-surface-3);
+    border: 2px solid var(--color-surface-2);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: var(--color-text-3);
+    z-index: 6;
+    box-shadow: var(--shadow-1);
+  }
+  .medal-piece.locked .lock-pip svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  /* ── In-progress: dimmed medal + conic ring + percent pip ── */
+  .medal-piece.in-progress .base {
+    filter: saturate(0.5) brightness(0.85);
+    opacity: 0.62;
+  }
+  .medal-piece.in-progress .reflex {
+    opacity: 0.35;
+  }
+  .medal-piece.in-progress .sym {
+    opacity: 0.8;
+  }
+  .medal-piece.in-progress::after {
+    content: '';
+    position: absolute;
+    inset: -2px; /* ring hugs the medal */
+    border-radius: 50%;
+    inset: -1px;
+    background: conic-gradient(
+      var(--color-primary) calc(var(--p, 50) * 1%),
+      rgba(20, 28, 50, 0.14) 0
+    );
+    mask: radial-gradient(closest-side, transparent calc(100% - 6px), #000 calc(100% - 5.5px));
+    -webkit-mask: radial-gradient(
+      closest-side,
+      transparent calc(100% - 6px),
+      #000 calc(100% - 5.5px)
+    );
+    filter: drop-shadow(0 0 4px rgba(10, 132, 255, 0.32));
+    z-index: 6;
+  }
+  .medal-piece.in-progress .pct-arm {
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    transform: rotate(calc(var(--p) * 3.6deg)); /* arc end angle, clockwise from top */
+    z-index: 8;
+    pointer-events: none;
+  }
+  .medal-piece.in-progress .pct-pip {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%) rotate(calc(var(--p) * -3.6deg)); /* keep text upright */
+    background: var(--color-primary);
+    color: #fff;
+    font-family: var(--font-en);
+    font-weight: 900;
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: var(--radius-pill);
+    border: 2px solid var(--color-surface-2);
+    box-shadow: 0 1px 4px rgba(10, 132, 255, 0.4);
+    letter-spacing: -0.02em;
+  }
+
+  /* ── Recently: bright wide halo + travelling shimmer + sparkles + NEW ribbon ── */
+  .medal-piece.recently {
+    animation: medal-bounce 2.6s ease-in-out infinite;
+    overflow: visible;
+  }
+  .medal-piece.recently::before {
+    content: '';
+    position: absolute;
+    inset: -14px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 224, 102, 0.8), transparent 62%);
+    opacity: 0.7;
+    animation: medal-halo 2.4s ease-in-out infinite;
+    z-index: 0;
+  }
+  /* travelling shimmer band across the medal face */
+  .medal-piece.recently .shimmer {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    z-index: 5;
+    pointer-events: none;
+  }
+  .medal-piece.recently .shimmer::after {
+    content: '';
+    position: absolute;
+    top: -40%;
+    left: -60%;
+    width: 50%;
+    height: 180%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.85), transparent);
+    transform: rotate(18deg);
+    animation: medal-shimmer 2.4s ease-in-out infinite;
+  }
+  .medal-piece.recently .sparkle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 7px var(--color-yellow);
+    animation: medal-sparkle 2.2s ease-in-out infinite;
+    z-index: 7;
+    pointer-events: none;
+  }
+  .medal-piece.recently .sparkle::before {
+    /* 4-point star cross */
+    content: '';
+    position: absolute;
+    inset: -3px;
+    background:
+      linear-gradient(currentColor, currentColor) center / 2px 100% no-repeat,
+      linear-gradient(currentColor, currentColor) center / 100% 2px no-repeat;
+    color: rgba(255, 255, 255, 0.8);
+  }
+  .medal-piece.recently .sparkle.s1 {
+    top: -6px;
+    inset-inline-start: 6px;
+    animation-delay: 0s;
+  }
+  .medal-piece.recently .sparkle.s2 {
+    bottom: 2px;
+    inset-inline-end: -8px;
+    animation-delay: 0.6s;
+  }
+  .medal-piece.recently .sparkle.s3 {
+    top: 16px;
+    inset-inline-end: -12px;
+    width: 6px;
+    height: 6px;
+    animation-delay: 1.1s;
+  }
+  .medal-piece.recently .sparkle.s4 {
+    top: -2px;
+    inset-inline-end: 2px;
+    width: 5px;
+    height: 5px;
+    animation-delay: 1.6s;
+  }
+  .medal-piece.recently .new-ribbon {
+    position: absolute;
+    top: -8px;
+    inset-inline-start: -10px;
+    background: linear-gradient(180deg, #ff6b9d, var(--color-pink));
+    color: #fff;
+    font-family: var(--font-en);
+    font-weight: 900;
+    font-size: 8.5px;
+    letter-spacing: 0.06em;
+    padding: 2px 7px;
+    border-radius: var(--radius-pill);
+    z-index: 8;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transform: rotate(-12deg);
+    border: 1.5px solid #fff;
+  }
+
+  /* Showcase chrome (state cell + label) — styleguide lines 5430–5441. */
+  .medal-state-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4px 0 8px;
+  }
+  .medal-state-cell .state-lbl {
+    font-family: var(--font-en);
+    font-weight: 700;
+    font-size: 9.5px;
+    color: var(--color-text-3);
+    letter-spacing: 0.04em;
+    margin-top: 2px;
+  }
+}
+
+/* RTL: mirror the NEW! ribbon tilt (styleguide lines 5418–5419). */
+[dir='rtl'] .medal-piece.recently .new-ribbon {
+  transform: rotate(12deg);
+}
+
+@keyframes medal-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+@keyframes medal-halo {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.75;
+  }
+}
+@keyframes medal-shimmer {
+  0% {
+    left: -60%;
+  }
+  55%,
+  100% {
+    left: 130%;
+  }
+}
+@keyframes medal-sparkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  25%,
+  75% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .medal-piece.recently,
+  .medal-piece.special::before,
+  .medal-piece.recently::before {
+    animation: none;
+  }
+  .medal-piece.recently .shimmer::after,
+  .medal-piece.recently .sparkle {
+    animation: none;
+  }
+}

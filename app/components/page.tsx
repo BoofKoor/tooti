@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Fragment } from 'react';
 import type { ReactNode } from 'react';
 import {
   Badge,
@@ -7,11 +8,13 @@ import {
   EmptyState,
   ErrorState,
   Mascot,
+  Medal,
   Skeleton,
   Spinner,
   Text,
   Toast,
 } from '@/components/ui';
+import type { MedalType } from '@/components/ui';
 import { icons } from './_icons';
 import { TabBarDemo, ToastDemo } from './_demos';
 
@@ -44,6 +47,20 @@ function Row({ children }: { children: ReactNode }) {
 
 const mascotPoses = ['encourage', 'celebrate', 'think', 'reassure'] as const;
 
+// 8 medals (gallery row order) with a representative in-progress percentage each.
+const medals: Array<{ type: MedalType; label: string; tier: string; progress: number }> = [
+  { type: 'first-lesson', label: 'First Lesson', tier: 'Bronze', progress: 30 },
+  { type: '100-xp', label: '100 XP', tier: 'Bronze', progress: 45 },
+  { type: '40-questions', label: '40 Questions', tier: 'Bronze', progress: 65 },
+  { type: '500-xp', label: '500 XP', tier: 'Silver', progress: 80 },
+  { type: 'perfect-lesson', label: 'Perfect Lesson', tier: 'Silver', progress: 33 },
+  { type: 'week-champ', label: '1 Week Champ', tier: 'Gold', progress: 85 },
+  { type: 'hot-streak', label: 'Hot Streak', tier: 'Special', progress: 50 },
+  { type: 'tooti-favorite', label: "Tooti's Favorite", tier: 'Special', progress: 20 },
+];
+
+const medalStates = ['locked', 'in-progress', 'earned', 'recently'] as const;
+
 export default function ComponentsPage() {
   return (
     <main className="mx-auto flex max-w-3xl flex-col gap-12 px-6 py-12">
@@ -51,7 +68,7 @@ export default function ComponentsPage() {
         <Text variant="display" as="h1">
           Component library
         </Text>
-        <Text variant="caption">Phase 1 · Batch A + B + C1</Text>
+        <Text variant="caption">Phase 1 · Batch A + B + C1 + C2</Text>
       </header>
 
       <Section title="Button" hint="Hover & press to feel the tactile press-edge.">
@@ -274,6 +291,37 @@ export default function ComponentsPage() {
             <Mascot key={pose} pose={pose} size={64} title={pose} />
           ))}
         </Row>
+      </Section>
+
+      <Section
+        title="Medal"
+        hint="8 achievements × 4 states. Verbatim emblem SVG; gradient ids namespaced per instance so the 32 pieces never collide."
+      >
+        <div className="overflow-x-auto">
+          <div className="grid min-w-[34rem] grid-cols-[minmax(7rem,1fr)_repeat(4,minmax(0,1fr))] items-center gap-x-2 gap-y-4">
+            <div />
+            {medalStates.map((s) => (
+              <Text key={s} variant="caption" className="text-center">
+                {s}
+              </Text>
+            ))}
+            {medals.map((m) => (
+              <Fragment key={m.type}>
+                <div className="flex flex-col">
+                  <Text variant="caption" className="font-extrabold text-[var(--color-text-1)]">
+                    {m.label}
+                  </Text>
+                  <Text variant="caption">{m.tier}</Text>
+                </div>
+                {medalStates.map((s) => (
+                  <div key={s} className="medal-state-cell">
+                    <Medal type={m.type} state={s} progress={m.progress} />
+                  </div>
+                ))}
+              </Fragment>
+            ))}
+          </div>
+        </div>
       </Section>
     </main>
   );
