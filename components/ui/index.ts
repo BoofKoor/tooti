@@ -21,3 +21,9 @@ export type { SkeletonProps, SkeletonShape } from './Skeleton';
 
 export { StateView, EmptyState, ErrorState } from './StateView';
 export type { StateViewProps, StateTone, StateAction } from './StateView';
+
+export { TabBar, defaultTabs } from './TabBar';
+export type { TabBarProps, TabItem } from './TabBar';
+
+export { Mascot } from './Mascot';
+export type { MascotProps, MascotPose } from './Mascot';

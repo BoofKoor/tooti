@@ -226,6 +226,22 @@
     --es-action-min: 180px;
     --es-sec-fs: 13px;
     --es-tag-fs: 9px;
+
+    /* ───────────────────────────────────────────────────────────────
+       Phase 1 · Batch C1 — TabBar tokens.
+       ─────────────────────────────────────────────────────────────── */
+    --tabbar-w: 360px;
+    --tabbar-h: 88px;
+    --tabbar-bar-h: 72px;
+    --tabbar-dot-size: 12px;
+    --tabbar-dot-bottom: 64px;
+    --tabbar-icon-box: 24px;
+    --tabbar-glyph: 22px;
+    --tabbar-label-fs: 11px;
+    --tabbar-gap: 4px;
+    --tabbar-dot-dur: 400ms;
+    --tabbar-bar-filter: drop-shadow(0 4px 14px rgba(20, 28, 50, 0.07));
+    --tabbar-dot-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary) 35%, transparent);
   }
 
   /* English-first / LTR default. */
@@ -845,5 +861,103 @@
   }
   .skeleton::after {
     animation: none;
+  }
+}
+
+/*
+ * Phase 1 · Batch C1 — TabBar (notched floating-active). Bar path geometry is
+ * generated in the component (SVG-artwork exemption); styling is token-only.
+ */
+@layer components {
+  .tabbar {
+    position: relative;
+    width: 100%;
+    max-width: var(--tabbar-w);
+    height: var(--tabbar-h);
+    margin-inline: auto;
+  }
+  .tabbar-bar {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    width: 100%;
+    height: var(--tabbar-bar-h);
+    filter: var(--tabbar-bar-filter);
+  }
+  .tabbar-bar path {
+    fill: var(--color-surface);
+    stroke: var(--color-border);
+    stroke-width: var(--border-hairline);
+    vector-effect: non-scaling-stroke;
+  }
+  .tabbar-dot {
+    position: absolute;
+    bottom: var(--tabbar-dot-bottom);
+    width: var(--tabbar-dot-size);
+    height: var(--tabbar-dot-size);
+    border-radius: var(--radius-pill);
+    background: var(--color-primary);
+    box-shadow: var(--tabbar-dot-shadow);
+    transform: translateX(-50%);
+    transition: inset-inline-start var(--tabbar-dot-dur) var(--ease-playful);
+  }
+  .tabbar-row {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    display: flex;
+    height: var(--tabbar-bar-h);
+  }
+  .tabbar-tab {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--tabbar-gap);
+    border: 0;
+    background: transparent;
+    color: var(--color-text-2);
+    cursor: pointer;
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+  .tabbar-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--tabbar-icon-box);
+    height: var(--tabbar-icon-box);
+    font-size: var(--tabbar-glyph);
+    line-height: 0;
+  }
+  .tabbar-label {
+    font-family: var(--font-en);
+    font-size: var(--tabbar-label-fs);
+    font-weight: 600;
+  }
+  .tabbar-tab[data-active] {
+    color: var(--color-primary);
+  }
+  .tabbar-tab[data-active] .tabbar-label {
+    font-weight: 800;
+    color: var(--color-primary-ink);
+  }
+  .tabbar-tab:focus-visible {
+    outline: var(--focus-ring) solid var(--color-primary);
+    outline-offset: calc(-1 * var(--focus-ring));
+  }
+}
+
+/* RTL: mirror the notch + dot so they track the active tab. */
+[dir='rtl'] .tabbar-bar {
+  transform: scaleX(-1);
+}
+[dir='rtl'] .tabbar-dot {
+  transform: translateX(50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tabbar-dot {
+    transition: none;
   }
 }

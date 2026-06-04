@@ -35,12 +35,3 @@ export const icons: Record<'success' | 'reward' | 'error' | 'info', ReactNode> =
     </svg>
   ),
 };
-
-// Neutral placeholder illustration for the state views (Mascot lands in Batch C).
-export const placeholderArt: ReactNode = (
-  <svg viewBox="0 0 120 120" fill="none" aria-hidden="true">
-    <rect x="22" y="24" width="76" height="76" rx="24" fill="currentColor" opacity="0.16" />
-    <circle cx="60" cy="54" r="20" fill="currentColor" opacity="0.3" />
-    <rect x="40" y="82" width="40" height="9" rx="4.5" fill="currentColor" opacity="0.22" />
-  </svg>
-);
