@@ -1605,3 +1605,396 @@
     animation: none;
   }
 }
+
+/* ─── Phase 2 · Batch 2B — Learn path (copied verbatim from
+   design/styleguide.html ~L2787-3047). Decorative path / trail / node artwork —
+   exempt from the no-raw-values rule. ─── */
+@layer components {
+  .scr-path .path-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 18px;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    z-index: 4;
+  }
+  .scr-path .path-topbar .unit-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: var(--color-purple);
+    color: #fff;
+    border-radius: var(--radius-md);
+    font-family: var(--font-body-fa);
+    font-weight: 700;
+    font-size: 13px;
+    border: 0;
+    /* same pressable-edge DNA as Stage 3 buttons */
+    box-shadow:
+      0 var(--press-edge) 0 #6b23a0,
+      var(--shadow-1);
+    position: relative;
+    transition:
+      transform var(--dur-fast) var(--ease-out),
+      box-shadow var(--dur-fast) var(--ease-out);
+  }
+  .scr-path .path-topbar .unit-pill:active {
+    transform: translateY(var(--press-edge));
+    box-shadow:
+      0 0 0 #6b23a0,
+      var(--shadow-1);
+  }
+  .scr-path .path-topbar.en .unit-pill {
+    font-family: var(--font-en);
+    font-weight: 800;
+  }
+  .scr-path .path-topbar .stats {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .scr-path .path-topbar .badge.badge-sm {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+
+  /* Winding path canvas with brand-tone textured background */
+  .path-canvas {
+    flex: 1;
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* organic sky/garden — warm cream gradient with subtle warmth shifts */
+    background:
+      radial-gradient(70px 28px at 18% 6%, rgba(255, 255, 255, 0.55), transparent 70%),
+      radial-gradient(90px 32px at 84% 22%, rgba(255, 255, 255, 0.45), transparent 70%),
+      radial-gradient(90px 32px at 8% 48%, rgba(255, 255, 255, 0.5), transparent 70%),
+      radial-gradient(100px 36px at 90% 64%, rgba(255, 255, 255, 0.4), transparent 70%),
+      radial-gradient(80px 28px at 6% 88%, rgba(255, 255, 255, 0.5), transparent 70%),
+      linear-gradient(180deg, #fff4cf 0%, #ffe9a8 55%, #f4dc8a 100%);
+  }
+  .path-bg-decor {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .path-bg-decor .bg-cloud {
+    position: absolute;
+    filter: drop-shadow(0 2px 4px rgba(200, 150, 30, 0.12));
+  }
+  .path-bg-decor .bg-flower {
+    position: absolute;
+  }
+  .path-canvas .trail {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 1000px;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .path-canvas .trail path {
+    fill: none;
+    stroke-width: 5;
+    stroke-linecap: round;
+    stroke-dasharray: 0 14;
+  }
+  .path-canvas .trail .trail-rest {
+    stroke: rgba(96, 70, 20, 0.32);
+  }
+  .path-canvas .trail .trail-done {
+    stroke: var(--color-streak);
+    stroke-width: 6;
+  }
+  .path-canvas .nodes {
+    position: relative;
+    width: 100%;
+    height: 1000px;
+    z-index: 2;
+  }
+
+  .path-node-v2 {
+    appearance: none;
+    border: 0;
+    cursor: pointer;
+    user-select: none;
+    font: inherit;
+    position: absolute;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    transition: transform var(--dur-fast);
+    font-family: var(--font-en);
+    font-weight: 900;
+  }
+  .path-node-v2:hover {
+    transform: translateY(-2px);
+  }
+  .path-node-v2:active {
+    transform: translateY(4px);
+  }
+
+  /* The subtle white highlight ellipse — the "apple highlight" treatment */
+  .path-node-v2::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 12px;
+    width: 26px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.55);
+    transform: rotate(-28deg);
+    pointer-events: none;
+    z-index: 1;
+  }
+  .path-node-v2 svg,
+  .path-node-v2 .pn-label {
+    position: relative;
+    z-index: 0;
+  }
+
+  .path-node-v2.done {
+    background: var(--color-correct);
+    color: #fff;
+    box-shadow: 0 7px 0 var(--color-correct-ink);
+  }
+  .path-node-v2.done svg {
+    color: #fff;
+  }
+  .path-node-v2:active.done {
+    box-shadow: 0 3px 0 var(--color-correct-ink);
+  }
+
+  .path-node-v2.current {
+    width: 88px;
+    height: 88px;
+    background: var(--color-primary);
+    color: #fff;
+    box-shadow:
+      0 8px 0 var(--color-primary-ink),
+      0 0 0 10px rgba(10, 132, 255, 0.16);
+    animation: path-current-pulse-v2 2.2s ease-in-out infinite;
+  }
+  .path-node-v2.current::before {
+    top: 10px;
+    left: 16px;
+    width: 30px;
+    height: 12px;
+  }
+
+  .path-node-v2.locked {
+    background: #b7bfcc;
+    color: #fff;
+    box-shadow: 0 6px 0 #8a909c;
+  }
+  .path-node-v2.locked::before {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .path-node-v2.boss {
+    /* mid-section "treasure chest" / section test */
+    width: 80px;
+    height: 80px;
+    border-radius: 18px;
+    background: var(--color-streak);
+    color: #fff;
+    box-shadow: 0 8px 0 var(--color-streak-ink);
+  }
+  .path-node-v2.boss::before {
+    border-radius: 30%;
+    top: 10px;
+    left: 14px;
+  }
+
+  /* Tooti sitting on the current node — syncs with START pill (same timing) */
+  .tooti-on-node {
+    position: absolute;
+    width: 100px;
+    height: 110px;
+    pointer-events: none;
+    z-index: 3;
+    animation: tooti-bob 3s ease-in-out infinite;
+    transform-origin: 50% 80%;
+  }
+  .tooti-on-node svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* "START" label · sits above Tooti's head, bobs WITH Tooti in sync */
+  .path-start-pill {
+    position: absolute;
+    background: linear-gradient(180deg, #3ba0ff 0%, var(--color-primary) 100%);
+    color: #fff;
+    font-family: var(--font-body-fa);
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    padding: 5px 12px;
+    border-radius: var(--radius-pill);
+    z-index: 4;
+    box-shadow:
+      0 3px 0 var(--color-primary-ink),
+      0 4px 10px -2px rgba(10, 132, 255, 0.4);
+    white-space: nowrap;
+    /* same timing + amplitude as Tooti's bob, so they move as one */
+    animation: start-bob 3s ease-in-out infinite;
+    transform: translateX(-50%);
+  }
+  .path-start-pill.en {
+    font-family: var(--font-en);
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    font-size: 10px;
+  }
+  .path-start-pill::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    bottom: -7px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 7px solid var(--color-primary);
+  }
+
+  /* Lesson name · neutral, minimal, sits under the current node */
+  .path-current-label {
+    position: absolute;
+    font-family: var(--font-body-fa);
+    font-weight: 600;
+    font-size: 12px;
+    color: rgba(96, 70, 20, 0.75);
+    white-space: nowrap;
+    z-index: 4;
+    transform: translateX(-50%);
+    letter-spacing: 0.02em;
+  }
+  .path-current-label.en {
+    font-family: var(--font-en);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+
+  /* Crown badge on done nodes — small medal-like indicator */
+  .pn-crown {
+    position: absolute;
+    bottom: -4px;
+    inset-inline-end: -4px;
+    width: 26px;
+    height: 26px;
+    background: var(--color-streak);
+    color: #fff;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-family: var(--font-body-fa);
+    font-weight: 800;
+    font-size: 12px;
+    border: 3px solid #ffe9a8;
+    box-shadow: 0 2px 0 var(--color-streak-ink);
+    z-index: 2;
+    font-variant-numeric: tabular-nums;
+  }
+  [dir='ltr'] .pn-crown {
+    font-family: var(--font-en);
+    font-weight: 900;
+    font-size: 11px;
+  }
+  .pn-crown::before {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 5px;
+    width: 8px;
+    height: 3px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.55);
+    transform: rotate(-20deg);
+  }
+
+  /* Section header that sits within the path */
+  .path-section-header {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    padding: 6px 16px;
+    font-family: var(--font-en);
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-2);
+    box-shadow: var(--shadow-2);
+    z-index: 4;
+    white-space: nowrap;
+  }
+  .path-section-header.fa {
+    font-family: var(--font-body-fa);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--color-text-1);
+  }
+}
+
+@keyframes path-current-pulse-v2 {
+  0%,
+  100% {
+    box-shadow:
+      0 8px 0 var(--color-primary-ink),
+      0 0 0 8px rgba(10, 132, 255, 0.16);
+  }
+  50% {
+    box-shadow:
+      0 8px 0 var(--color-primary-ink),
+      0 0 0 18px rgba(10, 132, 255, 0.1);
+  }
+}
+
+@keyframes tooti-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes start-bob {
+  0%,
+  100% {
+    transform: translate(-50%, 0);
+  }
+  50% {
+    transform: translate(-50%, -3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .path-node-v2.current {
+    animation: none;
+  }
+  .tooti-on-node {
+    animation: none;
+  }
+  .path-start-pill {
+    animation: none;
+  }
+}
