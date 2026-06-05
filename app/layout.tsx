@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { fontVariables } from '@/lib/fonts';
+import { ToastProvider } from '@/components/ui';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
@@ -12,7 +13,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   // the design tokens (styles/globals.css), not inline values.
   return (
     <html lang="en" dir="ltr" className={fontVariables}>
-      <body>{children}</body>
+      <body>
+        <ToastProvider>{children}</ToastProvider>
+      </body>
     </html>
   );
 }

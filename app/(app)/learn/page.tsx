@@ -69,6 +69,15 @@ const NODES: PathNode[] = [
   { id: 'vocabulary', state: 'locked', top: 1160, left: 236, label: 'Vocabulary' },
 ];
 
+// The 3 active present-tense nodes resolve to the canonical seed slugs so
+// completeLesson() finds the lesson. Full slug reconciliation across all
+// surfaces is Phase 5; this only aligns the active links.
+const LESSON_SLUG: Record<string, string> = {
+  'simple-present': 'present-simple',
+  'present-cont': 'present-continuous',
+  'present-perfect': 'present-perfect',
+};
+
 const SECTION_HEADERS = [
   { label: 'Present Tenses', top: 32 },
   { label: 'More — coming soon', top: 908 },
@@ -236,7 +245,11 @@ export default function LearnPage() {
                 style={{ top: node.top, left: node.left }}
                 disabled={!clickable}
                 aria-label={node.label}
-                onClick={clickable ? () => router.push('/lesson/intro') : undefined}
+                onClick={
+                  clickable
+                    ? () => router.push(`/lesson/${LESSON_SLUG[node.id] ?? node.id}`)
+                    : undefined
+                }
               >
                 {nodeGlyph(node)}
                 {node.crown != null ? <span className="pn-crown">{node.crown}</span> : null}

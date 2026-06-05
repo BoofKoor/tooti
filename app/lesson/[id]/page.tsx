@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Lightning, X } from '@phosphor-icons/react/dist/ssr';
-import { Button, Mascot, Text } from '@/components/ui';
+import { useParams, useRouter } from 'next/navigation';
+import { Flame, Lightning, X } from '@phosphor-icons/react/dist/ssr';
+import { Button, Mascot, Medal, Text, useToast } from '@/components/ui';
+import type { MedalType } from '@/components/ui';
+import { completeLesson, type CompleteResult } from '@/app/actions/gamification';
 import { cn } from '@/lib/utils';
 
 /*
@@ -68,11 +70,18 @@ function Heart({ filled, losing }: { filled: boolean; losing: boolean }) {
 
 export default function LessonRunnerPage() {
   const router = useRouter();
+  const slug = String(useParams().id);
+  const push = useToast();
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [checked, setChecked] = useState(false);
   const [hearts, setHearts] = useState(TOTAL_HEARTS);
   const [lostHeart, setLostHeart] = useState<number | null>(null);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [failed, setFailed] = useState(false);
+  const [outOfHearts, setOutOfHearts] = useState(false);
+  const [finishing, setFinishing] = useState(false);
+  const [result, setResult] = useState<CompleteResult | null>(null);
   const [done, setDone] = useState(false);
 
   const q = QUESTIONS[index];
@@ -81,16 +90,54 @@ export default function LessonRunnerPage() {
   function check() {
     if (selected === null) return;
     setChecked(true);
-    if (selected !== q.correctIndex) {
-      const remaining = Math.max(0, hearts - 1);
-      setHearts(remaining);
-      setLostHeart(remaining);
+    if (selected === q.correctIndex) {
+      setCorrectCount((c) => c + 1);
+      return;
     }
+    const remaining = Math.max(0, hearts - 1);
+    setHearts(remaining);
+    setLostHeart(remaining);
+    if (remaining === 0) setFailed(true);
+  }
+
+  async function finish() {
+    setFinishing(true);
+    // IANA tz from the browser; the action falls back to Asia/Tehran.
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const res = await completeLesson({
+      slug,
+      correctCount,
+      totalCount: QUESTIONS.length,
+      heartsLeft: hearts,
+      timezone: tz,
+    });
+    setResult(res);
+    res.newMedals.forEach((m) =>
+      push({
+        type: 'reward',
+        title: 'Medal unlocked!',
+        sub: m.name,
+        icon: <Lightning weight="fill" />,
+      }),
+    );
+    if (res.streakMilestone) {
+      push({
+        type: 'info',
+        title: `${res.streakMilestone}-day streak!`,
+        icon: <Flame weight="fill" />,
+      });
+    }
+    setFinishing(false);
+    setDone(true);
   }
 
   function next() {
+    if (failed) {
+      setOutOfHearts(true);
+      return;
+    }
     if (index + 1 >= QUESTIONS.length) {
-      setDone(true);
+      void finish();
       return;
     }
     setIndex(index + 1);
@@ -107,13 +154,53 @@ export default function LessonRunnerPage() {
     return '';
   }
 
+  if (outOfHearts) {
+    return (
+      <div className="flex h-dvh flex-col items-center justify-center gap-5 px-6 text-center">
+        <Mascot pose="reassure" size={160} />
+        <Text variant="section" as="h1">
+          Out of hearts
+        </Text>
+        <Text variant="body" className="text-text-2">
+          Take a breather and try again.
+        </Text>
+        <Button
+          variant="primary"
+          size="lg"
+          className="w-full max-w-xs"
+          onClick={() => router.push('/learn')}
+        >
+          Back to Learn
+        </Button>
+      </div>
+    );
+  }
+
   if (done) {
+    const earnedXp = result?.xpEarned ?? 0;
+    const newMedals = result?.newMedals ?? [];
     return (
       <div className="flex h-dvh flex-col items-center justify-center gap-5 px-6 text-center">
         <Mascot pose="celebrate" size={160} />
         <Text variant="section" as="h1">
           Lesson complete!
         </Text>
+        <div className="inline-flex items-center gap-2 text-xp-ink">
+          <Lightning weight="fill" />
+          <Text variant="section" as="span" className="text-xp-ink">
+            +{earnedXp} XP
+          </Text>
+        </div>
+        {newMedals.length ? (
+          <div className="flex flex-wrap items-start justify-center gap-4">
+            {newMedals.map((m) => (
+              <div key={m.key} className="flex w-20 flex-col items-center gap-1">
+                <Medal type={m.key as MedalType} state="recently" size={64} />
+                <span className="text-center text-xs font-bold text-text-2">{m.name}</span>
+              </div>
+            ))}
+          </div>
+        ) : null}
         <Button
           variant="primary"
           size="lg"
@@ -222,7 +309,13 @@ export default function LessonRunnerPage() {
               </div>
             </div>
             <div className="fb-action">
-              <Button variant="primary" size="lg" className="w-full" onClick={next}>
+              <Button
+                variant="primary"
+                size="lg"
+                className="w-full"
+                loading={finishing}
+                onClick={next}
+              >
                 Continue
               </Button>
             </div>

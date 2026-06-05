@@ -13,6 +13,8 @@ export type { BadgeProps, BadgeVariant, BadgeSize } from './Badge';
 export { Toast } from './Toast';
 export type { ToastProps, ToastType } from './Toast';
 
+export { ToastProvider, useToast } from './ToastProvider';
+
 export { Spinner, PageLoader } from './Spinner';
 export type { SpinnerProps, SpinnerSize } from './Spinner';
 
