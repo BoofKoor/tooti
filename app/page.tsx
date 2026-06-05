@@ -28,13 +28,13 @@ export default function WelcomePage() {
       </div>
 
       <div className="flex w-full max-w-xs flex-col items-center gap-3">
-        <Button className="w-full" onClick={() => router.push('/learn')}>
+        <Button className="w-full" onClick={() => router.push('/login')}>
           Get started
         </Button>
-        {/* Auth lands in Phase 3 — placeholder route for now. */}
+        {/* Both CTAs route to /login — Auth.js sign-in (magic-link + Google). */}
         <button
           type="button"
-          onClick={() => router.push('/learn')}
+          onClick={() => router.push('/login')}
           className="text-sm font-bold text-text-3 transition-colors duration-fast ease-out hover:text-text-1"
         >
           I already have an account

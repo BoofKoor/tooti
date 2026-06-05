@@ -3152,3 +3152,37 @@
     animation: none;
   }
 }
+
+/*
+ * Login (/login) — the single styled form control (the email input). Mirrors the
+ * secondary-button metrics (height, radius, focus ring) so the sign-in card reads
+ * as one welcome-screen-style piece. Tokens only; logical CSS.
+ */
+@layer components {
+  .auth-field {
+    width: 100%;
+    min-height: var(--btn-h-md);
+    padding-block: var(--space-3);
+    padding-inline: var(--space-4);
+    border: var(--border-hairline) solid var(--color-border-strong);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    color: var(--color-text-1);
+    font-family: var(--font-en);
+    font-size: var(--btn-fs-md);
+    font-weight: 600;
+    transition:
+      border-color var(--dur-base) var(--ease-out),
+      box-shadow var(--dur-base) var(--ease-out);
+  }
+
+  .auth-field::placeholder {
+    color: var(--color-text-3);
+  }
+
+  .auth-field:focus-visible {
+    outline: var(--focus-ring) solid var(--color-primary);
+    outline-offset: var(--focus-ring);
+    border-color: var(--color-primary);
+  }
+}
