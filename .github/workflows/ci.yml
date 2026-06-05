@@ -26,3 +26,6 @@ jobs:
         run: npm run build
         env:
           NEXT_TELEMETRY_DISABLED: '1'
+          DATABASE_URL: postgresql://tooti:tooti@localhost:5432/tooti?schema=public
+          AUTH_SECRET: ci-dummy-secret-not-used-at-runtime
+          AUTH_TRUST_HOST: 'true'
