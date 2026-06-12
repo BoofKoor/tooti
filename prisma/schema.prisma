@@ -21,6 +21,7 @@ model User {
   progress    Progress?
   completions LessonCompletion[]
   medals      UserMedal[]
+  dailyXp     DailyXp[]
 }
 
 model Account {
@@ -111,9 +112,31 @@ model Lesson {
 
   unit        Unit               @relation(fields: [unitId], references: [id], onDelete: Cascade)
   exercises   Exercise[]
+  sections    LessonSection[]
   completions LessonCompletion[]
 
   @@unique([unitId, order])
+}
+
+enum SectionKind {
+  READING
+  CONCEPT
+  SUMMARY
+  VIDEO
+}
+
+model LessonSection {
+  id       String      @id @default(cuid())
+  lessonId String
+  order    Int
+  kind     SectionKind
+  titleEn  String
+  titleFa  String
+  content  Json // SectionContent (lib/lesson-content.ts); rendered by Phase 5B
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([lessonId, order])
 }
 
 model Exercise {
@@ -134,6 +157,19 @@ model Exercise {
   lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   @@unique([lessonId, order])
+}
+
+// Per-local-day XP ledger — the single source of truth for daily/goal/week views
+// (replays credit the day they happen, not the day of first completion).
+model DailyXp {
+  id     String @id @default(cuid())
+  userId String
+  day    String // local "YYYY-MM-DD" in the user's tz (computed with localDay)
+  xp     Int    @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, day])
 }
 
 model LessonCompletion {
