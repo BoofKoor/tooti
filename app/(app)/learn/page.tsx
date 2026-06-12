@@ -34,6 +34,7 @@ const HEADER_TO_NODE = 48; // first node sits this far below its section header
 const SOON_HEADER_TO_NODE = 72; // mock used more air under the coming-soon header
 const NODE_STEP = 110; // vertical rhythm between consecutive nodes
 const NODE_TO_HEADER = 74; // next header sits this far below the previous node's top
+const SOON_HEADER_CLEARANCE = 36; // extra air so the soon header clears the 72px node + its crown badge
 const CANVAS_BOTTOM_PAD = 128; // air under the last node
 // Zig-zag horizontal rhythm (the mock's left offsets, repeated).
 const NODE_LEFTS = [42, 244, 118, 30, 236, 104];
@@ -214,8 +215,9 @@ function buildLayout(units: LearnUnit[]): {
   }
 
   if (soon.length > 0) {
-    headers.push({ label: 'More — coming soon', top: headerTop });
-    let top = headerTop + SOON_HEADER_TO_NODE;
+    const soonHeaderTop = headerTop + SOON_HEADER_CLEARANCE;
+    headers.push({ label: 'More — coming soon', top: soonHeaderTop });
+    let top = soonHeaderTop + SOON_HEADER_TO_NODE;
     for (const unit of soon) {
       nodes.push({
         key: unit.slug,

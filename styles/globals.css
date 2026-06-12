@@ -3246,3 +3246,16 @@
     outline-offset: var(--focus-ring);
   }
 }
+
+/* ─── Phase 5B — Learn-stage reader ─── */
+@layer components {
+  /* `**…**` spans in READING paragraphs (lib/lesson-content authoring
+     convention) render as grammar-highlight pills. */
+  .hl-grammar {
+    background: color-mix(in srgb, var(--color-xp) 28%, transparent);
+    color: inherit;
+    border-radius: var(--radius-xs);
+    padding-inline: var(--space-1);
+    font-weight: 700;
+  }
+}
