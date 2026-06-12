@@ -10,6 +10,10 @@ export const fa = {
   welcome: {
     tagline: 'انگلیسی را مثل بازی یاد بگیر',
   },
+  lesson: {
+    // SECTION_TEST "not passed" explanation (the 80% bar).
+    testBar: 'برای قبولی در آزمون باید دست‌کم ۸۰٪ پاسخ‌ها درست باشد. دوباره تلاش کن!',
+  },
 } as const;
 
 export type Fa = typeof fa;

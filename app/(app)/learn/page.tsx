@@ -1,87 +1,46 @@
-'use client';
-
 import type { CSSProperties, ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
-import {
-  BookOpen,
-  Check,
-  Flame,
-  Lightning,
-  Lock,
-  Play,
-  TreasureChest,
-} from '@phosphor-icons/react/dist/ssr';
-import { Badge, Mascot } from '@/components/ui';
+import type { LessonKind } from '@prisma/client';
+import { BookOpen, Flame, Lightning } from '@phosphor-icons/react/dist/ssr';
+import { auth } from '@/lib/auth';
+import { prisma } from '@/lib/db';
+import { Badge } from '@/components/ui';
+import { effectiveStreak, localDay } from '@/lib/gamification';
+import { getLearnPath, type LearnUnit } from '@/lib/learn-data';
 import { cn } from '@/lib/utils';
+import {
+  PathNodes,
+  type CurrentCompanions,
+  type PathGlyph,
+  type PathHeaderView,
+  type PathNodeView,
+} from './_path-nodes';
 
 /*
- * Learn path — mock data screen. The path/trail/node layout is screen artwork:
- * positions + the trail `d` use the styleguide coordinate space (the .trail and
- * .nodes share a fixed height so node `top` px == trail y). Styling is the
- * verbatim path CSS in globals.css (@layer components).
+ * Learn path — DB-driven (Phase 5A). The trail/node/garden visuals are the
+ * verbatim Phase 2 artwork (positions + the trail share the styleguide
+ * coordinate space; styling is the path CSS in globals.css @layer components).
+ * Only the data source changed: units/lessons/completions come from Prisma and
+ * node positions are generated with the mock's spacing rhythm, extracted into
+ * the named constants below.
  */
 
-const CANVAS_H = 1360;
+const FALLBACK_TZ = 'Asia/Tehran';
 
-// Trail: completed (orange) segment up to the current node + the rest (gray).
-// Section 1 segments are verbatim from the styleguide; extended for section 2.
-const TRAIL_DONE = 'M 78 116 Q 280 116 280 206 Q 280 296 162 358';
-const TRAIL_REST =
-  'M 162 358 Q 30 380 66 476 Q 130 570 276 570 Q 340 670 140 676 Q 0 700 66 786 ' +
-  'Q 120 870 272 866 Q 320 950 140 1016 Q 0 1070 66 1116 Q 150 1190 272 1196';
-
-type NodeState = 'done' | 'current' | 'locked';
-type PathNode = {
-  id: string;
-  state: NodeState;
-  top: number;
-  left: number;
-  label: string;
-  boss?: boolean;
-  crown?: number;
-};
-
-// Literal class map so Tailwind keeps the @layer components state rules.
-const STATE_CLASS: Record<NodeState, string> = {
-  done: 'done',
-  current: 'current',
-  locked: 'locked',
-};
-
-const NODES: PathNode[] = [
-  { id: 'simple-present', state: 'done', top: 80, left: 42, crown: 5, label: 'Simple Present' },
-  { id: 'present-cont', state: 'done', top: 170, left: 244, crown: 4, label: 'Present Continuous' },
-  { id: 'present-perfect', state: 'current', top: 330, left: 118, label: 'Present Perfect' },
-  {
-    id: 'present-perfect-cont',
-    state: 'locked',
-    top: 448,
-    left: 30,
-    label: 'Present Perfect Cont.',
-  },
-  { id: 'section-test', state: 'locked', boss: true, top: 540, left: 236, label: 'Section Test' },
-  { id: 'mixed-review', state: 'locked', top: 644, left: 104, label: 'Mixed Review' },
-  { id: 'speaking-set', state: 'locked', top: 754, left: 30, label: 'Speaking Set' },
-  { id: 'unit-story', state: 'locked', top: 834, left: 236, label: 'Unit Story' },
-  // "More — coming soon" (future topics, MVP keeps them locked).
-  { id: 'past-tenses', state: 'locked', top: 980, left: 104, label: 'Past Tenses' },
-  { id: 'future-tenses', state: 'locked', top: 1080, left: 30, label: 'Future Tenses' },
-  { id: 'vocabulary', state: 'locked', top: 1160, left: 236, label: 'Vocabulary' },
-];
-
-// The 3 active present-tense nodes resolve to the canonical seed slugs so
-// completeLesson() finds the lesson. Full slug reconciliation across all
-// surfaces is Phase 5; this only aligns the active links.
-const LESSON_SLUG: Record<string, string> = {
-  'simple-present': 'present-simple',
-  'present-cont': 'present-continuous',
-  'present-perfect': 'present-perfect',
-};
-
-const SECTION_HEADERS = [
-  { label: 'Present Tenses', top: 32 },
-  { label: 'More — coming soon', top: 908 },
-];
+// ── Layout rhythm (extracted from the Phase 2 mock positions) ──
+const TRAIL_VIEWBOX_W = 380; // styleguide coordinate-space width
+const NODE_SIZE = 72; // .path-node-v2 box
+const HEADER_TOP_FIRST = 32; // first section header
+const HEADER_TO_NODE = 48; // first node sits this far below its section header
+const SOON_HEADER_TO_NODE = 72; // mock used more air under the coming-soon header
+const NODE_STEP = 110; // vertical rhythm between consecutive nodes
+const NODE_TO_HEADER = 74; // next header sits this far below the previous node's top
+const CANVAS_BOTTOM_PAD = 128; // air under the last node
+// Zig-zag horizontal rhythm (the mock's left offsets, repeated).
+const NODE_LEFTS = [42, 244, 118, 30, 236, 104];
+// Current-node companions, relative to the current node's top/left (mock offsets).
+const START_PILL_OFFSET = { top: -74, left: 44 };
+const TOOTI_OFFSET = { top: -50, left: -10 };
+const CURRENT_LABEL_OFFSET = { top: 100, left: 44 };
 
 // Decorative garden art (verbatim from the styleguide #bg-* defs + positions).
 const cloudArt = (
@@ -174,26 +133,154 @@ const DECOR: Array<{ cls: string; viewBox: string; art: ReactNode; style: CSSPro
   },
 ];
 
-function nodeGlyph(node: PathNode) {
-  if (node.boss) return <TreasureChest size={34} weight="fill" />;
-  if (node.state === 'done') return <Check size={32} weight="bold" />;
-  if (node.state === 'current') return <Play size={38} weight="fill" />;
-  return <Lock size={28} weight="fill" />;
+function glyphForKind(kind: LessonKind): PathGlyph {
+  if (kind === 'LESSON') return 'lesson';
+  if (kind === 'SECTION_TEST') return 'test';
+  return 'review';
 }
 
-export default function LearnPage() {
-  const router = useRouter();
+function hrefForKind(kind: LessonKind, slug: string): string {
+  return kind === 'LESSON' ? `/study/${slug}` : `/lesson/${slug}`;
+}
+
+/** Dotted trail through node centers (midpoint-smoothed quadratic segments). */
+function buildTrailD(pts: Array<{ x: number; y: number }>): string {
+  if (pts.length < 2) return '';
+  const parts = [`M ${pts[0].x} ${pts[0].y}`];
+  for (let i = 1; i < pts.length - 1; i += 1) {
+    const mx = (pts[i].x + pts[i + 1].x) / 2;
+    const my = (pts[i].y + pts[i + 1].y) / 2;
+    parts.push(`Q ${pts[i].x} ${pts[i].y} ${mx} ${my}`);
+  }
+  const last = pts[pts.length - 1];
+  parts.push(`L ${last.x} ${last.y}`);
+  return parts.join(' ');
+}
+
+function buildLayout(units: LearnUnit[]): {
+  headers: PathHeaderView[];
+  nodes: PathNodeView[];
+  current: CurrentCompanions;
+  trailDone: string;
+  trailRest: string;
+  height: number;
+} {
+  const active = units.filter((u) => !u.comingSoon);
+  const soon = units.filter((u) => u.comingSoon);
+
+  const headers: PathHeaderView[] = [];
+  const nodes: PathNodeView[] = [];
+  let headerTop = HEADER_TOP_FIRST;
+  let lastNodeTop = HEADER_TOP_FIRST;
+  let n = 0; // global zig-zag index
+  let currentAssigned = false;
+  let current: CurrentCompanions = null;
+
+  for (const unit of active) {
+    if (unit.lessons.length === 0) continue;
+    headers.push({ label: unit.title, top: headerTop });
+    let top = headerTop + HEADER_TO_NODE;
+    for (const lesson of unit.lessons) {
+      const isCurrent = !currentAssigned && !lesson.completed && lesson.unlocked;
+      if (isCurrent) currentAssigned = true;
+      const left = NODE_LEFTS[n % NODE_LEFTS.length];
+      nodes.push({
+        key: lesson.slug,
+        label: lesson.title,
+        glyph: glyphForKind(lesson.kind),
+        state: lesson.completed ? 'done' : isCurrent ? 'current' : 'locked',
+        boss: lesson.kind === 'SECTION_TEST',
+        crown: lesson.completed && lesson.crownLevel > 0 ? lesson.crownLevel : null,
+        top,
+        left,
+        href: hrefForKind(lesson.kind, lesson.slug),
+      });
+      if (isCurrent) {
+        current = {
+          pill: { top: top + START_PILL_OFFSET.top, left: left + START_PILL_OFFSET.left },
+          tooti: { top: top + TOOTI_OFFSET.top, left: left + TOOTI_OFFSET.left },
+          label: {
+            top: top + CURRENT_LABEL_OFFSET.top,
+            left: left + CURRENT_LABEL_OFFSET.left,
+            text: lesson.title,
+          },
+        };
+      }
+      lastNodeTop = top;
+      top += NODE_STEP;
+      n += 1;
+    }
+    headerTop = lastNodeTop + NODE_TO_HEADER;
+  }
+
+  if (soon.length > 0) {
+    headers.push({ label: 'More — coming soon', top: headerTop });
+    let top = headerTop + SOON_HEADER_TO_NODE;
+    for (const unit of soon) {
+      nodes.push({
+        key: unit.slug,
+        label: unit.title,
+        glyph: 'soon',
+        state: 'locked',
+        boss: false,
+        crown: null,
+        top,
+        left: NODE_LEFTS[n % NODE_LEFTS.length],
+        href: null,
+      });
+      lastNodeTop = top;
+      top += NODE_STEP;
+      n += 1;
+    }
+  }
+
+  // Orange "done" trail runs from the first node THROUGH the current node (or
+  // through the last completed node when everything is done); gray covers the rest.
+  const pts = nodes.map((nd) => ({ x: nd.left + NODE_SIZE / 2, y: nd.top + NODE_SIZE / 2 }));
+  let splitIdx = nodes.findIndex((nd) => nd.state === 'current');
+  if (splitIdx === -1) {
+    for (let i = nodes.length - 1; i >= 0; i -= 1) {
+      if (nodes[i].state === 'done') {
+        splitIdx = i;
+        break;
+      }
+    }
+  }
+  const trailDone = splitIdx > 0 ? buildTrailD(pts.slice(0, splitIdx + 1)) : '';
+  const trailRest = buildTrailD(splitIdx >= 0 ? pts.slice(splitIdx) : pts);
+  const height = lastNodeTop + NODE_SIZE + CANVAS_BOTTOM_PAD;
+
+  return { headers, nodes, current, trailDone, trailRest, height };
+}
+
+export default async function LearnPage() {
+  const session = await auth();
+  if (!session?.user?.id) return null; // the (app) layout already guards this
+  const userId = session.user.id;
+
+  const [units, progress] = await Promise.all([
+    getLearnPath(userId),
+    prisma.progress.findUnique({ where: { userId } }),
+  ]);
+  const { headers, nodes, current, trailDone, trailRest, height } = buildLayout(units);
+
+  const tz = progress?.timezone ?? FALLBACK_TZ;
+  const today = localDay(new Date(), tz);
+  const lastActiveDay = progress?.lastActiveDate ? localDay(progress.lastActiveDate, tz) : null;
+  const streak = effectiveStreak(progress?.streak ?? 0, lastActiveDay, today);
+  const totalXp = progress?.xp ?? 0;
+  const activeUnitTitle = units.find((u) => !u.comingSoon)?.title ?? 'Tooti';
 
   return (
     <div className="scr-path en flex flex-1 flex-col" dir="ltr">
       <div className="path-topbar en">
         <span className="unit-pill">
           <BookOpen weight="bold" />
-          Present Tenses
+          {activeUnitTitle}
         </span>
         <div className="stats">
-          <Badge variant="streak" size="sm" icon={<Flame weight="fill" />} value={5} />
-          <Badge variant="xp" size="sm" icon={<Lightning weight="fill" />} value={120} />
+          <Badge variant="streak" size="sm" icon={<Flame weight="fill" />} value={streak} />
+          <Badge variant="xp" size="sm" icon={<Lightning weight="fill" />} value={totalXp} />
         </div>
       </div>
 
@@ -208,55 +295,16 @@ export default function LearnPage() {
 
         <svg
           className="trail"
-          viewBox={`0 0 380 ${CANVAS_H}`}
+          viewBox={`0 0 ${TRAIL_VIEWBOX_W} ${height}`}
           preserveAspectRatio="none"
-          style={{ height: CANVAS_H }}
+          style={{ height }}
           aria-hidden="true"
         >
-          <path className="trail-done" d={TRAIL_DONE} />
-          <path className="trail-rest" d={TRAIL_REST} />
+          {trailDone ? <path className="trail-done" d={trailDone} /> : null}
+          {trailRest ? <path className="trail-rest" d={trailRest} /> : null}
         </svg>
 
-        <div className="nodes" style={{ height: CANVAS_H }}>
-          {SECTION_HEADERS.map((s) => (
-            <div key={s.label} className="path-section-header" style={{ top: s.top }}>
-              {s.label}
-            </div>
-          ))}
-
-          {/* Current-node companions (one current node in this mock). */}
-          <span className="path-start-pill en" style={{ top: 256, left: 158 }}>
-            START
-          </span>
-          <div className="tooti-on-node" style={{ top: 280, left: 108 }}>
-            <Mascot pose="encourage" />
-          </div>
-          <span className="path-current-label en" style={{ top: 430, left: 162 }}>
-            Present Perfect
-          </span>
-
-          {NODES.map((node) => {
-            const clickable = node.state === 'done' || node.state === 'current';
-            return (
-              <button
-                key={node.id}
-                type="button"
-                className={cn('path-node-v2', node.boss && 'boss', STATE_CLASS[node.state])}
-                style={{ top: node.top, left: node.left }}
-                disabled={!clickable}
-                aria-label={node.label}
-                onClick={
-                  clickable
-                    ? () => router.push(`/lesson/${LESSON_SLUG[node.id] ?? node.id}`)
-                    : undefined
-                }
-              >
-                {nodeGlyph(node)}
-                {node.crown != null ? <span className="pn-crown">{node.crown}</span> : null}
-              </button>
-            );
-          })}
-        </div>
+        <PathNodes height={height} headers={headers} nodes={nodes} current={current} />
       </div>
     </div>
   );

@@ -40,13 +40,10 @@ export default async function ProfilePage() {
   if (!session?.user?.id) return null; // the (app) layout already guards this
   const userId = session.user.id;
 
-  const [user, progress, completions, catalog, userMedals] = await Promise.all([
+  const [user, progress, dailyXp, catalog, userMedals] = await Promise.all([
     prisma.user.findUnique({ where: { id: userId } }),
     prisma.progress.findUnique({ where: { userId } }),
-    prisma.lessonCompletion.findMany({
-      where: { userId },
-      select: { xpEarned: true, completedAt: true },
-    }),
+    prisma.dailyXp.findMany({ where: { userId }, select: { day: true, xp: true } }),
     prisma.medal.findMany({ orderBy: { order: 'asc' } }),
     prisma.userMedal.findMany({ where: { userId } }),
   ]);
@@ -58,12 +55,9 @@ export default async function ProfilePage() {
   const lastActiveDay = progress?.lastActiveDate ? localDay(progress.lastActiveDate, tz) : null;
   const streak = effectiveStreak(progress?.streak ?? 0, lastActiveDay, today);
 
-  // Sum XP per local day.
-  const perDay = new Map<string, number>();
-  for (const c of completions) {
-    const d = localDay(c.completedAt, tz);
-    perDay.set(d, (perDay.get(d) ?? 0) + c.xpEarned);
-  }
+  // XP per local day from the DailyXp ledger (the single source of truth —
+  // replays credit the day they happen, not the first-completion day).
+  const perDay = new Map(dailyXp.map((d) => [d.day, d.xp]));
   const todayXp = perDay.get(today) ?? 0;
   const goalPct = dailyGoal > 0 ? Math.min(100, Math.round((todayXp / dailyGoal) * 100)) : 0;
 

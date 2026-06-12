@@ -16,7 +16,8 @@ const LEARNED = [
 
 export default function PracticePage() {
   const router = useRouter();
-  const startReview = () => router.push('/lesson/practice');
+  // First real practice set (Phase 5A); a locked lesson bounces back to /learn.
+  const startReview = () => router.push('/lesson/present-simple-practice-1');
 
   return (
     <div className="flex flex-col gap-6 px-5 py-6">

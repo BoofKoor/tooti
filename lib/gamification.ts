@@ -7,6 +7,8 @@ export const XP_PER_CORRECT = 10;
 export const XP_LESSON_COMPLETE = 20;
 export const XP_PERFECT_BONUS = 10; // 0 hearts lost
 export const XP_REVIEW = 5; // flat XP for replaying an already-completed lesson
+export const XP_LEARN_STAGE = 15; // flat, first completion of a Learn (LESSON) stage only
+export const TEST_PASS_PCT = 0.8; // SECTION_TEST pass threshold
 export const TOTAL_HEARTS = 5;
 export const DAILY_GOAL_OPTIONS = [10, 20, 30, 50] as const;
 export const DEFAULT_DAILY_GOAL = 20;
@@ -15,6 +17,11 @@ export const COMEBACK_GAP_DAYS = 7;
 
 export function isPerfect(heartsLeft: number): boolean {
   return heartsLeft >= TOTAL_HEARTS;
+}
+
+/** SECTION_TEST verdict — below the bar (even with hearts left) is a fail. */
+export function testPassed(correct: number, total: number): boolean {
+  return total > 0 && correct / total >= TEST_PASS_PCT;
 }
 
 export function computeLessonXp(o: {
