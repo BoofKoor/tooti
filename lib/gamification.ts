@@ -24,6 +24,16 @@ export function testPassed(correct: number, total: number): boolean {
   return total > 0 && correct / total >= TEST_PASS_PCT;
 }
 
+/** Fisher–Yates; returns display→original index mapping (e.g. [2,0,3,1]). */
+export function shuffledOrder(n: number, rand: () => number = Math.random): number[] {
+  const a = Array.from({ length: n }, (_, i) => i);
+  for (let i = n - 1; i > 0; i -= 1) {
+    const j = Math.floor(rand() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 export function computeLessonXp(o: {
   correctCount: number;
   heartsLeft: number;

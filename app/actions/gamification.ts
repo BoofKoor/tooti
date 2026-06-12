@@ -162,6 +162,29 @@ async function persistTimezone(userId: string, tz: string, prior: Progress | nul
   });
 }
 
+/**
+ * Sequential unlock, server-side: a lesson is playable iff it's the first in
+ * its unit or the previous `order` is completed. The pages enforce this too,
+ * but a direct action call must not be able to skip the ladder. (Replays of
+ * completed lessons are by definition unlocked.)
+ */
+async function lessonUnlocked(
+  userId: string,
+  lesson: { id: string; unitId: string; order: number },
+): Promise<boolean> {
+  const prev = await prisma.lesson.findFirst({
+    where: { unitId: lesson.unitId, order: { lt: lesson.order } },
+    orderBy: { order: 'desc' },
+    select: { id: true },
+  });
+  if (!prev) return true; // first in unit
+  const done = await prisma.lessonCompletion.findUnique({
+    where: { userId_lessonId: { userId, lessonId: prev.id } },
+    select: { id: true },
+  });
+  return !!done;
+}
+
 export async function completeLesson(input: {
   slug: string;
   correctCount: number;
@@ -198,8 +221,14 @@ export async function completeLesson(input: {
     };
   }
 
-  const lesson = await prisma.lesson.findUnique({ where: { slug: input.slug } });
+  const lesson = await prisma.lesson.findUnique({
+    where: { slug: input.slug },
+    include: { unit: { select: { comingSoon: true } } },
+  });
   if (!lesson) return empty;
+
+  // Locked (coming-soon unit or ladder not reached) → no writes at all.
+  if (lesson.unit.comingSoon || !(await lessonUnlocked(userId, lesson))) return empty;
 
   // SECTION_TEST below the pass bar (even with hearts left) → not passed:
   // persist tz only — no completion, no XP, no streak/medal updates.
@@ -277,8 +306,14 @@ export async function completeLearnStage(input: {
   if (!session?.user?.id) return empty;
   const userId = session.user.id;
 
-  const lesson = await prisma.lesson.findUnique({ where: { slug: input.slug } });
+  const lesson = await prisma.lesson.findUnique({
+    where: { slug: input.slug },
+    include: { unit: { select: { comingSoon: true } } },
+  });
   if (!lesson || lesson.kind !== 'LESSON') return empty;
+
+  // Locked (coming-soon unit or ladder not reached) → no writes at all.
+  if (lesson.unit.comingSoon || !(await lessonUnlocked(userId, lesson))) return empty;
 
   const prior = await prisma.progress.findUnique({ where: { userId } });
   const tz = input.timezone || prior?.timezone || DEFAULT_TZ;

@@ -7,7 +7,7 @@ import { Flame, Lightning, X } from '@phosphor-icons/react/dist/ssr';
 import { Button, Mascot, Medal, Text, useToast } from '@/components/ui';
 import type { MedalType } from '@/components/ui';
 import { completeLesson, type CompleteResult } from '@/app/actions/gamification';
-import { TOTAL_HEARTS } from '@/lib/gamification';
+import { TOTAL_HEARTS, shuffledOrder } from '@/lib/gamification';
 import { fa } from '@/lib/i18n/fa';
 import { cn } from '@/lib/utils';
 
@@ -48,15 +48,21 @@ export function LessonRunner({
   kind,
   title,
   questions,
+  initialOrder,
 }: {
   slug: string;
   kind: LessonKind;
   title: string;
   questions: Question[];
+  /** Display→original option order for question 1 (server-shuffled per request). */
+  initialOrder: number[];
 }) {
   const router = useRouter();
   const push = useToast();
   const [index, setIndex] = useState(0);
+  // Options are authored correct-first, so each question gets a fresh shuffled
+  // display order; `selected` stores the DISPLAY index, `order` maps it back.
+  const [order, setOrder] = useState<number[]>(initialOrder);
   const [selected, setSelected] = useState<number | null>(null);
   const [checked, setChecked] = useState(false);
   const [hearts, setHearts] = useState(TOTAL_HEARTS);
@@ -69,12 +75,12 @@ export function LessonRunner({
   const [done, setDone] = useState(false);
 
   const q = questions[index];
-  const isCorrect = selected === q.correctIndex;
+  const isCorrect = selected !== null && order[selected] === q.correctIndex;
 
   function check() {
     if (selected === null) return;
     setChecked(true);
-    if (selected === q.correctIndex) {
+    if (order[selected] === q.correctIndex) {
       setCorrectCount((c) => c + 1);
       return;
     }
@@ -125,6 +131,7 @@ export function LessonRunner({
       return;
     }
     setIndex(index + 1);
+    setOrder(shuffledOrder(questions[index + 1].options.length));
     setSelected(null);
     setChecked(false);
     setLostHeart(null);
@@ -132,6 +139,7 @@ export function LessonRunner({
 
   function restart() {
     setIndex(0);
+    setOrder(shuffledOrder(questions[0].options.length)); // reshuffle — retries aren't memorizable by position
     setSelected(null);
     setChecked(false);
     setHearts(TOTAL_HEARTS);
@@ -145,10 +153,10 @@ export function LessonRunner({
   }
 
   // Literal class strings so Tailwind keeps the @layer components state rules.
-  function tileClass(i: number): string {
-    if (!checked) return i === selected ? 'is-selected' : '';
-    if (i === q.correctIndex) return 'is-correct';
-    if (i === selected) return 'is-incorrect';
+  function tileClass(display: number): string {
+    if (!checked) return display === selected ? 'is-selected' : '';
+    if (order[display] === q.correctIndex) return 'is-correct';
+    if (display === selected) return 'is-incorrect';
     return '';
   }
 
@@ -283,18 +291,18 @@ export function LessonRunner({
           <div className="ex-prompt">{q.prompt}</div>
 
           <div className="mcq-grid">
-            {q.options.map((opt, i) => (
+            {order.map((orig, display) => (
               <button
-                key={i}
+                key={display}
                 type="button"
-                className={cn('mcq-tile', tileClass(i))}
+                className={cn('mcq-tile', tileClass(display))}
                 disabled={checked}
-                aria-pressed={selected === i}
-                onClick={() => setSelected(i)}
+                aria-pressed={selected === display}
+                onClick={() => setSelected(display)}
               >
-                <span className="mcq-num">{i + 1}</span>
+                <span className="mcq-num">{display + 1}</span>
                 <span className="mcq-state-ic" aria-hidden="true" />
-                <span className="mcq-label-en">{opt}</span>
+                <span className="mcq-label-en">{q.options[orig]}</span>
               </button>
             ))}
           </div>

@@ -223,7 +223,7 @@ const learnSections: SectionSeed[] = [
     kind: SectionKind.VIDEO,
     titleEn: 'Watch (optional)',
     titleFa: 'ویدیو (اختیاری)',
-    content: { url: null, noteFa: 'یک مرورِ ویدیوییِ کوتاه — به‌زودی.' },
+    content: { url: 'https://youtu.be/nvVdIJ0las0', noteFa: 'یک مرورِ ویدیوییِ کوتاه — به‌زودی.' },
   },
 ];
 

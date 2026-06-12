@@ -14,6 +14,10 @@ export const fa = {
     // SECTION_TEST "not passed" explanation (the 80% bar).
     testBar: 'برای قبولی در آزمون باید دست‌کم ۸۰٪ پاسخ‌ها درست باشد. دوباره تلاش کن!',
   },
+  study: {
+    // VIDEO section fallback hint (much of the audience is on filtered networks).
+    videoFallback: 'اگر ویدیو باز نشد، ممکن است به دسترسیِ آزاد به اینترنت نیاز داشته باشد.',
+  },
 } as const;
 
 export type Fa = typeof fa;

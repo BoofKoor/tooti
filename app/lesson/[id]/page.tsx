@@ -1,5 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
+import { shuffledOrder } from '@/lib/gamification';
 import { getLearnPath, getLessonWithExercises } from '@/lib/learn-data';
 import { LessonRunner, type Question } from './_runner';
 
@@ -36,5 +37,18 @@ export default async function LessonPage({ params }: { params: Promise<{ id: str
     }));
   if (questions.length === 0) redirect('/learn');
 
-  return <LessonRunner slug={slug} kind={lesson.kind} title={lesson.title} questions={questions} />;
+  // Pre-shuffled display order for question 1, computed per request so the
+  // server-rendered HTML is already shuffled (and hydration matches). The
+  // runner reshuffles client-side for every later question / retry.
+  const initialOrder = shuffledOrder(questions[0].options.length);
+
+  return (
+    <LessonRunner
+      slug={slug}
+      kind={lesson.kind}
+      title={lesson.title}
+      questions={questions}
+      initialOrder={initialOrder}
+    />
+  );
 }
