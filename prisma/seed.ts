@@ -1,4 +1,11 @@
-import { LessonKind, MedalTier, Prisma, PrismaClient, SectionKind } from '@prisma/client';
+import {
+  ExerciseType,
+  LessonKind,
+  MedalTier,
+  Prisma,
+  PrismaClient,
+  SectionKind,
+} from '@prisma/client';
 import type { SectionContent } from '../lib/lesson-content';
 
 /**
@@ -8,9 +15,10 @@ import type { SectionContent } from '../lib/lesson-content';
  * stable. Persian here is LESSON CONTENT and lives in the DB (the
  * /lib/i18n/fa.ts dict is only for UI-chrome islands).
  *
- * Seeds: 1 active unit + 4 coming-soon units, 5 lessons (Learn → Practice ×3 →
- * Test), 28 exercises, 8 Learn-stage sections, 8 medals. Does NOT seed
- * User/Progress/LessonCompletion/UserMedal/DailyXp — those come from real use.
+ * Seeds: 1 active unit + 4 coming-soon units, 6 lessons (Learn → Practice ×4 →
+ * Test), 46 exercises (incl. the 20-item test pool), 8 Learn-stage sections,
+ * 8 medals. Does NOT seed User/Progress/LessonCompletion/UserMedal/DailyXp —
+ * those come from real use.
  */
 const prisma = new PrismaClient();
 
@@ -22,7 +30,9 @@ const units = [
   { slug: 'vocabulary', title: 'Vocabulary', order: 5, comingSoon: true },
 ];
 
-// The Present Simple topic: Learn stage → 3 practice sets → checkpoint test.
+// The Present Simple topic: Learn stage → 4 practice sets → checkpoint test
+// (recognition → production: "Build & write" sits after the MCQ sets, before
+// the test).
 const lessons = [
   {
     slug: 'present-simple-learn',
@@ -39,9 +49,15 @@ const lessons = [
     kind: LessonKind.REVIEW,
   },
   {
+    slug: 'present-simple-practice-4',
+    title: 'Build & write',
+    order: 5,
+    kind: LessonKind.REVIEW,
+  },
+  {
     slug: 'present-simple-test',
     title: 'Checkpoint test',
-    order: 5,
+    order: 6,
     kind: LessonKind.SECTION_TEST,
   },
 ];
@@ -223,17 +239,23 @@ const learnSections: SectionSeed[] = [
     kind: SectionKind.VIDEO,
     titleEn: 'Watch (optional)',
     titleFa: 'ویدیو (اختیاری)',
-    content: { url: 'https://youtu.be/nvVdIJ0las0', noteFa: 'یک مرورِ ویدیوییِ کوتاه — به‌زودی.' },
+    content: {
+      url: 'https://youtu.be/nvVdIJ0las0',
+      noteFa: 'اگر دوست داری، یک مرورِ ویدیوییِ کوتاهِ این درس را ببین.',
+    },
   },
 ];
 
 type ExerciseSeed = {
   order: number;
+  type: ExerciseType;
   instructionEn: string;
   instructionFa: string;
-  prompt: string;
-  options: string[];
-  correctIndex: number;
+  prompt: string; // '' for promptless WORD_BANK builders
+  options: string[]; // MCQ choices / bank tokens (incl. distractors); [] for FILL_BLANK
+  correctIndex: number | null; // MCQ only (authored correct-first; the runner shuffles)
+  answer: string | null; // canonical answer for the typed/builder types
+  data: { accept: string[] } | null; // FILL_BLANK extra accepted answers
   explanationFa: string;
 };
 
@@ -244,11 +266,53 @@ function mcqSet(
 ): ExerciseSeed[] {
   return items.map((it, i) => ({
     order: i + 1,
+    type: ExerciseType.MCQ,
     instructionEn,
     instructionFa,
     prompt: it.prompt,
     options: it.options,
     correctIndex: 0, // authored with the correct option first
+    answer: null,
+    data: null,
+    explanationFa: it.explanationFa,
+  }));
+}
+
+function fillBlankItems(
+  startOrder: number,
+  items: Array<{ prompt: string; answer: string; accept?: string[]; explanationFa: string }>,
+): ExerciseSeed[] {
+  return items.map((it, i) => ({
+    order: startOrder + i,
+    type: ExerciseType.FILL_BLANK,
+    instructionEn: 'Type the correct form of the verb.',
+    instructionFa: 'شکلِ درستِ فعل را تایپ کن',
+    prompt: it.prompt,
+    options: [],
+    correctIndex: null,
+    answer: it.answer,
+    data: it.accept ? { accept: it.accept } : null,
+    explanationFa: it.explanationFa,
+  }));
+}
+
+function builderItems(
+  startOrder: number,
+  type: ExerciseType,
+  instructionEn: string,
+  instructionFa: string,
+  items: Array<{ prompt?: string; options: string[]; answer: string; explanationFa: string }>,
+): ExerciseSeed[] {
+  return items.map((it, i) => ({
+    order: startOrder + i,
+    type,
+    instructionEn,
+    instructionFa,
+    prompt: it.prompt ?? '',
+    options: it.options,
+    correctIndex: null,
+    answer: it.answer,
+    data: null,
     explanationFa: it.explanationFa,
   }));
 }
@@ -351,6 +415,58 @@ const exercisesByLesson: Record<string, ExerciseSeed[]> = {
       explanationFa: 'بعد از doesn’t فعلِ ساده.',
     },
   ]),
+  'present-simple-practice-4': [
+    ...fillBlankItems(1, [
+      {
+        prompt: 'She ___ (go) to school by bus.',
+        answer: 'goes',
+        explanationFa: 'go با -o تمام می‌شود → goes.',
+      },
+      {
+        prompt: 'My parents ___ (not / like) loud music.',
+        answer: 'don’t like',
+        accept: ['do not like'],
+        explanationFa: 'فاعلِ جمع → don’t + فعلِ ساده.',
+      },
+      {
+        prompt: 'He ___ (study) English every night.',
+        answer: 'studies',
+        explanationFa: 'حرفِ بی‌صدا + y → ies.',
+      },
+    ]),
+    ...builderItems(4, ExerciseType.WORD_BANK, 'Build the sentence.', 'جمله را بساز', [
+      {
+        options: ['She', 'drinks', 'tea', 'every', 'morning', 'drink'],
+        answer: 'She drinks tea every morning',
+        explanationFa: 'سوم‌شخصِ مفرد s می‌گیرد: drinks.',
+      },
+      {
+        options: ['Does', 'he', 'like', 'football', 'Do', 'likes'],
+        answer: 'Does he like football',
+        explanationFa: 'سؤالِ سوم‌شخص: Does + فعلِ ساده.',
+      },
+      {
+        options: ['They', 'don’t', 'watch', 'TV', 'at', 'night', 'doesn’t'],
+        answer: 'They don’t watch TV at night',
+        explanationFa: 'فاعلِ جمع → don’t.',
+      },
+    ]),
+    ...builderItems(7, ExerciseType.TRANSLATE, 'Translate into English.', 'به انگلیسی ترجمه کن', [
+      {
+        prompt: 'او هر روز انگلیسی می‌خوانَد.',
+        options: ['She', 'studies', 'English', 'every', 'day', 'study', 'days'],
+        answer: 'She studies English every day',
+        explanationFa: 'عادتِ روزانه → حالِ ساده با s.',
+      },
+      {
+        prompt: 'من قهوه دوست ندارم.',
+        options: ['I', 'don’t', 'like', 'coffee', 'doesn’t', 'likes'],
+        answer: 'I don’t like coffee',
+        explanationFa: 'اول‌شخص → don’t + فعلِ ساده.',
+      },
+    ]),
+  ],
+  // Checkpoint pool — TEST_SAMPLE_SIZE questions are sampled per attempt.
   'present-simple-test': mcqSet('Choose the correct answer.', 'گزینهٔ درست را انتخاب کن', [
     {
       prompt: 'Sara ___ up at 6 every day.',
@@ -401,6 +517,58 @@ const exercisesByLesson: Record<string, ExerciseSeed[]> = {
       prompt: 'He usually ___ tea, but today he is drinking coffee.',
       options: ['drinks', 'drink', 'is drinking', 'drank'],
       explanationFa: 'عادت → حالِ ساده؛ «امروز» استثناست.',
+    },
+    {
+      prompt:
+        'Our new apartment is awful. The heater doesn’t work, the sink leaks, and the refrigerator ___ a loud noise every time it comes on.',
+      options: ['makes', 'will make', 'has made', 'made'],
+      explanationFa: 'اتفاقِ تکراری (هر بار که روشن می‌شود) → حالِ ساده با s.',
+    },
+    {
+      prompt:
+        'According to recent advertisements, the new program ___ a dictionary and a spell checker.',
+      options: ['includes', 'include', 'is including', 'including'],
+      explanationFa: 'ویژگیِ ثابتِ محصول → حالِ ساده؛ سوم‌شخص s می‌گیرد.',
+    },
+    {
+      prompt: 'Mr. Lee often ___ his car to work in the morning.',
+      options: ['drives', 'drive', 'is driving', 'driving'],
+      explanationFa: 'قیدِ تکرارِ often + سوم‌شخص → drives.',
+    },
+    {
+      prompt: '“Do they ever go on a picnic at the weekends?” “No, they ___ go on a picnic.”',
+      options: ['hardly ever', 'sometimes', 'usually', 'always'],
+      explanationFa: 'جوابِ منفی: hardly ever یعنی تقریباً هیچ‌وقت.',
+    },
+    {
+      prompt: '“Do you clean up your room every day?” “No. My mom says my room is ___ untidy.”',
+      options: ['always', 'hardly', 'seldom', 'never'],
+      explanationFa: 'هر روز تمیز نمی‌کند → اتاق همیشه نامرتب است: always.',
+    },
+    {
+      prompt: 'My little brother always ___ me when I study my lessons.',
+      options: ['bothers', 'bothering', 'bothered', 'bother'],
+      explanationFa: 'قیدِ تکرار قبل از فعلِ اصلی، و فعل s می‌گیرد: always bothers.',
+    },
+    {
+      prompt: '“Does she ever talk on the phone?” “Yes, ___.”',
+      options: ['she usually does', 'she does usually', 'usually she does', 'does she usually'],
+      explanationFa: 'در جوابِ کوتاه، قیدِ تکرار قبل از does می‌آید: she usually does.',
+    },
+    {
+      prompt: 'My brother is very lazy. He ___ helps our parents.',
+      options: ['never', 'ever', 'often', 'always'],
+      explanationFa: 'تنبل است → هیچ‌وقت کمک نمی‌کند: never. (ever در جملهٔ مثبت به‌کار نمی‌رود.)',
+    },
+    {
+      prompt: 'Does she ever ___ her mom around the house?',
+      options: ['help', 'helps', 'helping', 'helped'],
+      explanationFa: 'بعد از Does فعلِ ساده می‌آید: help.',
+    },
+    {
+      prompt: 'Tom is a vegetarian, so he ___ meat.',
+      options: ['doesn’t eat', 'don’t eat', 'doesn’t eats', 'isn’t eat'],
+      explanationFa: 'گیاه‌خوار است → doesn’t + فعلِ ساده.',
     },
   ]),
 };
@@ -473,6 +641,14 @@ async function main() {
   });
   await prisma.lesson.deleteMany({ where: { slug: { notIn: lessons.map((l) => l.slug) } } });
 
+  // Ladder edits move lessons (e.g. the test shifted to make room for new
+  // practice sets) — bump surviving rows out of the way first so the
+  // @@unique([unitId, order]) slots are free for the upserts below.
+  await prisma.lesson.updateMany({
+    where: { unitId: presentSimple.id },
+    data: { order: { increment: 1000 } },
+  });
+
   for (const l of lessons) {
     const lesson = await prisma.lesson.upsert({
       where: { slug: l.slug },
@@ -492,12 +668,14 @@ async function main() {
       data: exercisesByLesson[l.slug].map((e) => ({
         lessonId: lesson.id,
         order: e.order,
-        type: 'MCQ',
+        type: e.type,
         instructionEn: e.instructionEn,
         instructionFa: e.instructionFa,
         prompt: e.prompt,
         options: e.options,
         correctIndex: e.correctIndex,
+        answer: e.answer,
+        data: e.data ? (e.data as Prisma.InputJsonValue) : Prisma.DbNull,
         explanationFa: e.explanationFa,
       })),
     });

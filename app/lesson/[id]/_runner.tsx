@@ -7,26 +7,20 @@ import { Flame, Lightning, X } from '@phosphor-icons/react/dist/ssr';
 import { Button, Mascot, Medal, Text, useToast } from '@/components/ui';
 import type { MedalType } from '@/components/ui';
 import { completeLesson, type CompleteResult } from '@/app/actions/gamification';
-import { TOTAL_HEARTS, shuffledOrder } from '@/lib/gamification';
+import { TOTAL_HEARTS, answerMatches, shuffledOrder } from '@/lib/gamification';
 import { fa } from '@/lib/i18n/fa';
 import { cn } from '@/lib/utils';
+import { optionCount, type Question } from './_questions';
 
 /*
  * Lesson / exercise runner — client island, fed real questions by the server
  * wrapper (page.tsx). Full-screen (outside the (app) tab shell). Runner/exercise
  * styling is the verbatim CSS in globals.css (@layer components). In dir="ltr"
  * the styleguide flips the instruct slots so English is primary and Persian
- * secondary.
+ * secondary. Renders by Question type: MCQ tiles, FILL_BLANK typed input, and
+ * the WORD_BANK/TRANSLATE tile builder — hearts/XP/feedback are type-agnostic
+ * (one correct-or-wrong per exercise).
  */
-
-export type Question = {
-  instructionEn: string;
-  instructionFa: string;
-  prompt: string;
-  options: string[];
-  correctIndex: number;
-  explanationFa: string;
-};
 
 // Heart artwork (verbatim from the styleguide hearts markup).
 const HEART_PATH =
@@ -54,16 +48,19 @@ export function LessonRunner({
   kind: LessonKind;
   title: string;
   questions: Question[];
-  /** Display→original option order for question 1 (server-shuffled per request). */
-  initialOrder: number[];
+  /** Display→original tile order for question 1 (server-shuffled per request); null = no tiles. */
+  initialOrder: number[] | null;
 }) {
   const router = useRouter();
   const push = useToast();
   const [index, setIndex] = useState(0);
-  // Options are authored correct-first, so each question gets a fresh shuffled
-  // display order; `selected` stores the DISPLAY index, `order` maps it back.
-  const [order, setOrder] = useState<number[]>(initialOrder);
+  // Options/banks are authored correct-first, so each question gets a fresh
+  // shuffled display order; `selected`/`built` store DISPLAY/original indices
+  // and `order` maps between them.
+  const [order, setOrder] = useState<number[]>(initialOrder ?? []);
   const [selected, setSelected] = useState<number | null>(null);
+  const [typed, setTyped] = useState('');
+  const [built, setBuilt] = useState<number[]>([]);
   const [checked, setChecked] = useState(false);
   const [hearts, setHearts] = useState(TOTAL_HEARTS);
   const [lostHeart, setLostHeart] = useState<number | null>(null);
@@ -75,12 +72,28 @@ export function LessonRunner({
   const [done, setDone] = useState(false);
 
   const q = questions[index];
-  const isCorrect = selected !== null && order[selected] === q.correctIndex;
+
+  const isCorrect =
+    q.type === 'MCQ'
+      ? selected !== null && order[selected] === q.correctIndex
+      : q.type === 'FILL_BLANK'
+        ? answerMatches(typed, q.answer, q.accept)
+        : answerMatches(built.map((i) => q.options[i]).join(' '), q.answer);
+
+  const canCheck =
+    q.type === 'MCQ'
+      ? selected !== null
+      : q.type === 'FILL_BLANK'
+        ? typed.trim().length > 0
+        : built.length > 0;
+
+  // Wrong-answer banner: the canonical answer (MCQ shows the correct option).
+  const correctText = q.type === 'MCQ' ? q.options[q.correctIndex] : q.answer;
 
   function check() {
-    if (selected === null) return;
+    if (!canCheck || checked) return;
     setChecked(true);
-    if (order[selected] === q.correctIndex) {
+    if (isCorrect) {
       setCorrectCount((c) => c + 1);
       return;
     }
@@ -121,6 +134,15 @@ export function LessonRunner({
     setDone(true);
   }
 
+  function resetQuestionState(nextQuestion: Question) {
+    setOrder(shuffledOrder(optionCount(nextQuestion)));
+    setSelected(null);
+    setTyped('');
+    setBuilt([]);
+    setChecked(false);
+    setLostHeart(null);
+  }
+
   function next() {
     if (failed) {
       setOutOfHearts(true);
@@ -131,33 +153,129 @@ export function LessonRunner({
       return;
     }
     setIndex(index + 1);
-    setOrder(shuffledOrder(questions[index + 1].options.length));
-    setSelected(null);
-    setChecked(false);
-    setLostHeart(null);
+    resetQuestionState(questions[index + 1]);
   }
 
   function restart() {
     setIndex(0);
-    setOrder(shuffledOrder(questions[0].options.length)); // reshuffle — retries aren't memorizable by position
-    setSelected(null);
-    setChecked(false);
+    resetQuestionState(questions[0]); // reshuffle — retries aren't memorizable by position
     setHearts(TOTAL_HEARTS);
-    setLostHeart(null);
     setCorrectCount(0);
     setFailed(false);
     setOutOfHearts(false);
     setFinishing(false);
     setResult(null);
     setDone(false);
+    // SECTION_TEST questions are sampled server-side per request, so a retry
+    // refetches the page data for a fresh 10-question draw from the pool.
+    router.refresh();
   }
 
   // Literal class strings so Tailwind keeps the @layer components state rules.
   function tileClass(display: number): string {
+    if (q.type !== 'MCQ') return '';
     if (!checked) return display === selected ? 'is-selected' : '';
     if (order[display] === q.correctIndex) return 'is-correct';
     if (display === selected) return 'is-incorrect';
     return '';
+  }
+
+  function addToBuilt(orig: number) {
+    setBuilt((b) => (b.includes(orig) ? b : [...b, orig]));
+  }
+
+  function removeFromBuilt(position: number) {
+    setBuilt((b) => b.filter((_, j) => j !== position));
+  }
+
+  function questionBody(question: Question) {
+    switch (question.type) {
+      case 'MCQ':
+        return (
+          <>
+            <div className="ex-prompt">{question.prompt}</div>
+            <div className="mcq-grid">
+              {order.map((orig, display) => (
+                <button
+                  key={display}
+                  type="button"
+                  className={cn('mcq-tile', tileClass(display))}
+                  disabled={checked}
+                  aria-pressed={selected === display}
+                  onClick={() => setSelected(display)}
+                >
+                  <span className="mcq-num">{display + 1}</span>
+                  <span className="mcq-state-ic" aria-hidden="true" />
+                  <span className="mcq-label-en">{question.options[orig]}</span>
+                </button>
+              ))}
+            </div>
+          </>
+        );
+      case 'FILL_BLANK':
+        return (
+          <>
+            <div className="ex-prompt">{question.prompt}</div>
+            <input
+              type="text"
+              className={cn('fb-input', checked && (isCorrect ? 'is-correct' : 'is-incorrect'))}
+              value={typed}
+              placeholder="Type your answer"
+              aria-label="Your answer"
+              disabled={checked}
+              autoCapitalize="none"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+              onChange={(e) => setTyped(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') check();
+              }}
+            />
+          </>
+        );
+      case 'WORD_BANK':
+      case 'TRANSLATE': {
+        const bank = order.filter((orig) => !built.includes(orig));
+        return (
+          <>
+            {question.type === 'TRANSLATE' ? (
+              <div className="ex-target fa" dir="rtl">
+                {question.prompt}
+              </div>
+            ) : question.prompt ? (
+              <div className="ex-prompt">{question.prompt}</div>
+            ) : null}
+            <div className="wb-built" aria-label="Your sentence">
+              {built.map((orig, position) => (
+                <button
+                  key={`${orig}-${position}`}
+                  type="button"
+                  className="wb-tile"
+                  disabled={checked}
+                  onClick={() => removeFromBuilt(position)}
+                >
+                  {question.options[orig]}
+                </button>
+              ))}
+            </div>
+            <div className="wb-bank" aria-label="Word bank">
+              {bank.map((orig) => (
+                <button
+                  key={orig}
+                  type="button"
+                  className="wb-tile"
+                  disabled={checked}
+                  onClick={() => addToBuilt(orig)}
+                >
+                  {question.options[orig]}
+                </button>
+              ))}
+            </div>
+          </>
+        );
+      }
+    }
   }
 
   if (outOfHearts) {
@@ -288,24 +406,7 @@ export function LessonRunner({
             </div>
           </div>
 
-          <div className="ex-prompt">{q.prompt}</div>
-
-          <div className="mcq-grid">
-            {order.map((orig, display) => (
-              <button
-                key={display}
-                type="button"
-                className={cn('mcq-tile', tileClass(display))}
-                disabled={checked}
-                aria-pressed={selected === display}
-                onClick={() => setSelected(display)}
-              >
-                <span className="mcq-num">{display + 1}</span>
-                <span className="mcq-state-ic" aria-hidden="true" />
-                <span className="mcq-label-en">{q.options[orig]}</span>
-              </button>
-            ))}
-          </div>
+          {questionBody(q)}
         </article>
       </div>
 
@@ -315,7 +416,7 @@ export function LessonRunner({
             variant="confirm"
             size="lg"
             className="w-full"
-            disabled={selected === null}
+            disabled={!canCheck}
             onClick={check}
           >
             Check
@@ -334,7 +435,7 @@ export function LessonRunner({
                   </span>
                 ) : (
                   <>
-                    Correct: <b>{q.options[q.correctIndex]}</b> ·{' '}
+                    Correct: <b>{correctText}</b> ·{' '}
                     <span className="fa" dir="rtl">
                       {q.explanationFa}
                     </span>

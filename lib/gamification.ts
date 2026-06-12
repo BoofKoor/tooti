@@ -34,6 +34,23 @@ export function shuffledOrder(n: number, rand: () => number = Math.random): numb
   return a;
 }
 
+export const TEST_SAMPLE_SIZE = 10; // questions per SECTION_TEST attempt, drawn from the pool
+
+/** Forgiving on mechanics, strict on grammar (apostrophes matter: don't ≠ dont). */
+export function normalizeAnswer(s: string): string {
+  return s
+    .replace(/[’‘]/g, "'")
+    .trim()
+    .replace(/\s+/g, ' ')
+    .replace(/[.?!]$/, '')
+    .toLowerCase();
+}
+
+export function answerMatches(input: string, canonical: string, accept: string[] = []): boolean {
+  const n = normalizeAnswer(input);
+  return n === normalizeAnswer(canonical) || accept.some((a) => normalizeAnswer(a) === n);
+}
+
 export function computeLessonXp(o: {
   correctCount: number;
   heartsLeft: number;
