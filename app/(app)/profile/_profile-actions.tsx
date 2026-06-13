@@ -1,37 +1,47 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, Export, GearSix, SignOut } from '@phosphor-icons/react/dist/ssr';
 import { useToast } from '@/components/ui';
 import { signOutAction } from '@/app/actions/auth';
+import { updateName } from '@/app/actions/profile';
 
 /*
- * Profile topbar actions — Settings menu + Share. Replaces the two inert
- * buttons. Renders two flex children so the topbar's space-between still pushes
- * Settings to the start and Share to the end. The settings menu is a small
- * popover that closes on outside-click / Escape; Sign out posts a server action
- * (works with database sessions, no client SessionProvider needed).
+ * Profile topbar actions — Settings (gear) opens the Edit-profile bottom sheet
+ * (ported from the styleguide .prof-sheet), Share stays as-is. Renders two flex
+ * children so the topbar's space-between keeps the gear at the start and Share
+ * at the end. The sheet (scrim z-40 / sheet z-41) sits above the floating tab
+ * bar (z-30). Name saves to User.name via a server action; Sign out lives in the
+ * sheet below a divider. Username + Choose-avatar are a later batch.
  */
-export function ProfileActions() {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+export function ProfileActions({ currentName }: { currentName: string }) {
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const push = useToast();
 
   useEffect(() => {
-    if (!open) return;
-    function onDown(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    }
+    if (!sheetOpen) return;
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === 'Escape') setSheetOpen(false);
     }
-    document.addEventListener('mousedown', onDown);
     document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('mousedown', onDown);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [open]);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [sheetOpen]);
+
+  function closeSheet() {
+    setSheetOpen(false);
+    setError(null);
+  }
+
+  async function onSave(fd: FormData) {
+    const res = await updateName(fd);
+    if (res.ok) {
+      closeSheet();
+      push({ type: 'info', title: 'Saved', icon: <Check weight="bold" /> });
+    } else {
+      setError(res.error ?? 'Could not save');
+    }
+  }
 
   async function copyLink(url: string) {
     try {
@@ -58,38 +68,62 @@ export function ProfileActions() {
 
   return (
     <>
-      <div ref={ref} className="relative">
-        <button
-          type="button"
-          className="prof-icon-btn"
-          aria-label="Settings"
-          aria-haspopup="menu"
-          aria-expanded={open}
-          onClick={() => setOpen((o) => !o)}
-        >
-          <GearSix />
-        </button>
-        {open ? (
-          <div
-            role="menu"
-            className="absolute top-full z-10 mt-2 min-w-40 rounded-xl border border-border bg-surface p-1 shadow-3 start-0"
-          >
-            <form action={signOutAction}>
-              <button
-                type="submit"
-                role="menuitem"
-                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start text-sm font-bold text-text-1 transition-colors hover:bg-surface-2"
-              >
-                <SignOut weight="bold" /> Sign out
-              </button>
-            </form>
-          </div>
-        ) : null}
-      </div>
+      <button
+        type="button"
+        className="prof-icon-btn"
+        aria-label="Settings"
+        aria-haspopup="dialog"
+        aria-expanded={sheetOpen}
+        onClick={() => setSheetOpen((o) => !o)}
+      >
+        <GearSix />
+      </button>
 
       <button type="button" className="prof-icon-btn" aria-label="Share" onClick={onShare}>
         <Export />
       </button>
+
+      {sheetOpen ? (
+        <>
+          <div className="prof-sheet-scrim" onClick={closeSheet} />
+          <div className="prof-sheet" role="dialog" aria-modal="true" aria-label="Edit profile">
+            <div className="handle" />
+            <h3 className="sh-title">Edit profile</h3>
+            <form action={onSave}>
+              <div className="prof-form">
+                <div className="prof-field">
+                  <span className="lbl">Name</span>
+                  <input
+                    className="prof-input"
+                    type="text"
+                    name="name"
+                    defaultValue={currentName}
+                    maxLength={40}
+                    dir="ltr"
+                    autoFocus
+                  />
+                  {error ? <span className="err">{error}</span> : null}
+                </div>
+                <div className="prof-form-actions">
+                  <button type="button" className="btn btn--secondary" onClick={closeSheet}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn btn--confirm">
+                    Save
+                  </button>
+                </div>
+              </div>
+            </form>
+            <div className="prof-sheet-signout">
+              <form action={signOutAction}>
+                <button type="submit" className="btn btn--secondary" style={{ inlineSize: '100%' }}>
+                  <SignOut /> Sign out
+                </button>
+              </form>
+            </div>
+          </div>
+        </>
+      ) : null}
     </>
   );
 }

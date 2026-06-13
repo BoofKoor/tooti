@@ -3621,3 +3621,127 @@
     font-weight: 700;
   }
 }
+
+/* ─── Batch 2b — Edit-profile sheet (ported from design/styleguide.html
+   .prof-sheet; Name field only this batch). Scrim/sheet sit above the floating
+   tab bar (z-index:30): scrim 40, sheet 41. ─── */
+@layer components {
+  .prof-sheet-scrim {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 28, 50, 0.36);
+    z-index: 40;
+    animation: prof-fade-in 220ms ease-out;
+  }
+  .prof-sheet {
+    position: fixed;
+    inset-inline: 0;
+    inset-block-end: 0;
+    margin-inline: auto;
+    max-inline-size: var(--app-max-w);
+    background: var(--color-surface);
+    border-radius: 24px 24px 0 0;
+    padding: 18px 20px 22px;
+    box-shadow: 0 -10px 32px -6px rgba(20, 28, 50, 0.22);
+    animation: prof-sheet-up 360ms var(--ease-spring);
+    z-index: 41;
+    max-block-size: 78%;
+    overflow-y: auto;
+  }
+  .prof-sheet .handle {
+    inline-size: 38px;
+    block-size: 4px;
+    background: var(--color-border-strong);
+    border-radius: 2px;
+    margin: 0 auto 14px;
+  }
+  .prof-sheet .sh-title {
+    font-family: var(--font-en);
+    font-weight: 900;
+    font-size: 20px;
+    color: var(--color-text-1);
+    margin: 0 0 14px;
+    text-align: center;
+  }
+  .prof-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .prof-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    position: relative;
+  }
+  .prof-field .lbl {
+    font-family: var(--font-en);
+    font-weight: 800;
+    font-size: 10px;
+    color: var(--color-text-3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .prof-input {
+    background: var(--color-surface);
+    border: 2px solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    font: inherit;
+    font-size: 15px;
+    color: var(--color-text-1);
+    font-family: var(--font-en);
+    font-weight: 700;
+    inline-size: 100%;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 200ms;
+  }
+  .prof-input:focus {
+    border-color: var(--color-primary);
+  }
+  .prof-field .err {
+    font-family: var(--font-en);
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--color-error);
+  }
+  .prof-form-actions {
+    display: flex;
+    gap: 8px;
+    margin-block-start: 6px;
+  }
+  .prof-form-actions .btn {
+    flex: 1;
+    min-block-size: 50px;
+    font-size: 15px;
+  }
+  .prof-sheet-signout {
+    margin-block-start: 14px;
+    padding-block-start: 14px;
+    border-block-start: 1px solid var(--color-border);
+  }
+}
+
+@keyframes prof-fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes prof-sheet-up {
+  0% {
+    transform: translateY(100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .prof-sheet,
+  .prof-sheet-scrim {
+    animation: none;
+  }
+}
