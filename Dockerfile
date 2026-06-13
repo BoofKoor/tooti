@@ -14,6 +14,14 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
+# ---- migrator: runs prisma migrate deploy + seed on deploy (no Next build) ----
+FROM node:22-alpine AS migrator
+WORKDIR /app
+ENV NEXT_TELEMETRY_DISABLED=1
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+CMD ["sh", "-c", "npx prisma migrate deploy && npx prisma db seed"]
+
 # ---- runner: minimal production image ----
 FROM node:22-alpine AS runner
 WORKDIR /app
