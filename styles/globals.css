@@ -3357,3 +3357,69 @@
     opacity: 0.65;
   }
 }
+
+/* ─── Phase 6 — route fade + lesson-complete confetti ─── */
+@layer components {
+  /* Per-navigation fade-up (app/template.tsx re-mounts this on every route). */
+  .route-fade {
+    animation: route-fade-in var(--dur-base) var(--ease-out);
+  }
+
+  /* One-shot confetti burst behind the complete-screen mascot (client-only,
+     pieces animate `forwards` and stop — no infinite loop). */
+  .confetti {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .confetti-bit {
+    position: absolute;
+    inset-block-start: -10%;
+    inset-inline-start: var(--x);
+    inline-size: var(--space-2);
+    block-size: var(--space-3);
+    background: var(--c);
+    border-radius: var(--radius-xs);
+    animation: confetti-fall var(--d) var(--ease-out) forwards;
+  }
+}
+
+@keyframes route-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(0) rotate(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(115vh) rotate(540deg);
+    opacity: 0;
+  }
+}
+
+/* Reduced-motion catch-all — a safety net on top of the existing targeted
+   blocks so nothing new (confetti, route fade, future animations) slips
+   through. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .confetti,
+  .route-fade {
+    animation: none !important;
+  }
+}
