@@ -25,7 +25,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           nothing is hidden; the wrapper is click-through except the bar itself. */}
       <nav
         aria-label="Primary"
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-30 px-4 pb-[env(safe-area-inset-bottom)]"
+        className="pointer-events-none absolute inset-x-0 bottom-0 px-4 pb-[env(safe-area-inset-bottom)]"
       >
         <AppTabBar />
       </nav>
