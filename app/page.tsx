@@ -1,45 +1,39 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Button, Mascot, Text } from '@/components/ui';
+import { Button, Mascot } from '@/components/ui';
 
+/*
+ * Welcome / entry — ported faithfully from design/styleguide.html (.scr-welcome,
+ * English version). Centered celebrate-mascot hero with the "Hi, I'm Tooti!"
+ * greeting + sub-line, and a full-width "Let's go!" CTA with a "Log in" link
+ * beneath. English-only (handoff §2): the styleguide's UI-language picker is
+ * intentionally omitted. Both CTAs route to /login (Auth.js magic-link + Google).
+ */
 export default function WelcomePage() {
   const router = useRouter();
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-app flex-col items-center justify-center gap-8 px-6 py-12 text-center">
-      <Mascot pose="encourage" size={140} />
-
-      {/* Wordmark — welcome is a Persian-allowed island (handoff §2). */}
-      <div className="flex flex-col items-center gap-1">
-        <Text variant="display" as="h1">
-          Tooti
-        </Text>
-        <Text variant="display" fa as="p">
-          طوطی
-        </Text>
+    <div className="scr-welcome" dir="ltr">
+      <div className="welcome-hero">
+        <div className="welcome-mascot">
+          <Mascot pose="celebrate" />
+        </div>
+        <h2 className="en">Hi, I&apos;m Tooti!</h2>
+        <p className="welcome-sub">
+          Your buddy for learning English — a tiny step a day is all it takes.
+        </p>
       </div>
 
-      <div className="flex flex-col items-center gap-2">
-        <Text variant="body">Learn English, the playful way.</Text>
-        <Text variant="body" fa>
-          انگلیسی را بازی‌گونه یاد بگیر.
-        </Text>
-      </div>
-
-      <div className="flex w-full max-w-xs flex-col items-center gap-3">
-        <Button className="w-full" onClick={() => router.push('/login')}>
-          Get started
+      <div className="welcome-actions">
+        <Button variant="confirm" size="lg" onClick={() => router.push('/login')}>
+          Let&apos;s go!
         </Button>
-        {/* Both CTAs route to /login — Auth.js sign-in (magic-link + Google). */}
-        <button
-          type="button"
-          onClick={() => router.push('/login')}
-          className="text-sm font-bold text-text-3 transition-colors duration-fast ease-out hover:text-text-1"
-        >
-          I already have an account
-        </button>
+        <div className="alt-link">
+          Have an account? <Link href="/login">Log in</Link>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }
