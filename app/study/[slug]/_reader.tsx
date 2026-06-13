@@ -318,15 +318,16 @@ export function StudyReader({
                       </div>
                       <div className="fb-text">
                         <div className="fb-title en">{checkCorrect ? 'Nice!' : 'Not quite'}</div>
-                        <div className="fb-meta">
-                          {!checkCorrect ? (
-                            <>
-                              Correct: <b>{check.options[check.correctIndex]}</b> ·{' '}
-                            </>
-                          ) : null}
-                          <span className="fa" dir="rtl">
-                            {check.explanationFa}
-                          </span>
+                        {!checkCorrect ? (
+                          <div className="fb-correct-line">
+                            Correct:{' '}
+                            <bdi>
+                              <b>{check.options[check.correctIndex]}</b>
+                            </bdi>
+                          </div>
+                        ) : null}
+                        <div className="fb-explain fa" dir="rtl">
+                          {check.explanationFa}
                         </div>
                       </div>
                     </div>

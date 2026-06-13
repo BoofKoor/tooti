@@ -497,24 +497,25 @@ export function LessonRunner({
             </div>
             <div className="fb-text">
               <div className="fb-title en">{isCorrect ? 'Nice!' : 'Not quite'}</div>
-              <div className="fb-meta">
-                {isCorrect ? (
+              {isCorrect ? (
+                <div className="fb-meta">
                   <span className="fb-xp">
                     <Lightning weight="fill" /> +10 XP
                   </span>
-                ) : (
-                  <>
+                </div>
+              ) : (
+                <>
+                  <div className="fb-correct-line">
                     Correct:{' '}
                     <bdi>
                       <b>{correctText}</b>
-                    </bdi>{' '}
-                    ·{' '}
-                    <span className="fa" dir="rtl">
-                      {q.explanationFa}
-                    </span>
-                  </>
-                )}
-              </div>
+                    </bdi>
+                  </div>
+                  <div className="fb-explain fa" dir="rtl">
+                    {q.explanationFa}
+                  </div>
+                </>
+              )}
             </div>
             <div className="fb-action">
               <Button
