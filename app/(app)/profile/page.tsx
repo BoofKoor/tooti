@@ -103,7 +103,7 @@ export default async function ProfilePage() {
   return (
     <div className="prof min-h-0 flex-1" dir="ltr">
       <div className="prof-topbar">
-        <ProfileActions />
+        <ProfileActions currentName={displayName} />
       </div>
 
       <div className="prof-scroll">
