@@ -3745,3 +3745,103 @@
     animation: none;
   }
 }
+
+/* ─── Lesson-complete pilot — ported verbatim from design/styleguide.html
+   (.lesson-complete "the big moment"). Stat-focused celebration; medals still
+   surface as toasts. Confetti (Phase 6) mounts inside data-confetti-host. ─── */
+@layer components {
+  .lesson-complete {
+    background:
+      radial-gradient(110% 80% at 50% 0%, var(--color-parrot-tint), transparent 65%),
+      linear-gradient(180deg, #fff, var(--color-surface-2));
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-12) var(--space-8) var(--space-10);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-3);
+  }
+  .lc-mascot {
+    width: 180px;
+    height: 200px;
+    margin: 0 auto var(--space-5);
+    position: relative;
+  }
+  .lesson-complete .lc-mascot svg {
+    inline-size: 100%;
+    block-size: 100%;
+  }
+  .lesson-complete h2 {
+    font-size: 40px;
+    line-height: 1.05;
+    margin: 0 0 var(--space-2);
+    color: var(--color-text-1);
+    font-family: var(--font-en);
+    font-weight: 800;
+  }
+  .lc-sub {
+    font-size: 17px;
+    color: var(--color-text-2);
+    margin: 0 auto var(--space-8);
+    max-width: 36ch;
+  }
+  .lc-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4);
+    max-width: 580px;
+    margin: 0 auto var(--space-8);
+  }
+  .lc-stat {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-4) var(--space-3);
+    box-shadow: var(--shadow-1);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+    min-inline-size: 0;
+  }
+  .lc-stat .ic {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.14);
+  }
+  .lc-stat .ic-streak {
+    background: var(--color-streak);
+  }
+  .lc-stat .ic-xp {
+    background: var(--grad-xp);
+  }
+  .lc-stat .ic-acc {
+    background: var(--color-correct);
+  }
+  .lc-stat .v {
+    font-family: var(--font-en);
+    font-weight: 900;
+    font-size: 26px;
+    color: var(--color-text-1);
+  }
+  .lc-stat .k {
+    font-size: 12px;
+    color: var(--color-text-3);
+    font-weight: 700;
+  }
+  .lc-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    max-width: 320px;
+    margin: 0 auto;
+  }
+  .lc-actions .btn {
+    inline-size: 100%;
+  }
+}

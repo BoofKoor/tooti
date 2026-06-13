@@ -4,9 +4,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { CSSProperties } from 'react';
 import type { LessonKind } from '@prisma/client';
-import { Flame, Lightning, X } from '@phosphor-icons/react/dist/ssr';
-import { Button, Mascot, Medal, Text, useToast } from '@/components/ui';
-import type { MedalType } from '@/components/ui';
+import { Check, Flame, Lightning, X } from '@phosphor-icons/react/dist/ssr';
+import { Button, Mascot, Text, useToast } from '@/components/ui';
 import { completeLesson, type CompleteResult } from '@/app/actions/gamification';
 import { TOTAL_HEARTS, answerMatches, shuffledOrder } from '@/lib/gamification';
 import { useReducedMotion } from '@/lib/use-reduced-motion';
@@ -47,9 +46,9 @@ function useCountUp(target: number, ms = 700): number {
   return n;
 }
 
-/** Animated XP total on the success complete screen. */
-function XpCountUp({ value }: { value: number }) {
-  return <>+{useCountUp(value)} XP</>;
+/** Animated count-up of a number (the XP stat on the complete screen). */
+function CountUp({ value }: { value: number }) {
+  return <>{useCountUp(value)}</>;
 }
 
 type ConfettiPiece = { x: string; d: string; c: string };
@@ -398,38 +397,53 @@ export function LessonRunner({
 
   if (done) {
     const earnedXp = result?.xpEarned ?? 0;
-    const newMedals = result?.newMedals ?? [];
+    const streak = result?.streak ?? 0;
+    const accuracy = Math.round((correctCount / questions.length) * 100);
     return (
-      <div className="relative flex h-dvh flex-col items-center justify-center gap-5 px-6 text-center">
-        <Confetti />
-        <Mascot pose="celebrate" size={160} />
-        <Text variant="section" as="h1">
-          Lesson complete!
-        </Text>
-        <div className="inline-flex items-center gap-2 text-xp-ink">
-          <Lightning weight="fill" />
-          <Text variant="section" as="span" className="text-xp-ink">
-            <XpCountUp value={earnedXp} />
-          </Text>
-        </div>
-        {newMedals.length ? (
-          <div className="flex flex-wrap items-start justify-center gap-4">
-            {newMedals.map((m) => (
-              <div key={m.key} className="flex w-20 flex-col items-center gap-1">
-                <Medal type={m.key as MedalType} state="recently" size={64} />
-                <span className="text-center text-xs font-bold text-text-2">{m.name}</span>
-              </div>
-            ))}
+      <div className="flex min-h-dvh flex-col justify-center p-4" dir="ltr">
+        <div className="lesson-complete" data-confetti-host>
+          <Confetti />
+          <div className="lc-mascot">
+            <Mascot pose="celebrate" />
           </div>
-        ) : null}
-        <Button
-          variant="primary"
-          size="lg"
-          className="w-full max-w-xs"
-          onClick={() => router.push('/learn')}
-        >
-          Done
-        </Button>
+          <h2 className="en">Lesson complete!</h2>
+          <p className="lc-sub">
+            {correctCount} of {questions.length} questions · one step closer today
+          </p>
+          <div className="lc-stats">
+            <div className="lc-stat">
+              <div className="ic ic-xp">
+                <Lightning weight="fill" />
+              </div>
+              <div className="v num">
+                <CountUp value={earnedXp} />
+              </div>
+              <div className="k">XP earned</div>
+            </div>
+            <div className="lc-stat">
+              <div className="ic ic-streak">
+                <Flame weight="fill" />
+              </div>
+              <div className="v num">{streak}</div>
+              <div className="k">day streak</div>
+            </div>
+            <div className="lc-stat">
+              <div className="ic ic-acc">
+                <Check weight="bold" />
+              </div>
+              <div className="v num">{accuracy}%</div>
+              <div className="k">accuracy</div>
+            </div>
+          </div>
+          <div className="lc-actions">
+            <Button variant="confirm" size="lg" onClick={() => router.push('/learn')}>
+              Continue
+            </Button>
+            <Button variant="secondary" size="lg" onClick={restart}>
+              Review questions
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
