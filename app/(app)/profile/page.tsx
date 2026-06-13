@@ -1,10 +1,4 @@
-import {
-  Export,
-  Flame,
-  GearSix,
-  Lightning,
-  Medal as MedalIcon,
-} from '@phosphor-icons/react/dist/ssr';
+import { Flame, Lightning, Medal as MedalIcon } from '@phosphor-icons/react/dist/ssr';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { Mascot, Medal } from '@/components/ui';
@@ -13,6 +7,7 @@ import { DEFAULT_DAILY_GOAL, effectiveStreak, localDay } from '@/lib/gamificatio
 import { cn } from '@/lib/utils';
 import { DailyGoalPicker } from './_daily-goal-picker';
 import { MedalAcknowledger } from './_medal-acknowledger';
+import { ProfileActions } from './_profile-actions';
 
 /*
  * Profile — real data, English / LTR. Inside the (app) shell (TabBar provided by
@@ -108,20 +103,15 @@ export default async function ProfilePage() {
   return (
     <div className="prof min-h-0 flex-1" dir="ltr">
       <div className="prof-topbar">
-        <button className="prof-icon-btn" type="button" aria-label="Settings">
-          <GearSix />
-        </button>
-        <button className="prof-icon-btn" type="button" aria-label="Share">
-          <Export />
-        </button>
+        <ProfileActions />
       </div>
 
       <div className="prof-scroll">
         <div className="prof-hero-v2">
-          <button className="prof-avatar" type="button" aria-label="Edit profile">
+          <div className="prof-avatar is-static">
             <Mascot pose="encourage" />
             <span className="edit-pip">✎</span>
-          </button>
+          </div>
           <h2 className="prof-name en">{displayName}</h2>
           <div className="prof-handle">
             {handle} · {daysWithTooti} {daysWithTooti === 1 ? 'day' : 'days'} with Tooti
@@ -129,27 +119,27 @@ export default async function ProfilePage() {
         </div>
 
         <div className="prof-stats-v2">
-          <button className="prof-stat-v2" type="button">
+          <div className="prof-stat-v2 is-static">
             <div className="ic streak">
               <Flame weight="fill" />
             </div>
             <div className="v">{streak}</div>
             <div className="k">Day streak</div>
-          </button>
-          <button className="prof-stat-v2" type="button">
+          </div>
+          <div className="prof-stat-v2 is-static">
             <div className="ic xp">
               <Lightning weight="fill" />
             </div>
             <div className="v compact">{totalXp.toLocaleString('en-US')}</div>
             <div className="k">Total XP</div>
-          </button>
-          <button className="prof-stat-v2" type="button">
+          </div>
+          <div className="prof-stat-v2 is-static">
             <div className="ic gem">
               <MedalIcon weight="fill" />
             </div>
             <div className="v">{earnedCount}</div>
             <div className="k">Badges</div>
-          </button>
+          </div>
         </div>
 
         <div className="prof-c">
@@ -197,11 +187,9 @@ export default async function ProfilePage() {
           <MedalAcknowledger hasRecently={hasRecently}>
             <div className="flex gap-3 overflow-x-auto pb-1">
               {medals.map((m) => (
-                <div key={m.key} className="flex w-16 shrink-0 flex-col items-center gap-1">
+                <div key={m.key} className="flex w-[72px] shrink-0 flex-col items-center gap-2">
                   <Medal type={m.key} state={m.state} progress={m.progress} size={56} />
-                  <span className="line-clamp-2 text-center text-xs font-bold text-text-2">
-                    {m.name}
-                  </span>
+                  <span className="ach-label text-xs font-bold text-text-2">{m.name}</span>
                 </div>
               ))}
             </div>

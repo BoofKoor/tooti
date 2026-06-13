@@ -2153,11 +2153,15 @@
     background: var(--color-surface);
     border: 2px solid var(--color-border);
     border-radius: var(--radius-xl);
-    padding: var(--space-4) var(--space-3) calc(var(--space-3) + 2px);
+    /* Text options are a horizontal row: [number] [label …] [result]. The
+       column layout below (.mcq-art) was for image options, not used today. */
+    padding: var(--space-3) var(--space-4);
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
+    justify-content: flex-start;
     gap: var(--space-3);
+    text-align: start;
     box-shadow:
       0 var(--press-edge) 0 var(--color-border),
       var(--shadow-1);
@@ -2196,6 +2200,9 @@
     height: 70%;
   }
   .mcq-tile .mcq-label-en {
+    order: 2;
+    flex: 1;
+    text-align: start;
     font-family: var(--font-en);
     font-weight: 800;
     font-size: 18px;
@@ -2203,6 +2210,9 @@
     line-height: 1.1;
   }
   .mcq-tile .mcq-label-fa {
+    order: 2;
+    flex: 1;
+    text-align: start;
     font-family: var(--font-body-fa);
     font-weight: 600;
     font-size: 14px;
@@ -2210,9 +2220,9 @@
     line-height: 1.1;
   }
   .mcq-tile .mcq-num {
-    position: absolute;
-    top: 10px;
-    inset-inline-start: 10px;
+    order: 1;
+    position: static;
+    flex-shrink: 0;
     width: 22px;
     height: 22px;
     border-radius: 50%;
@@ -2224,17 +2234,18 @@
     font-weight: 800;
     font-size: 11px;
     color: var(--color-text-2);
-    z-index: 1;
   }
-  /* State icon · non-color signal in opposite corner (top-end) */
+  /* Result icon · always holds its end slot (visibility, not display) so showing
+     it on answer never reflows the row. */
   .mcq-tile .mcq-state-ic {
-    position: absolute;
-    top: 10px;
-    inset-inline-end: 10px;
-    width: 26px;
-    height: 26px;
+    order: 3;
+    position: static;
+    flex-shrink: 0;
+    visibility: hidden;
+    inline-size: 26px;
+    block-size: 26px;
     border-radius: 50%;
-    display: none;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     color: #fff;
@@ -2243,7 +2254,6 @@
     font-size: 14px;
     line-height: 1;
     box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
-    z-index: 1;
   }
 
   /* MCQ states */
@@ -2267,10 +2277,10 @@
       var(--shadow-2);
   }
   .mcq-tile.is-correct .mcq-num {
-    display: none;
+    visibility: hidden;
   }
   .mcq-tile.is-correct .mcq-state-ic {
-    display: inline-flex;
+    visibility: visible;
     background: var(--color-correct);
   }
   .mcq-tile.is-correct .mcq-state-ic::before {
@@ -2284,10 +2294,10 @@
       var(--shadow-2);
   }
   .mcq-tile.is-incorrect .mcq-num {
-    display: none;
+    visibility: hidden;
   }
   .mcq-tile.is-incorrect .mcq-state-ic {
-    display: inline-flex;
+    visibility: visible;
     background: var(--color-error);
   }
   .mcq-tile.is-incorrect .mcq-state-ic::before {
@@ -2393,18 +2403,14 @@
   .ex-stage[dir='ltr'] .mcq-tile .mcq-label-en {
     font-size: 16px;
     color: var(--color-text-2);
-    order: 2;
     font-weight: 700;
-    margin-top: -4px;
   }
   .ex-stage[dir='ltr'] .mcq-tile .mcq-label-fa {
     font-family: var(--font-display-fa);
     font-weight: 400;
     font-size: 22px;
     color: var(--color-text-1);
-    order: 1;
     line-height: 1;
-    margin-top: 0;
   }
   .fb-banner {
     position: relative;
@@ -3421,5 +3427,42 @@
   .confetti,
   .route-fade {
     animation: none !important;
+  }
+}
+
+/* ─── Phase 8 — production UI bug fixes ─── */
+@layer components {
+  /* Achievement label: a fixed two-line clamp so every column aligns and long
+     names (e.g. "Tooti's Favorite") wrap below the medal instead of widening
+     or riding onto the art. */
+  .ach-label {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    text-align: center;
+    line-height: 1.3;
+    min-block-size: calc(2 * 1.3em);
+    margin-block-start: var(--space-1);
+  }
+
+  /* Formerly-interactive Profile tiles that have no action yet — keep the look
+     but drop the tappable affordance (now plain <div>s). */
+  .prof-avatar.is-static,
+  .prof-stat-v2.is-static {
+    cursor: default;
+  }
+  .prof-avatar.is-static:hover,
+  .prof-avatar.is-static:active,
+  .prof-stat-v2.is-static:hover,
+  .prof-stat-v2.is-static:active {
+    transform: none;
+  }
+  /* stat tiles also flatten their pressable edge on :active — keep it resting. */
+  .prof-stat-v2.is-static:active {
+    box-shadow:
+      0 var(--press-edge) 0 var(--color-border),
+      var(--shadow-1);
   }
 }

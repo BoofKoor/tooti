@@ -214,7 +214,9 @@ export function Medal({ type, state = 'earned', progress = 0, size = 64, classNa
     : undefined;
   const pieceStyle = {
     '--p': progress,
-    ...(scaled ? { transform: `scale(${size / 64})`, transformOrigin: 'center' } : null),
+    // When scaled into a size×size box, drop the piece's standalone 8px margin
+    // so its footprint matches `size` and never overflows onto an adjacent label.
+    ...(scaled ? { transform: `scale(${size / 64})`, transformOrigin: 'center', margin: 0 } : null),
   } as React.CSSProperties;
 
   const piece = (
