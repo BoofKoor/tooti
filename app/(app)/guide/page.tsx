@@ -16,7 +16,7 @@ export default async function GuidePage() {
   const soon = units.filter((u) => u.comingSoon);
 
   return (
-    <div className="flex flex-col gap-6 px-5 py-6">
+    <div className="flex flex-col gap-6 px-5 pt-6 pb-[var(--tabbar-inset)]">
       <div className="flex flex-col gap-1">
         <Text variant="section" as="h1">
           Guide

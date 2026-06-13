@@ -232,6 +232,9 @@
        ─────────────────────────────────────────────────────────────── */
     --tabbar-w: 360px;
     --tabbar-h: 88px;
+    /* Bottom inset for scroll regions so content clears the floating tab bar
+       (the bar overlays the scroll area; this keeps the last item reachable). */
+    --tabbar-inset: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + var(--space-2));
     --tabbar-bar-h: 72px;
     --tabbar-dot-size: 12px;
     --tabbar-dot-bottom: 64px;
@@ -880,6 +883,9 @@
     max-width: var(--tabbar-w);
     height: var(--tabbar-h);
     margin-inline: auto;
+    /* The bar floats inside a pointer-events-none <nav>; re-enable taps on the
+       bar itself so the empty area around it still scrolls the content. */
+    pointer-events: auto;
   }
   /* Frosted ground behind the floating bar — saturate+blur of whatever sits
      behind it, fading in from ~half-height (the iOS scroll-edge look). The bar
@@ -1688,6 +1694,7 @@
     position: relative;
     overflow-y: auto;
     overflow-x: hidden;
+    padding-block-end: var(--tabbar-inset); /* clear the floating tab bar */
     /* organic sky/garden — warm cream gradient with subtle warmth shifts */
     background:
       radial-gradient(70px 28px at 18% 6%, rgba(255, 255, 255, 0.55), transparent 70%),
@@ -2789,7 +2796,7 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding-bottom: 12px;
+    padding-block-end: var(--tabbar-inset); /* clear the floating tab bar */
   }
   .prof-scroll::-webkit-scrollbar {
     display: none;

@@ -18,9 +18,15 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   if (!session?.user) redirect('/login');
 
   return (
-    <div className="mx-auto flex h-dvh w-full max-w-app flex-col bg-bg">
+    <div className="relative mx-auto flex h-dvh w-full max-w-app flex-col bg-bg">
       <main className="flex flex-1 flex-col overflow-y-auto">{children}</main>
-      <nav aria-label="Primary" className="shrink-0 px-4 pb-[env(safe-area-inset-bottom)]">
+      {/* Floated over the scroll area so content passes under the frosted bar.
+          Each screen's scroll region carries --tabbar-inset bottom padding so
+          nothing is hidden; the wrapper is click-through except the bar itself. */}
+      <nav
+        aria-label="Primary"
+        className="pointer-events-none absolute inset-x-0 bottom-0 px-4 pb-[env(safe-area-inset-bottom)]"
+      >
         <AppTabBar />
       </nav>
     </div>
