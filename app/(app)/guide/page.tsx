@@ -1,41 +1,20 @@
 import Link from 'next/link';
 import { CaretRight, Lock } from '@phosphor-icons/react/dist/ssr';
 import { Card, Text } from '@/components/ui';
+import { getGuideIndex } from '@/lib/learn-data';
 
 /*
- * Guide — grammar reference index. Mock data, English-first. Inside the (app)
- * shell (TabBar already provided). Composed from Card / Text + Phosphor + tokens.
+ * Guide — grammar reference index, DB-driven. A read-only view of what the
+ * learner studies: each unit's title + a one-line summary pulled from its
+ * Learn-stage SUMMARY recap. Inside the (app) shell (TabBar already provided).
+ * Composed from Card / Text + Phosphor + tokens. Request-time only → dynamic.
  */
 
-const PRESENT_TENSES = [
-  {
-    slug: 'present-simple',
-    name: 'Present Simple',
-    summary: 'Habits, facts, and fixed schedules.',
-  },
-  {
-    slug: 'present-continuous',
-    name: 'Present Continuous',
-    summary: 'Actions happening right now.',
-  },
-  {
-    slug: 'present-perfect',
-    name: 'Present Perfect',
-    summary: 'Past actions with present relevance.',
-  },
-  {
-    slug: 'present-perfect-continuous',
-    name: 'Present Perfect Continuous',
-    summary: 'Ongoing actions up to now.',
-  },
-];
+export default async function GuidePage() {
+  const units = await getGuideIndex();
+  const active = units.filter((u) => !u.comingSoon);
+  const soon = units.filter((u) => u.comingSoon);
 
-const SOON = [
-  { name: 'Past Tenses', summary: 'Simple, continuous, and perfect.' },
-  { name: 'Future Tenses', summary: 'will, going to, and more.' },
-];
-
-export default function GuidePage() {
   return (
     <div className="flex flex-col gap-6 px-5 py-6">
       <div className="flex flex-col gap-1">
@@ -49,7 +28,7 @@ export default function GuidePage() {
         <Text variant="caption" className="uppercase tracking-wider text-text-3">
           Present Tenses
         </Text>
-        {PRESENT_TENSES.map((t) => (
+        {active.map((t) => (
           <Link
             key={t.slug}
             href={`/guide/${t.slug}`}
@@ -62,9 +41,9 @@ export default function GuidePage() {
             >
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 <Text variant="body" className="font-extrabold text-text-1">
-                  {t.name}
+                  {t.title}
                 </Text>
-                <Text variant="caption">{t.summary}</Text>
+                {t.summary ? <Text variant="caption">{t.summary}</Text> : null}
               </div>
               <CaretRight className="shrink-0 text-text-3" />
             </Card>
@@ -76,13 +55,12 @@ export default function GuidePage() {
         <Text variant="caption" className="uppercase tracking-wider text-text-3">
           More — coming soon
         </Text>
-        {SOON.map((t) => (
-          <Card key={t.name} padding="sm" shadow={1} className="flex items-center gap-4 opacity-60">
+        {soon.map((t) => (
+          <Card key={t.slug} padding="sm" shadow={1} className="flex items-center gap-4 opacity-60">
             <div className="flex min-w-0 flex-1 flex-col gap-1">
               <Text variant="body" className="font-extrabold text-text-1">
-                {t.name}
+                {t.title}
               </Text>
-              <Text variant="caption">{t.summary}</Text>
             </div>
             <span className="inline-flex shrink-0 items-center gap-1 rounded-pill bg-surface-3 px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-text-3">
               <Lock weight="fill" /> Soon
