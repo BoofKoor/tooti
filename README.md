@@ -94,6 +94,18 @@ push/PR.
 Production runs the same Compose stack on your own server, with Caddy terminating
 TLS via Let's Encrypt.
 
+**Recommended — the installer.** On a fresh server, clone and run the interactive
+script: it installs Docker if missing, generates the secrets, collects your domain
+and the Google/Resend values, writes a `0600` `.env`, checks DNS, and brings the
+stack up. It is safe to re-run (an existing `.env` is reused, so the DB password is
+never regenerated).
+
+```bash
+git clone https://github.com/BoofKoor/tooti.git && cd tooti && ./scripts/install.sh
+```
+
+To do it by hand instead:
+
 1. **DNS:** point an `A` record for `tooti.academy` at the server's IP and open
    inbound `80`/`443`.
 2. **Env:** `cp .env.production.example .env` and fill in `POSTGRES_PASSWORD`,
