@@ -3538,3 +3538,72 @@
       var(--shadow-1);
   }
 }
+
+/* ─── Batch 2a — Welcome screen (ported from design/styleguide.html .scr-welcome;
+   English-only: the styleguide's UI-language picker is intentionally omitted). ─── */
+@layer components {
+  .scr-welcome {
+    display: flex;
+    flex-direction: column;
+    padding: 0 24px 24px;
+    min-block-size: 100dvh;
+    position: relative;
+  }
+  .scr-welcome .welcome-hero {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .scr-welcome .welcome-mascot {
+    inline-size: 200px;
+    block-size: 220px;
+    margin-block-end: var(--space-4);
+  }
+  .scr-welcome .welcome-mascot svg {
+    inline-size: 100%;
+    block-size: 100%;
+  }
+  .scr-welcome h2 {
+    font-family: var(--font-display-fa);
+    font-size: 38px;
+    color: var(--color-text-1);
+    margin: 0 0 8px;
+    line-height: 1;
+  }
+  .scr-welcome h2.en {
+    font-family: var(--font-en);
+    font-weight: 900;
+    font-size: 34px;
+    letter-spacing: -0.01em;
+  }
+  .scr-welcome .welcome-sub {
+    font-size: 15px;
+    color: var(--color-text-2);
+    max-inline-size: 28ch;
+    line-height: 1.55;
+    margin: 0 auto var(--space-6);
+  }
+  .welcome-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-block-end: var(--space-3);
+  }
+  .welcome-actions .btn {
+    inline-size: 100%;
+    min-block-size: 52px;
+  }
+  .welcome-actions .alt-link {
+    text-align: center;
+    font-size: 13px;
+    color: var(--color-text-2);
+  }
+  .welcome-actions .alt-link a {
+    font-weight: 700;
+  }
+}
