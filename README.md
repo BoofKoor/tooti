@@ -74,8 +74,37 @@ design/                   # handoff / roadmap / styleguide (reference)
 
 ## Docker
 
+[`Dockerfile`](./Dockerfile) is multi-stage: `deps` → `builder` (Next standalone) →
+`runner` (minimal runtime), plus a `migrator` stage that runs `prisma migrate deploy`
+and the seed without a Next build. [`docker-compose.yml`](./docker-compose.yml) wires
+the app behind [Caddy](./Caddyfile) (automatic HTTPS) with Postgres and a one-shot
+`migrate` gate. It reads secrets from `.env`, so copy the template first:
+
 ```bash
-docker compose up --build      # app on :3000, postgres on :5432
+cp .env.production.example .env   # then fill in real values
+docker compose up -d --build      # db → migrate → app → caddy
 ```
 
-[`Dockerfile`](./Dockerfile) produces a minimal standalone runtime image; [`docker-compose.yml`](./docker-compose.yml) runs the app alongside Postgres. CI ([`.github/workflows/ci.yml`](./.github/workflows/ci.yml)) runs lint + build on every push/PR.
+Only Caddy publishes host ports (80/443); `app` and `db` are internal. CI
+([`.github/workflows/ci.yml`](./.github/workflows/ci.yml)) runs lint + build on every
+push/PR.
+
+## Deploy (tooti.academy)
+
+Production runs the same Compose stack on your own server, with Caddy terminating
+TLS via Let's Encrypt.
+
+1. **DNS:** point an `A` record for `tooti.academy` at the server's IP and open
+   inbound `80`/`443`.
+2. **Env:** `cp .env.production.example .env` and fill in `POSTGRES_PASSWORD`,
+   `AUTH_SECRET` (`openssl rand -base64 32`), `AUTH_URL=https://tooti.academy`, the
+   Google OAuth pair, and the Resend SMTP `EMAIL_SERVER` / `EMAIL_FROM` (the
+   from-address must be on a Resend-verified domain).
+3. **Bring up:** `docker compose up -d --build`. First boot order is
+   `db` → `migrate` (applies migrations + seeds Present Simple) → `app` → `caddy`,
+   which fetches the cert once DNS resolves and the ports are reachable. Watch it
+   with `docker compose logs -f caddy`, then open <https://tooti.academy>.
+4. **Updates:** `git pull && docker compose up -d --build` — the `migrate` one-shot
+   re-runs migrations + seed each deploy (idempotent).
+
+The full account/DNS/OAuth runbook lives with the Phase 7 plan in [`design/`](./design).
