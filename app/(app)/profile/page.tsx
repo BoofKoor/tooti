@@ -197,9 +197,11 @@ export default async function ProfilePage() {
           <MedalAcknowledger hasRecently={hasRecently}>
             <div className="flex gap-3 overflow-x-auto pb-1">
               {medals.map((m) => (
-                <div key={m.key} className="flex shrink-0 flex-col items-center gap-1">
+                <div key={m.key} className="flex w-16 shrink-0 flex-col items-center gap-1">
                   <Medal type={m.key} state={m.state} progress={m.progress} size={56} />
-                  <span className="text-center text-xs font-bold text-text-2">{m.name}</span>
+                  <span className="line-clamp-2 text-center text-xs font-bold text-text-2">
+                    {m.name}
+                  </span>
                 </div>
               ))}
             </div>

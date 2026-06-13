@@ -1,16 +1,84 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import type { CSSProperties } from 'react';
 import type { LessonKind } from '@prisma/client';
 import { Flame, Lightning, X } from '@phosphor-icons/react/dist/ssr';
 import { Button, Mascot, Medal, Text, useToast } from '@/components/ui';
 import type { MedalType } from '@/components/ui';
 import { completeLesson, type CompleteResult } from '@/app/actions/gamification';
 import { TOTAL_HEARTS, answerMatches, shuffledOrder } from '@/lib/gamification';
+import { useReducedMotion } from '@/lib/use-reduced-motion';
 import { fa } from '@/lib/i18n/fa';
 import { cn } from '@/lib/utils';
 import { optionCount, type Question } from './_questions';
+
+// Brand palette the confetti burst cycles through (existing color tokens).
+const CONFETTI_COLORS = [
+  'var(--color-primary)',
+  'var(--color-xp)',
+  'var(--color-correct)',
+  'var(--color-purple)',
+  'var(--color-pink)',
+  'var(--color-teal)',
+];
+const CONFETTI_COUNT = 16;
+
+/** Counts a number up from 0 to `target` (~ms, easeOutCubic); skipped under reduced motion. */
+function useCountUp(target: number, ms = 700): number {
+  const reduce = useReducedMotion();
+  const [n, setN] = useState(reduce ? target : 0);
+  useEffect(() => {
+    if (reduce) {
+      setN(target);
+      return;
+    }
+    let raf = 0;
+    const start = performance.now();
+    const tick = (t: number) => {
+      const p = Math.min(1, (t - start) / ms);
+      setN(Math.round((1 - Math.pow(1 - p, 3)) * target)); // easeOutCubic
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, ms, reduce]);
+  return n;
+}
+
+/** Animated XP total on the success complete screen. */
+function XpCountUp({ value }: { value: number }) {
+  return <>+{useCountUp(value)} XP</>;
+}
+
+type ConfettiPiece = { x: string; d: string; c: string };
+
+/** One-shot CSS confetti burst behind the mascot; renders nothing under reduced motion. */
+function Confetti() {
+  const reduce = useReducedMotion();
+  const pieces = useMemo<ConfettiPiece[]>(
+    () =>
+      Array.from({ length: CONFETTI_COUNT }, (_, i) => ({
+        x: `${Math.round((i / CONFETTI_COUNT) * 100 + (Math.random() * 6 - 3))}%`,
+        d: `${(1.4 + Math.random() * 1.1).toFixed(2)}s`,
+        c: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+      })),
+    [],
+  );
+  if (reduce) return null;
+  return (
+    <div className="confetti" aria-hidden="true">
+      {pieces.map((p, i) => (
+        <span
+          key={i}
+          className="confetti-bit"
+          style={{ '--x': p.x, '--d': p.d, '--c': p.c } as CSSProperties}
+        />
+      ))}
+    </div>
+  );
+}
 
 /*
  * Lesson / exercise runner — client island, fed real questions by the server
@@ -332,7 +400,8 @@ export function LessonRunner({
     const earnedXp = result?.xpEarned ?? 0;
     const newMedals = result?.newMedals ?? [];
     return (
-      <div className="flex h-dvh flex-col items-center justify-center gap-5 px-6 text-center">
+      <div className="relative flex h-dvh flex-col items-center justify-center gap-5 px-6 text-center">
+        <Confetti />
         <Mascot pose="celebrate" size={160} />
         <Text variant="section" as="h1">
           Lesson complete!
@@ -340,7 +409,7 @@ export function LessonRunner({
         <div className="inline-flex items-center gap-2 text-xp-ink">
           <Lightning weight="fill" />
           <Text variant="section" as="span" className="text-xp-ink">
-            +{earnedXp} XP
+            <XpCountUp value={earnedXp} />
           </Text>
         </div>
         {newMedals.length ? (
@@ -435,7 +504,11 @@ export function LessonRunner({
                   </span>
                 ) : (
                   <>
-                    Correct: <b>{correctText}</b> ·{' '}
+                    Correct:{' '}
+                    <bdi>
+                      <b>{correctText}</b>
+                    </bdi>{' '}
+                    ·{' '}
                     <span className="fa" dir="rtl">
                       {q.explanationFa}
                     </span>
