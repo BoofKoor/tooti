@@ -4,6 +4,9 @@
 FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json* ./
+# Prisma's `postinstall: prisma generate` (run by npm ci) needs the schema, so
+# the prisma dir must be present before install.
+COPY prisma ./prisma
 RUN npm ci
 
 # ---- builder: compile the Next.js standalone output ----
