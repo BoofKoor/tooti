@@ -20,7 +20,7 @@ export default async function GuideDetailPage({ params }: { params: Promise<{ sl
   const summary = entry.summary ? (entry.summary.content as unknown as SectionContent) : null;
 
   return (
-    <div className="flex flex-col gap-5 px-5 py-6">
+    <div className="flex flex-col gap-5 px-5 pt-6 pb-[var(--tabbar-inset)]">
       <Link
         href="/guide"
         className="inline-flex w-fit items-center gap-1 font-bold text-text-2 transition-colors hover:text-text-1"

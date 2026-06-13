@@ -20,7 +20,7 @@ export default function PracticePage() {
   const startReview = () => router.push('/lesson/present-simple-practice-1');
 
   return (
-    <div className="flex flex-col gap-6 px-5 py-6">
+    <div className="flex flex-col gap-6 px-5 pt-6 pb-[var(--tabbar-inset)]">
       <div className="flex flex-col items-center gap-3 text-center">
         <Mascot pose="encourage" size={120} />
         <Text variant="section" as="h1">
