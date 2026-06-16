@@ -1,5 +1,13 @@
 import type { CSSProperties } from 'react';
-import { BookOpen, Check, Flame, Lightning, Medal as MedalIcon } from '@phosphor-icons/react/dist/ssr';
+import Link from 'next/link';
+import {
+  ArrowLeft,
+  BookOpen,
+  Check,
+  Flame,
+  Lightning,
+  Medal as MedalIcon,
+} from '@phosphor-icons/react/dist/ssr';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { Mascot, Medal } from '@/components/ui';
@@ -119,7 +127,12 @@ export default async function ProfilePage() {
             <span className="pf-cover-blob pf-cover-blob--1" aria-hidden="true" />
             <span className="pf-cover-blob pf-cover-blob--2" aria-hidden="true" />
             <div className="pf-cover-actions">
-              <ProfileActions currentName={displayName} />
+              <Link href="/learn" className="prof-icon-btn" aria-label="Back to Learn">
+                <ArrowLeft weight="bold" />
+              </Link>
+              <div className="pf-actions-group">
+                <ProfileActions currentName={displayName} />
+              </div>
             </div>
           </div>
 

@@ -235,9 +235,9 @@
        ─────────────────────────────────────────────────────────────── */
     --tabbar-w: 360px;
     --tabbar-h: 88px;
-    /* Bottom inset for scroll regions so content clears the floating tab bar
-       (the bar overlays the scroll area; this keeps the last item reachable). */
-    --tabbar-inset: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + var(--space-2));
+    /* Bottom inset for scroll regions (there's no bottom bar now — just keep the
+       last item clear of the safe-area edge with a little breathing room). */
+    --tabbar-inset: calc(env(safe-area-inset-bottom) + var(--space-6));
     --tabbar-bar-h: 72px;
     --tabbar-dot-size: 12px;
     --tabbar-dot-bottom: 64px;
@@ -1662,7 +1662,36 @@
     box-shadow: 0 6px 18px -8px color-mix(in srgb, var(--color-primary-ink) 70%, transparent);
   }
   .scr-path .path-unit {
+    flex: 1;
     min-inline-size: 0;
+  }
+  .scr-path .path-profile {
+    inline-size: 44px;
+    block-size: 44px;
+    border-radius: 50%;
+    background: var(--color-surface);
+    border: 2px solid rgba(255, 255, 255, 0.65);
+    box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.22);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    flex-shrink: 0;
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+  .scr-path .path-profile:hover {
+    transform: translateY(-1px);
+  }
+  .scr-path .path-profile:active {
+    transform: scale(0.95);
+  }
+  .scr-path .path-profile:focus-visible {
+    outline: var(--focus-ring) solid var(--color-surface);
+    outline-offset: 2px;
+  }
+  .scr-path .path-profile svg {
+    inline-size: 42px;
+    block-size: 44px;
+    transform: translateY(3px);
   }
   .scr-path .path-unit-title {
     font-family: var(--font-en);
@@ -2951,6 +2980,10 @@
   }
   .pf-cover-actions .prof-icon-btn svg {
     color: var(--color-text-inverse);
+  }
+  .pf-actions-group {
+    display: inline-flex;
+    gap: var(--space-2);
   }
 
   .pf-id {

@@ -1,7 +1,7 @@
 'use client';
 
 import type { ComponentType } from 'react';
-import { Barbell, BookOpen, House, User } from '@phosphor-icons/react/dist/ssr';
+import { House, User } from '@phosphor-icons/react/dist/ssr';
 import type { IconProps } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 
@@ -11,10 +11,10 @@ export interface TabItem {
   icon: ComponentType<IconProps>;
 }
 
+// The whole learning journey (learn → practice → test → next) lives in the Learn
+// path, so the app needs just two destinations: the path and the profile.
 export const defaultTabs: TabItem[] = [
   { id: 'learn', label: 'Learn', icon: House },
-  { id: 'practice', label: 'Practice', icon: Barbell },
-  { id: 'guide', label: 'Guide', icon: BookOpen },
   { id: 'profile', label: 'Profile', icon: User },
 ];
 
