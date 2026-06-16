@@ -2812,6 +2812,229 @@
     display: none;
   }
 
+  /* ─────────────────────────────────────────────────────────────────────
+     Profile — rebuilt hero (brand cover + level-ring avatar) + stat grid.
+     ───────────────────────────────────────────────────────────────────── */
+  .pf-hero {
+    position: relative;
+  }
+  .pf-cover {
+    height: 134px;
+    background:
+      radial-gradient(120% 100% at 82% -20%, rgba(255, 255, 255, 0.22), transparent 55%),
+      linear-gradient(135deg, var(--color-primary), var(--color-primary-ink));
+    position: relative;
+    overflow: hidden;
+  }
+  .pf-cover-blob {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    pointer-events: none;
+  }
+  .pf-cover-blob--1 {
+    width: 170px;
+    height: 170px;
+    top: -78px;
+    inset-inline-start: -46px;
+  }
+  .pf-cover-blob--2 {
+    width: 120px;
+    height: 120px;
+    bottom: -54px;
+    inset-inline-end: 16px;
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .pf-cover-actions {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: calc(env(safe-area-inset-top) + var(--space-3)) var(--space-5) 0;
+  }
+  /* the shared icon buttons read as frosted-white chips on the teal cover */
+  .pf-cover-actions .prof-icon-btn {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.4);
+    color: var(--color-text-inverse);
+    box-shadow: none;
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+  }
+  .pf-cover-actions .prof-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+  }
+  .pf-cover-actions .prof-icon-btn svg {
+    color: var(--color-text-inverse);
+  }
+
+  .pf-id {
+    margin-top: -56px;
+    padding: 0 var(--space-5) var(--space-1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+  /* avatar wrapped in a conic level-progress ring */
+  .pf-avatar-ring {
+    width: 118px;
+    height: 118px;
+    border-radius: 50%;
+    background: conic-gradient(
+      from -90deg,
+      var(--color-primary) calc(var(--p) * 1%),
+      var(--color-surface-3) 0
+    );
+    display: grid;
+    place-items: center;
+    position: relative;
+    box-shadow: var(--shadow-3);
+  }
+  .pf-avatar {
+    width: 104px;
+    height: 104px;
+    border-radius: 50%;
+    background: var(--color-surface);
+    border: 4px solid var(--color-surface);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+  .pf-avatar svg {
+    width: 102px;
+    height: 106px;
+    transform: translateY(5px);
+  }
+  .pf-level-badge {
+    position: absolute;
+    bottom: -3px;
+    inset-inline-start: 50%;
+    transform: translateX(-50%);
+    background: var(--color-primary-ink);
+    color: var(--color-text-inverse);
+    font-family: var(--font-en);
+    font-weight: 900;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    padding: 3px 11px;
+    border-radius: var(--radius-pill);
+    border: 2px solid var(--color-surface);
+    white-space: nowrap;
+  }
+  [dir='rtl'] .pf-level-badge {
+    transform: translateX(50%);
+  }
+  .pf-name {
+    font-family: var(--font-en);
+    font-weight: 900;
+    font-size: 25px;
+    line-height: 1.1;
+    color: var(--color-text-1);
+    margin: var(--space-3) 0 0;
+  }
+  .pf-meta {
+    font-family: var(--font-en);
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--color-text-3);
+    margin: var(--space-1) 0 0;
+  }
+  .pf-level {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+    max-width: 280px;
+    margin-top: var(--space-3);
+  }
+  .pf-level-bar {
+    width: 100%;
+    height: 9px;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-3);
+    overflow: hidden;
+  }
+  .pf-level-bar .fill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--color-primary), #2fd3c0);
+  }
+  .pf-level-cap {
+    font-family: var(--font-en);
+    font-weight: 800;
+    font-size: 11px;
+    color: var(--color-text-2);
+  }
+
+  /* stat grid (2×2) */
+  .pf-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+    margin-inline: var(--space-5);
+  }
+  .pf-stat {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-3) var(--space-4);
+    box-shadow: var(--shadow-1);
+  }
+  .pf-stat-ic {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    color: var(--color-text-inverse);
+    flex-shrink: 0;
+  }
+  .pf-stat-ic svg {
+    width: 20px;
+    height: 20px;
+  }
+  .pf-stat-ic.streak {
+    background: var(--color-streak);
+  }
+  .pf-stat-ic.xp {
+    background: var(--grad-xp);
+  }
+  .pf-stat-ic.lessons {
+    background: var(--color-primary);
+  }
+  .pf-stat-ic.medals {
+    background: var(--color-purple);
+  }
+  .pf-stat-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-inline-size: 0;
+  }
+  .pf-stat-v {
+    font-family: var(--font-en);
+    font-weight: 900;
+    font-size: 21px;
+    line-height: 1;
+    color: var(--color-text-1);
+  }
+  .pf-stat-k {
+    font-family: var(--font-en);
+    font-weight: 700;
+    font-size: 11px;
+    color: var(--color-text-3);
+  }
+
   /* ─ Top bar (zone 2) ─ */
   .prof-topbar {
     display: flex;
