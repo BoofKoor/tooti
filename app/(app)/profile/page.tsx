@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { DailyGoalPicker } from './_daily-goal-picker';
 import { MedalAcknowledger } from './_medal-acknowledger';
 import { ProfileActions } from './_profile-actions';
+import { ThemeToggle } from './_theme-toggle';
 
 /*
  * Profile — real data, English / LTR. Inside the (app) shell (TabBar from the
@@ -131,6 +132,7 @@ export default async function ProfilePage() {
                 <ArrowLeft weight="bold" />
               </Link>
               <div className="pf-actions-group">
+                <ThemeToggle />
                 <ProfileActions currentName={displayName} />
               </div>
             </div>
