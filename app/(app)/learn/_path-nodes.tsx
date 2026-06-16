@@ -1,7 +1,14 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Barbell, BookOpen, Lock, Trophy } from '@phosphor-icons/react/dist/ssr';
+import {
+  Barbell,
+  BookOpen,
+  ChatCircleText,
+  Check,
+  Lock,
+  Trophy,
+} from '@phosphor-icons/react/dist/ssr';
 import { Mascot } from '@/components/ui';
 import { cn } from '@/lib/utils';
 
@@ -11,7 +18,7 @@ import { cn } from '@/lib/utils';
  * and handles clicks. Markup/classes are verbatim from the Phase 2 mock.
  */
 
-export type PathGlyph = 'lesson' | 'review' | 'test' | 'soon';
+export type PathGlyph = 'lesson' | 'story' | 'review' | 'test' | 'soon';
 export type PathNodeState = 'done' | 'current' | 'locked';
 
 export type PathNodeView = {
@@ -42,9 +49,16 @@ const STATE_CLASS: Record<PathNodeState, string> = {
 };
 
 function nodeGlyph(node: PathNodeView) {
+  // Completed nodes read as "done" with a check (styleguide), regardless of kind;
+  // locked nodes show a lock. Only available/current nodes carry the lesson-type
+  // glyph so the next step's nature (lesson vs review vs boss) stays legible.
+  if (node.state === 'done') return <Check size={node.boss ? 36 : 32} weight="bold" />;
+  if (node.state === 'locked') return <Lock size={node.boss ? 30 : 28} weight="fill" />;
   switch (node.glyph) {
     case 'lesson':
       return <BookOpen size={node.state === 'current' ? 38 : 32} weight="fill" />;
+    case 'story':
+      return <ChatCircleText size={node.state === 'current' ? 38 : 32} weight="fill" />;
     case 'review':
       return <Barbell size={node.state === 'current' ? 38 : 32} weight="fill" />;
     case 'test':

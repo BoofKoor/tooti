@@ -1,14 +1,22 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { CSSProperties } from 'react';
 import type { LessonKind } from '@prisma/client';
-import { Check, Flame, Lightning, X } from '@phosphor-icons/react/dist/ssr';
+import {
+  Check,
+  Flame,
+  Lightning,
+  SpeakerHigh,
+  SpeakerLow,
+  X,
+} from '@phosphor-icons/react/dist/ssr';
 import { Button, Mascot, Text, useToast } from '@/components/ui';
 import { completeLesson, type CompleteResult } from '@/app/actions/gamification';
 import { TOTAL_HEARTS, answerMatches, shuffledOrder } from '@/lib/gamification';
 import { useReducedMotion } from '@/lib/use-reduced-motion';
+import { useSpeech } from '@/lib/use-speech';
 import { fa } from '@/lib/i18n/fa';
 import { cn } from '@/lib/utils';
 import { optionCount, type Question } from './_questions';
@@ -85,8 +93,9 @@ function Confetti() {
  * styling is the verbatim CSS in globals.css (@layer components). In dir="ltr"
  * the styleguide flips the instruct slots so English is primary and Persian
  * secondary. Renders by Question type: MCQ tiles, FILL_BLANK typed input, and
- * the WORD_BANK/TRANSLATE tile builder — hearts/XP/feedback are type-agnostic
- * (one correct-or-wrong per exercise).
+ * the WORD_BANK/TRANSLATE tile builder, and LISTEN (browser-TTS audio + the same
+ * tile builder, sentence hidden until answered) — hearts/XP/feedback are
+ * type-agnostic (one correct-or-wrong per exercise).
  */
 
 // Heart artwork (verbatim from the styleguide hearts markup).
@@ -139,6 +148,18 @@ export function LessonRunner({
   const [done, setDone] = useState(false);
 
   const q = questions[index];
+
+  // Browser TTS for LISTEN items. Auto-play the sentence once when a listening
+  // question first appears (and once more if voices resolve a beat late) — the
+  // ref guards against re-speaking on every unrelated re-render.
+  const { status: speechStatus, speaking, speak } = useSpeech();
+  const autoplayedRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (q.type === 'LISTEN' && speechStatus === 'ready' && autoplayedRef.current !== index) {
+      autoplayedRef.current = index;
+      speak(q.prompt);
+    }
+  }, [index, q, speechStatus, speak]);
 
   const isCorrect =
     q.type === 'MCQ'
@@ -255,6 +276,42 @@ export function LessonRunner({
     setBuilt((b) => b.filter((_, j) => j !== position));
   }
 
+  // Shared sentence builder (word-bank + translate + listen): the built row and
+  // the remaining bank, mapping display order → original token index.
+  function builderTiles(options: string[]) {
+    const bank = order.filter((orig) => !built.includes(orig));
+    return (
+      <>
+        <div className="wb-built" aria-label="Your sentence">
+          {built.map((orig, position) => (
+            <button
+              key={`${orig}-${position}`}
+              type="button"
+              className="wb-tile"
+              disabled={checked}
+              onClick={() => removeFromBuilt(position)}
+            >
+              {options[orig]}
+            </button>
+          ))}
+        </div>
+        <div className="wb-bank" aria-label="Word bank">
+          {bank.map((orig) => (
+            <button
+              key={orig}
+              type="button"
+              className="wb-tile"
+              disabled={checked}
+              onClick={() => addToBuilt(orig)}
+            >
+              {options[orig]}
+            </button>
+          ))}
+        </div>
+      </>
+    );
+  }
+
   function questionBody(question: Question) {
     switch (question.type) {
       case 'MCQ':
@@ -302,8 +359,7 @@ export function LessonRunner({
           </>
         );
       case 'WORD_BANK':
-      case 'TRANSLATE': {
-        const bank = order.filter((orig) => !built.includes(orig));
+      case 'TRANSLATE':
         return (
           <>
             {question.type === 'TRANSLATE' ? (
@@ -313,35 +369,52 @@ export function LessonRunner({
             ) : question.prompt ? (
               <div className="ex-prompt">{question.prompt}</div>
             ) : null}
-            <div className="wb-built" aria-label="Your sentence">
-              {built.map((orig, position) => (
-                <button
-                  key={`${orig}-${position}`}
-                  type="button"
-                  className="wb-tile"
-                  disabled={checked}
-                  onClick={() => removeFromBuilt(position)}
-                >
-                  {question.options[orig]}
-                </button>
-              ))}
-            </div>
-            <div className="wb-bank" aria-label="Word bank">
-              {bank.map((orig) => (
-                <button
-                  key={orig}
-                  type="button"
-                  className="wb-tile"
-                  disabled={checked}
-                  onClick={() => addToBuilt(orig)}
-                >
-                  {question.options[orig]}
-                </button>
-              ))}
-            </div>
+            {builderTiles(question.options)}
           </>
         );
-      }
+      case 'LISTEN':
+        return (
+          <>
+            <div className="listen-stage">
+              <button
+                type="button"
+                className={cn('listen-play', speaking && 'is-speaking')}
+                disabled={speechStatus === 'pending'}
+                aria-label="Play the sentence"
+                onClick={() => speak(question.prompt)}
+              >
+                <SpeakerHigh weight="fill" />
+              </button>
+              {speechStatus === 'ready' ? (
+                <button
+                  type="button"
+                  className="listen-slow"
+                  aria-label="Play slowly"
+                  onClick={() => speak(question.prompt, { slow: true })}
+                >
+                  <SpeakerLow weight="fill" />
+                  <span>Slow</span>
+                </button>
+              ) : null}
+              {/* No speech voice → reveal the sentence so the item stays solvable. */}
+              {speechStatus === 'unsupported' ? (
+                <div className="listen-fallback">
+                  <p className="listen-fallback-text en">{question.prompt}</p>
+                  <p className="fa" dir="rtl">
+                    {fa.listen.audioFallback}
+                  </p>
+                </div>
+              ) : null}
+            </div>
+            {builderTiles(question.options)}
+            {checked && speechStatus !== 'unsupported' ? (
+              <div className="listen-reveal en">
+                <span className="listen-reveal-label">You heard</span>
+                {question.prompt}
+              </div>
+            ) : null}
+          </>
+        );
     }
   }
 
@@ -463,9 +536,6 @@ export function LessonRunner({
         </button>
         <div className="progress">
           <div className="progress-fill" style={{ width: `${progressPct}%` }} />
-          <span className="progress-label">
-            {index + 1}/{questions.length}
-          </span>
         </div>
         <div className="lb-stats">
           <div className="hearts">
@@ -483,8 +553,6 @@ export function LessonRunner({
               <Mascot pose="encourage" />
             </div>
             <div className="ex-instruct">
-              {/* dir="ltr": the -en slot is the Persian secondary, -fa the English primary. */}
-              <div className="ex-instruct-en">{q.instructionFa}</div>
               <div className="ex-instruct-fa">{q.instructionEn}</div>
             </div>
           </div>
@@ -525,9 +593,7 @@ export function LessonRunner({
                       <b>{correctText}</b>
                     </bdi>
                   </div>
-                  <div className="fb-explain fa" dir="rtl">
-                    {q.explanationFa}
-                  </div>
+                  {q.explanationEn ? <div className="fb-explain">{q.explanationEn}</div> : null}
                 </>
               )}
             </div>

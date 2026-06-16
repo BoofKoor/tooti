@@ -12,8 +12,16 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   // English-first app: html is English + LTR. Background / text / font come from
   // the design tokens (styles/globals.css), not inline values.
   return (
-    <html lang="en" dir="ltr" className={fontVariables}>
+    <html lang="en" dir="ltr" className={fontVariables} suppressHydrationWarning>
       <body>
+        {/* No-flash theme: set the .dark class before paint from the saved
+            preference (falling back to the OS setting). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})();",
+          }}
+        />
         <ToastProvider>{children}</ToastProvider>
       </body>
     </html>

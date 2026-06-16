@@ -39,7 +39,15 @@ const config: Config = {
           ink: 'var(--color-error-ink)',
           tint: 'var(--color-error-tint)',
         },
-        purple: 'var(--color-purple)',
+        coral: {
+          DEFAULT: 'var(--color-coral)',
+          ink: 'var(--color-coral-ink)',
+          tint: 'var(--color-coral-tint)',
+        },
+        purple: {
+          DEFAULT: 'var(--color-purple)',
+          ink: 'var(--color-purple-ink)',
+        },
         pink: {
           DEFAULT: 'var(--color-pink)',
           ink: 'var(--color-pink-ink)',

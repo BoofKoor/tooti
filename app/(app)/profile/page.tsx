@@ -1,4 +1,11 @@
-import { Flame, Lightning, Medal as MedalIcon } from '@phosphor-icons/react/dist/ssr';
+import type { CSSProperties } from 'react';
+import {
+  BookOpen,
+  Check,
+  Flame,
+  Lightning,
+  Medal as MedalIcon,
+} from '@phosphor-icons/react/dist/ssr';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { Mascot, Medal } from '@/components/ui';
@@ -8,16 +15,18 @@ import { cn } from '@/lib/utils';
 import { DailyGoalPicker } from './_daily-goal-picker';
 import { MedalAcknowledger } from './_medal-acknowledger';
 import { ProfileActions } from './_profile-actions';
+import { ThemeToggle } from './_theme-toggle';
 
 /*
- * Profile — real data, English / LTR. Inside the (app) shell (TabBar provided by
- * the layout). Styling is the verbatim .prof CSS in globals.css (@layer
- * components); the markup is unchanged from the mock — only the numbers are now
- * fetched + derived from the DB. Request-time only (auth + Prisma) → dynamic.
+ * Profile — real data, English / LTR. Inside the (app) shell (TabBar from the
+ * layout). Rebuilt hero: a brand-teal cover with an overlapping avatar wrapped in
+ * a level-progress ring, bold identity, and a level bar; then a 2×2 stat grid and
+ * the daily-goal / this-week / achievements cards. Request-time only → dynamic.
  */
 
 const FALLBACK_TZ = 'Asia/Tehran';
 const WEEKDAY_INITIALS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const XP_PER_LEVEL = 500; // gentle, legible level curve (display-only)
 
 function medalState(um?: {
   progress: number;
@@ -35,12 +44,13 @@ export default async function ProfilePage() {
   if (!session?.user?.id) return null; // the (app) layout already guards this
   const userId = session.user.id;
 
-  const [user, progress, dailyXp, catalog, userMedals] = await Promise.all([
+  const [user, progress, dailyXp, catalog, userMedals, lessonsDone] = await Promise.all([
     prisma.user.findUnique({ where: { id: userId } }),
     prisma.progress.findUnique({ where: { userId } }),
     prisma.dailyXp.findMany({ where: { userId }, select: { day: true, xp: true } }),
     prisma.medal.findMany({ orderBy: { order: 'asc' } }),
     prisma.userMedal.findMany({ where: { userId } }),
+    prisma.lessonCompletion.count({ where: { userId } }),
   ]);
 
   const tz = progress?.timezone ?? FALLBACK_TZ;
@@ -49,6 +59,12 @@ export default async function ProfilePage() {
   const today = localDay(new Date(), tz);
   const lastActiveDay = progress?.lastActiveDate ? localDay(progress.lastActiveDate, tz) : null;
   const streak = effectiveStreak(progress?.streak ?? 0, lastActiveDay, today);
+
+  // Level from total XP (display-only curve): each level is XP_PER_LEVEL apart.
+  const level = Math.floor(totalXp / XP_PER_LEVEL) + 1;
+  const intoLevel = totalXp % XP_PER_LEVEL;
+  const levelPct = Math.round((intoLevel / XP_PER_LEVEL) * 100);
+  const xpToNext = XP_PER_LEVEL - intoLevel;
 
   // XP per local day from the DailyXp ledger (the single source of truth —
   // replays credit the day they happen, not the first-completion day).
@@ -72,10 +88,11 @@ export default async function ProfilePage() {
     return {
       lbl: WEEKDAY_INITIALS[dow],
       state: isToday ? 'today' : done ? 'done' : '',
-      dot: done ? '✓' : isToday ? String(xp) : '—',
+      kind: done ? 'done' : isToday ? 'today' : 'idle',
+      xp,
     };
   });
-  const weekDoneCount = week.filter((d) => d.dot === '✓').length;
+  const weekDoneCount = week.filter((d) => d.kind === 'done').length;
 
   // Medals: full catalog joined with the user's rows → derived state.
   const umByMedalId = new Map(userMedals.map((um) => [um.medalId, um]));
@@ -102,46 +119,83 @@ export default async function ProfilePage() {
 
   return (
     <div className="prof min-h-0 flex-1" dir="ltr">
-      <div className="prof-topbar">
-        <ProfileActions currentName={displayName} />
-      </div>
-
       <div className="prof-scroll">
-        <div className="prof-hero-v2">
-          <div className="prof-avatar is-static">
-            <Mascot pose="encourage" />
-            <span className="edit-pip">✎</span>
+        {/* ── Hero header — brand cover + level-ring avatar + identity ── */}
+        <header className="pf-hero">
+          <div className="pf-cover">
+            <span className="pf-cover-blob pf-cover-blob--1" aria-hidden="true" />
+            <span className="pf-cover-blob pf-cover-blob--2" aria-hidden="true" />
+            <div className="pf-cover-actions">
+              <div className="pf-actions-group">
+                <ThemeToggle />
+                <ProfileActions currentName={displayName} />
+              </div>
+            </div>
           </div>
-          <h2 className="prof-name en">{displayName}</h2>
-          <div className="prof-handle">
-            {handle} · {daysWithTooti} {daysWithTooti === 1 ? 'day' : 'days'} with Tooti
-          </div>
-        </div>
 
-        <div className="prof-stats-v2">
-          <div className="prof-stat-v2 is-static">
-            <div className="ic streak">
+          <div className="pf-id">
+            <div className="pf-avatar-ring" style={{ '--p': levelPct } as CSSProperties}>
+              <div className="pf-avatar">
+                <Mascot pose="encourage" />
+              </div>
+              <span className="pf-level-badge">Lv {level}</span>
+            </div>
+            <h1 className="pf-name">{displayName}</h1>
+            <p className="pf-meta">
+              {handle} · {daysWithTooti} {daysWithTooti === 1 ? 'day' : 'days'} with Tooti
+            </p>
+            <div className="pf-level">
+              <div className="pf-level-bar">
+                <span className="fill" style={{ width: `${levelPct}%` }} />
+              </div>
+              <span className="pf-level-cap">
+                {xpToNext} XP to Level {level + 1}
+              </span>
+            </div>
+          </div>
+        </header>
+
+        {/* ── Stat grid (2×2) ── */}
+        <div className="pf-stats">
+          <div className="pf-stat">
+            <span className="pf-stat-ic streak">
               <Flame weight="fill" />
-            </div>
-            <div className="v">{streak}</div>
-            <div className="k">Day streak</div>
+            </span>
+            <span className="pf-stat-text">
+              <span className="pf-stat-v">{streak}</span>
+              <span className="pf-stat-k">Day streak</span>
+            </span>
           </div>
-          <div className="prof-stat-v2 is-static">
-            <div className="ic xp">
+          <div className="pf-stat">
+            <span className="pf-stat-ic xp">
               <Lightning weight="fill" />
-            </div>
-            <div className="v compact">{totalXp.toLocaleString('en-US')}</div>
-            <div className="k">Total XP</div>
+            </span>
+            <span className="pf-stat-text">
+              <span className="pf-stat-v">{totalXp.toLocaleString('en-US')}</span>
+              <span className="pf-stat-k">Total XP</span>
+            </span>
           </div>
-          <div className="prof-stat-v2 is-static">
-            <div className="ic gem">
+          <div className="pf-stat">
+            <span className="pf-stat-ic lessons">
+              <BookOpen weight="fill" />
+            </span>
+            <span className="pf-stat-text">
+              <span className="pf-stat-v">{lessonsDone}</span>
+              <span className="pf-stat-k">Lessons</span>
+            </span>
+          </div>
+          <div className="pf-stat">
+            <span className="pf-stat-ic medals">
               <MedalIcon weight="fill" />
-            </div>
-            <div className="v">{earnedCount}</div>
-            <div className="k">Badges</div>
+            </span>
+            <span className="pf-stat-text">
+              <span className="pf-stat-v">{earnedCount}</span>
+              <span className="pf-stat-k">Medals</span>
+            </span>
           </div>
         </div>
 
+        {/* ── Daily goal ── */}
         <div className="prof-c">
           <div className="c-h">
             <span className="ttl">Daily goal</span>
@@ -155,6 +209,7 @@ export default async function ProfilePage() {
           <DailyGoalPicker current={dailyGoal} />
         </div>
 
+        {/* ── This week ── */}
         <div className="prof-c">
           <div className="c-h">
             <span className="ttl">This week</span>
@@ -166,12 +221,15 @@ export default async function ProfilePage() {
             {week.map((d, i) => (
               <div key={i} className={cn('prof-day', d.state)}>
                 <span className="lbl">{d.lbl}</span>
-                <span className="dot">{d.dot}</span>
+                <span className="dot">
+                  {d.kind === 'done' ? <Check weight="bold" /> : d.kind === 'today' ? d.xp : '·'}
+                </span>
               </div>
             ))}
           </div>
         </div>
 
+        {/* ── Achievements ── */}
         <div className="prof-c">
           <div className="c-h">
             <span className="ttl">Achievements</span>
@@ -185,11 +243,16 @@ export default async function ProfilePage() {
             </span>
           </div>
           <MedalAcknowledger hasRecently={hasRecently}>
-            <div className="flex gap-3 overflow-x-auto pb-1">
+            <div className="prof-ach-row">
               {medals.map((m) => (
-                <div key={m.key} className="flex w-[72px] shrink-0 flex-col items-center gap-2">
-                  <Medal type={m.key} state={m.state} progress={m.progress} size={56} />
-                  <span className="ach-label text-xs font-bold text-text-2">{m.name}</span>
+                <div key={m.key} className="prof-ach-cell">
+                  <Medal
+                    type={m.key}
+                    state={m.state}
+                    progress={m.progress}
+                    size={64}
+                    label={m.name}
+                  />
                 </div>
               ))}
             </div>

@@ -7,11 +7,11 @@ import { LessonRunner } from './_runner';
 
 /*
  * Lesson runner — server wrapper. Loads the real exercises, enforces routing
- * rules (Learn stages live under /study, locked lessons bounce back to the
- * path) and hands a plain Question[] to the client runner. All four authored
- * ExerciseTypes map to the discriminated union below; malformed rows are
- * skipped. SECTION_TEST lessons sample TEST_SAMPLE_SIZE questions from the
- * pool per request, so retries aren't memorizable.
+ * rules (Learn stages live under /study, Stories under /story, locked lessons
+ * bounce back to the path) and hands a plain Question[] to the client runner.
+ * All five authored ExerciseTypes map to the discriminated union below;
+ * malformed rows are skipped. SECTION_TEST lessons sample TEST_SAMPLE_SIZE
+ * questions from the pool per request, so retries aren't memorizable.
  */
 
 export default async function LessonPage({ params }: { params: Promise<{ id: string }> }) {
@@ -22,6 +22,7 @@ export default async function LessonPage({ params }: { params: Promise<{ id: str
   const lesson = await getLessonWithExercises(slug);
   if (!lesson) notFound();
   if (lesson.kind === 'LESSON') redirect(`/study/${slug}`);
+  if (lesson.kind === 'STORY') redirect(`/story/${slug}`);
 
   // Sequential unlock — locked lessons are not playable.
   const path = await getLearnPath(session.user.id);
@@ -35,6 +36,7 @@ export default async function LessonPage({ params }: { params: Promise<{ id: str
       instructionFa: e.instructionFa,
       prompt: e.prompt,
       explanationFa: e.explanationFa,
+      explanationEn: e.explanationEn,
     };
     if (e.type === 'MCQ' && e.correctIndex !== null) {
       pool.push({ type: 'MCQ', ...base, options: e.options, correctIndex: e.correctIndex });
@@ -43,8 +45,11 @@ export default async function LessonPage({ params }: { params: Promise<{ id: str
       pool.push({ type: 'FILL_BLANK', ...base, answer: e.answer, accept });
     } else if ((e.type === 'WORD_BANK' || e.type === 'TRANSLATE') && e.options.length && e.answer) {
       pool.push({ type: e.type, ...base, options: e.options, answer: e.answer });
+    } else if (e.type === 'LISTEN' && e.options.length && e.answer) {
+      // prompt = the sentence the runner speaks aloud (and reveals after checking).
+      pool.push({ type: 'LISTEN', ...base, options: e.options, answer: e.answer });
     }
-    // other types / malformed rows are skipped (LISTEN is a later phase)
+    // malformed rows are skipped
   }
 
   // SECTION_TEST: sample per request from the item pool (the sampled order is

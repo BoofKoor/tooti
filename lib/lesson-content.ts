@@ -28,4 +28,38 @@ export type SectionContent = {
   noteFa?: string;
   // Any section may end with one hearts-free micro-check (5B renders it inline).
   check?: MicroCheck;
+  // STORY lessons (LessonKind.STORY) carry their whole interactive narrative here,
+  // on a single section, so no new SectionKind / migration is needed. The Story
+  // player (/story/[slug]) renders it; the Learn-stage reader never sees it.
+  story?: StoryContent;
+};
+
+/**
+ * Interactive Story (Duolingo-style) — an ordered script of spoken lines and
+ * inline comprehension questions. Lines are spoken with browser TTS (no audio
+ * assets); the Persian `fa` subtitle is the comprehension-critical island.
+ */
+export type StoryTone = 'a' | 'b' | 'narrator'; // drives the bubble's side + accent
+
+export type StoryStep =
+  | {
+      kind: 'line';
+      tone: StoryTone;
+      speaker?: string; // shown above the bubble; omitted for narration
+      en: string; // spoken aloud
+      fa?: string; // Persian gloss (sanctioned island)
+    }
+  | {
+      kind: 'q';
+      // Hearts-free inline check (authored correct-first; the player shuffles).
+      prompt: string;
+      options: string[];
+      correctIndex: number;
+      explanationFa: string;
+    };
+
+export type StoryContent = {
+  titleEn: string;
+  titleFa: string;
+  steps: StoryStep[];
 };

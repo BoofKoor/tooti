@@ -145,6 +145,8 @@ export interface MedalProps {
   progress?: number;
   /** Rendered width/height in px. The 64px artwork is scaled to fit. @default 64 */
   size?: number;
+  /** Accessible name. When set, the medal exposes role="img" + a hover tooltip. */
+  label?: string;
   className?: string;
 }
 
@@ -187,7 +189,14 @@ function ArtSym({ emblem, locked, uid }: { emblem: Emblem; locked: boolean; uid:
   );
 }
 
-export function Medal({ type, state = 'earned', progress = 0, size = 64, className }: MedalProps) {
+export function Medal({
+  type,
+  state = 'earned',
+  progress = 0,
+  size = 64,
+  label,
+  className,
+}: MedalProps) {
   const uid = useId().replace(/:/g, '');
   const tier = TIER[type];
   const stateClass = STATE_CLASS[state];
@@ -249,12 +258,21 @@ export function Medal({ type, state = 'earned', progress = 0, size = 64, classNa
     </div>
   );
 
+  // An explicit label makes the otherwise-decorative artwork announce itself.
+  const a11y = label ? ({ role: 'img', 'aria-label': label, title: label } as const) : {};
   if (scaled) {
     return (
-      <div className={className} style={wrapperStyle}>
+      <div className={className} style={wrapperStyle} {...a11y}>
         {piece}
       </div>
     );
   }
-  return className ? <div className={className}>{piece}</div> : piece;
+  if (className || label) {
+    return (
+      <div className={className} {...a11y}>
+        {piece}
+      </div>
+    );
+  }
+  return piece;
 }

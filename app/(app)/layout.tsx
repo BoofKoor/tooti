@@ -5,8 +5,10 @@ import { AppTabBar } from './_app-tabbar';
 
 /**
  * Mobile-first app shell: a fixed-height column (centered on larger screens so it
- * reads as a phone), a scrollable content region, and the TabBar pinned to the
- * bottom with safe-area padding. Welcome ('/') and the lesson runner live outside
+ * reads as a phone) with a scrollable content region, and the TabBar
+ * (Learn · Vocab · Profile) floated over the bottom. Each screen's scroll region
+ * carries --tabbar-inset bottom padding so nothing hides behind the frosted bar.
+ * Welcome ('/') and the full-screen lesson / story / study routes live outside
  * this shell (no tab bar).
  *
  * This layout also guards the whole (app) route group: an unauthenticated visitor
@@ -20,9 +22,8 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   return (
     <div className="relative mx-auto flex h-dvh w-full max-w-app flex-col bg-bg">
       <main className="flex flex-1 flex-col overflow-y-auto">{children}</main>
-      {/* Floated over the scroll area so content passes under the frosted bar.
-          Each screen's scroll region carries --tabbar-inset bottom padding so
-          nothing is hidden; the wrapper is click-through except the bar itself. */}
+      {/* Floated over the scroll area so content passes under the frosted bar;
+          the wrapper is click-through except the bar itself. */}
       <nav
         aria-label="Primary"
         className="pointer-events-none absolute inset-x-0 bottom-0 px-4 pb-[env(safe-area-inset-bottom)]"

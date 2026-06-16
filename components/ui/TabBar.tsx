@@ -1,7 +1,7 @@
 'use client';
 
 import type { ComponentType } from 'react';
-import { Barbell, BookOpen, House, User } from '@phosphor-icons/react/dist/ssr';
+import { Cards, House, User } from '@phosphor-icons/react/dist/ssr';
 import type { IconProps } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 
@@ -11,11 +11,13 @@ export interface TabItem {
   icon: ComponentType<IconProps>;
 }
 
+// Three destinations: the Profile, the Learn path (the whole learn→practice→test
+// journey, the home tab in the center), and the Vocabulary section. `id` doubles
+// as the route segment.
 export const defaultTabs: TabItem[] = [
-  { id: 'learn', label: 'Learn', icon: House },
-  { id: 'practice', label: 'Practice', icon: Barbell },
-  { id: 'guide', label: 'Guide', icon: BookOpen },
   { id: 'profile', label: 'Profile', icon: User },
+  { id: 'learn', label: 'Learn', icon: House },
+  { id: 'vocab', label: 'Vocab', icon: Cards },
 ];
 
 export interface TabBarProps {
