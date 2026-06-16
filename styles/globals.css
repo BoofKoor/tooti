@@ -235,9 +235,9 @@
        ─────────────────────────────────────────────────────────────── */
     --tabbar-w: 360px;
     --tabbar-h: 88px;
-    /* Bottom inset for scroll regions (there's no bottom bar now — just keep the
-       last item clear of the safe-area edge with a little breathing room). */
-    --tabbar-inset: calc(env(safe-area-inset-bottom) + var(--space-6));
+    /* Bottom inset for scroll regions so the last item clears the floating bar
+       (its height + the safe-area edge + a little breathing room). */
+    --tabbar-inset: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + var(--space-2));
     --tabbar-bar-h: 72px;
     --tabbar-dot-size: 12px;
     --tabbar-dot-bottom: 64px;
