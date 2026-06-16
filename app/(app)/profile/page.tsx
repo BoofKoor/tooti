@@ -138,7 +138,7 @@ export default async function ProfilePage() {
               <MedalIcon weight="fill" />
             </div>
             <div className="v">{earnedCount}</div>
-            <div className="k">Badges</div>
+            <div className="k">Medals</div>
           </div>
         </div>
 
@@ -185,11 +185,10 @@ export default async function ProfilePage() {
             </span>
           </div>
           <MedalAcknowledger hasRecently={hasRecently}>
-            <div className="flex gap-3 overflow-x-auto pb-1">
+            <div className="prof-ach-row">
               {medals.map((m) => (
-                <div key={m.key} className="flex w-[72px] shrink-0 flex-col items-center gap-2">
-                  <Medal type={m.key} state={m.state} progress={m.progress} size={56} />
-                  <span className="ach-label text-xs font-bold text-text-2">{m.name}</span>
+                <div key={m.key} className="prof-ach-cell">
+                  <Medal type={m.key} state={m.state} progress={m.progress} size={64} label={m.name} />
                 </div>
               ))}
             </div>

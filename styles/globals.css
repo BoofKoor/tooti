@@ -3205,6 +3205,25 @@
     font-family: var(--font-body-fa);
     font-weight: 700;
   }
+
+  /* Achievements gallery — medal art only (styleguide has no per-medal labels);
+     names are exposed to assistive tech via each Medal's aria-label. Scrolls
+     horizontally with a trailing fade hinting there's more beyond the edge. */
+  .prof-ach-row {
+    display: flex;
+    gap: var(--space-3);
+    overflow-x: auto;
+    padding-block: var(--space-2) var(--space-1);
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(to right, #000 86%, transparent);
+    mask-image: linear-gradient(to right, #000 86%, transparent);
+  }
+  .prof-ach-row::-webkit-scrollbar {
+    display: none;
+  }
+  .prof-ach-cell {
+    flex: 0 0 auto;
+  }
 }
 
 @keyframes goal-fill-shine {
