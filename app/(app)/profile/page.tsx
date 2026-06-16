@@ -1,7 +1,5 @@
 import type { CSSProperties } from 'react';
-import Link from 'next/link';
 import {
-  ArrowLeft,
   BookOpen,
   Check,
   Flame,
@@ -128,9 +126,6 @@ export default async function ProfilePage() {
             <span className="pf-cover-blob pf-cover-blob--1" aria-hidden="true" />
             <span className="pf-cover-blob pf-cover-blob--2" aria-hidden="true" />
             <div className="pf-cover-actions">
-              <Link href="/learn" className="prof-icon-btn" aria-label="Back to Learn">
-                <ArrowLeft weight="bold" />
-              </Link>
               <div className="pf-actions-group">
                 <ThemeToggle />
                 <ProfileActions currentName={displayName} />
@@ -227,13 +222,7 @@ export default async function ProfilePage() {
               <div key={i} className={cn('prof-day', d.state)}>
                 <span className="lbl">{d.lbl}</span>
                 <span className="dot">
-                  {d.kind === 'done' ? (
-                    <Check weight="bold" />
-                  ) : d.kind === 'today' ? (
-                    d.xp
-                  ) : (
-                    '·'
-                  )}
+                  {d.kind === 'done' ? <Check weight="bold" /> : d.kind === 'today' ? d.xp : '·'}
                 </span>
               </div>
             ))}
@@ -257,7 +246,13 @@ export default async function ProfilePage() {
             <div className="prof-ach-row">
               {medals.map((m) => (
                 <div key={m.key} className="prof-ach-cell">
-                  <Medal type={m.key} state={m.state} progress={m.progress} size={64} label={m.name} />
+                  <Medal
+                    type={m.key}
+                    state={m.state}
+                    progress={m.progress}
+                    size={64}
+                    label={m.name}
+                  />
                 </div>
               ))}
             </div>

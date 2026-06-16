@@ -1,10 +1,9 @@
 import type { CSSProperties, ReactNode } from 'react';
-import Link from 'next/link';
 import type { LessonKind } from '@prisma/client';
 import { Flame, Lightning } from '@phosphor-icons/react/dist/ssr';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { Badge, Mascot } from '@/components/ui';
+import { Badge } from '@/components/ui';
 import { effectiveStreak, localDay } from '@/lib/gamification';
 import { getLearnPath, type LearnUnit } from '@/lib/learn-data';
 import { cn } from '@/lib/utils';
@@ -298,9 +297,6 @@ export default async function LearnPage() {
   return (
     <div className="scr-path en flex flex-1 flex-col" dir="ltr">
       <header className="path-topbar en">
-        <Link href="/profile" className="path-profile" aria-label="Your profile">
-          <Mascot pose="encourage" />
-        </Link>
         <div className="path-unit">
           <h1 className="path-unit-title">{activeUnitTitle}</h1>
           <div className="path-unit-progress">
