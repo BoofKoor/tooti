@@ -56,11 +56,7 @@ const cloudArt = (
 );
 const leafArt = (
   <>
-    <path
-      d="M22 2C9 8 3 22 6 42c4 1 10-1 15-5C33 28 33 13 22 2Z"
-      fill="#9fe0d1"
-      opacity="0.55"
-    />
+    <path d="M22 2C9 8 3 22 6 42c4 1 10-1 15-5C33 28 33 13 22 2Z" fill="#9fe0d1" opacity="0.55" />
     <path
       d="M20 8C15 18 12 30 9 40"
       stroke="#4fbda7"
@@ -73,11 +69,7 @@ const leafArt = (
 );
 const featherArt = (
   <>
-    <path
-      d="M11 1C4 9 2 22 6 38c0 0 8-7 9-19 1-8-2-14-4-18Z"
-      fill="#ffb3a8"
-      opacity="0.5"
-    />
+    <path d="M11 1C4 9 2 22 6 38c0 0 8-7 9-19 1-8-2-14-4-18Z" fill="#ffb3a8" opacity="0.5" />
     <path
       d="M11 6 8 35"
       stroke="#ff8475"
@@ -159,12 +151,15 @@ const DECOR: Array<{ cls: string; viewBox: string; art: ReactNode; style: CSSPro
 
 function glyphForKind(kind: LessonKind): PathGlyph {
   if (kind === 'LESSON') return 'lesson';
+  if (kind === 'STORY') return 'story';
   if (kind === 'SECTION_TEST') return 'test';
   return 'review';
 }
 
 function hrefForKind(kind: LessonKind, slug: string): string {
-  return kind === 'LESSON' ? `/study/${slug}` : `/lesson/${slug}`;
+  if (kind === 'LESSON') return `/study/${slug}`;
+  if (kind === 'STORY') return `/story/${slug}`;
+  return `/lesson/${slug}`;
 }
 
 /** Dotted trail through node centers (midpoint-smoothed quadratic segments). */

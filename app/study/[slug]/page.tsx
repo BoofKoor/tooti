@@ -19,6 +19,7 @@ export default async function StudyPage({ params }: { params: Promise<{ slug: st
 
   const lesson = await getLessonWithExercises(slug);
   if (!lesson) notFound();
+  if (lesson.kind === 'STORY') redirect(`/story/${slug}`);
   if (lesson.kind !== 'LESSON') redirect(`/lesson/${slug}`);
 
   // Sequential unlock — locked stages bounce back to the path.

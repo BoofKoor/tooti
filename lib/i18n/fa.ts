@@ -14,6 +14,11 @@ export const fa = {
     // SECTION_TEST "not passed" explanation (the 80% bar).
     testBar: 'برای قبولی در آزمون باید دست‌کم ۸۰٪ پاسخ‌ها درست باشد. دوباره تلاش کن!',
   },
+  listen: {
+    // Shown when the browser has no speech voice — the sentence is revealed so the
+    // listening item stays solvable as a word-order exercise instead.
+    audioFallback: 'صدای مرورگرت در دسترس نیست؛ جمله نوشته شده تا بتوانی کلمه‌ها را مرتب کنی.',
+  },
   study: {
     // VIDEO section fallback hint (much of the audience is on filtered networks).
     videoFallback: 'اگر ویدیو باز نشد، ممکن است به دسترسیِ آزاد به اینترنت نیاز داشته باشد.',

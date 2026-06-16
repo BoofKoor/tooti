@@ -1,8 +1,11 @@
 /**
  * The runner's question contract — a discriminated union over the authored
- * ExerciseTypes (LISTEN is a later phase). Shared by the server wrapper
- * (mapping/sampling) and the client runner, so it must stay free of 'use
- * client' and server-only imports.
+ * ExerciseTypes. Shared by the server wrapper (mapping/sampling) and the client
+ * runner, so it must stay free of 'use client' and server-only imports.
+ *
+ * LISTEN reuses the word-bank tile mechanic (so checking, shuffling and the
+ * wrong-answer line all work unchanged), but its `prompt` is the sentence spoken
+ * by TTS — kept hidden until the learner answers.
  */
 export type Question =
   | {
@@ -30,6 +33,16 @@ export type Question =
       instructionEn: string;
       instructionFa: string;
       prompt: string;
+      options: string[];
+      answer: string;
+      explanationFa: string;
+      explanationEn: string;
+    }
+  | {
+      type: 'LISTEN';
+      instructionEn: string;
+      instructionFa: string;
+      prompt: string; // the sentence spoken aloud (hidden until checked)
       options: string[];
       answer: string;
       explanationFa: string;

@@ -7,6 +7,7 @@ import {
   COMEBACK_GAP_DAYS,
   DAILY_GOAL_OPTIONS,
   XP_LEARN_STAGE,
+  XP_STORY,
   computeLessonXp,
   daysBetween,
   evaluateMedals,
@@ -349,6 +350,72 @@ export async function completeLearnStage(input: {
 
   const award = await awardXp({ userId, prior, xp: XP_LEARN_STAGE, correctCount: 0, tz, now });
   return { ok: true, passed: true, xpEarned: XP_LEARN_STAGE, ...award };
+}
+
+/**
+ * Story (kind STORY) completion — flat XP_STORY, first time only. Like the
+ * Learn-stage read, replays award nothing (the inline questions are hearts-free,
+ * so a story is never "failed"). Shares the unlock guard and award path.
+ */
+export async function completeStory(input: {
+  slug: string;
+  timezone?: string;
+}): Promise<CompleteResult> {
+  const empty: CompleteResult = {
+    ok: false,
+    xpEarned: 0,
+    totalXp: 0,
+    streak: 0,
+    newMedals: [],
+    streakMilestone: null,
+  };
+  const session = await auth();
+  if (!session?.user?.id) return empty;
+  const userId = session.user.id;
+
+  const lesson = await prisma.lesson.findUnique({
+    where: { slug: input.slug },
+    include: { unit: { select: { comingSoon: true } } },
+  });
+  if (!lesson || lesson.kind !== 'STORY') return empty;
+
+  // Locked (coming-soon unit or ladder not reached) → no writes at all.
+  if (lesson.unit.comingSoon || !(await lessonUnlocked(userId, lesson))) return empty;
+
+  const prior = await prisma.progress.findUnique({ where: { userId } });
+  const tz = input.timezone || prior?.timezone || DEFAULT_TZ;
+
+  const existing = await prisma.lessonCompletion.findUnique({
+    where: { userId_lessonId: { userId, lessonId: lesson.id } },
+  });
+  if (existing) {
+    // Already played → nothing extra to award (no replay XP).
+    await persistTimezone(userId, tz, prior);
+    return {
+      ok: true,
+      passed: true,
+      xpEarned: 0,
+      totalXp: prior?.xp ?? 0,
+      streak: prior?.streak ?? 0,
+      newMedals: [],
+      streakMilestone: null,
+    };
+  }
+
+  const now = new Date();
+  await prisma.lessonCompletion.create({
+    data: {
+      userId,
+      lessonId: lesson.id,
+      xpEarned: XP_STORY,
+      heartsLeft: 0,
+      perfect: false,
+      crownLevel: 1,
+    },
+  });
+
+  const award = await awardXp({ userId, prior, xp: XP_STORY, correctCount: 0, tz, now });
+  return { ok: true, passed: true, xpEarned: XP_STORY, ...award };
 }
 
 export async function setDailyGoal(goal: number): Promise<void> {

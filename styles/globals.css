@@ -311,15 +311,9 @@
     --color-parrot-tint: #14322d;
 
     --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
-    --shadow-2:
-      0 2px 4px rgba(0, 0, 0, 0.4),
-      0 6px 14px rgba(0, 0, 0, 0.45);
-    --shadow-3:
-      0 4px 8px rgba(0, 0, 0, 0.45),
-      0 14px 30px rgba(0, 0, 0, 0.5);
-    --shadow-4:
-      0 10px 20px rgba(0, 0, 0, 0.5),
-      0 28px 60px rgba(0, 0, 0, 0.6);
+    --shadow-2: 0 2px 4px rgba(0, 0, 0, 0.4), 0 6px 14px rgba(0, 0, 0, 0.45);
+    --shadow-3: 0 4px 8px rgba(0, 0, 0, 0.45), 0 14px 30px rgba(0, 0, 0, 0.5);
+    --shadow-4: 0 10px 20px rgba(0, 0, 0, 0.5), 0 28px 60px rgba(0, 0, 0, 0.6);
 
     --press-edge-color: rgba(0, 0, 0, 0.45);
     --press-edge-soft: rgba(0, 0, 0, 0.3);
@@ -3911,6 +3905,306 @@
   }
 }
 
+/* ─── Listening exercise (LISTEN) + Story player (STORY) — browser-TTS audio,
+   token-only; the word-bank tiles above are reused for the listening builder. ─── */
+@layer components {
+  .listen-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+    margin-block-end: var(--space-6);
+  }
+  .listen-play {
+    appearance: none;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    inline-size: 96px;
+    block-size: 96px;
+    border-radius: var(--radius-pill);
+    border: none;
+    color: var(--color-text-inverse);
+    background: var(--color-primary);
+    box-shadow:
+      0 var(--press-edge) 0 var(--color-primary-ink),
+      var(--shadow-2);
+    transition:
+      transform var(--dur-fast) var(--ease-out),
+      box-shadow var(--dur-fast) var(--ease-out);
+  }
+  .listen-play svg {
+    inline-size: 44px;
+    block-size: 44px;
+  }
+  .listen-play:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+  .listen-play:active:not(:disabled) {
+    transform: translateY(var(--press-edge));
+    box-shadow:
+      0 0 0 var(--color-primary-ink),
+      var(--shadow-1);
+  }
+  .listen-play:focus-visible {
+    outline: var(--focus-ring) solid var(--color-primary);
+    outline-offset: 3px;
+  }
+  .listen-play:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+  .listen-play.is-speaking {
+    animation: listen-pulse 1.1s var(--ease-out) infinite;
+  }
+  @keyframes listen-pulse {
+    0%,
+    100% {
+      box-shadow:
+        0 var(--press-edge) 0 var(--color-primary-ink),
+        var(--shadow-2);
+    }
+    50% {
+      box-shadow:
+        0 var(--press-edge) 0 var(--color-primary-ink),
+        0 0 0 10px var(--color-primary-tint);
+    }
+  }
+  .listen-slow {
+    appearance: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-family: var(--font-en);
+    font-weight: 800;
+    font-size: 13px;
+    color: var(--color-primary-ink);
+    background: var(--color-primary-tint);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-pill);
+    padding: var(--space-1) var(--space-3);
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+  .listen-slow svg {
+    inline-size: 18px;
+    block-size: 18px;
+  }
+  .listen-slow:active {
+    transform: translateY(1px);
+  }
+  .listen-slow:focus-visible {
+    outline: var(--focus-ring) solid var(--color-primary);
+    outline-offset: 2px;
+  }
+  .listen-fallback {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    text-align: center;
+  }
+  .listen-fallback-text {
+    font-family: var(--font-en);
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--color-text-1);
+  }
+  .listen-fallback .fa {
+    font-size: 13px;
+    color: var(--color-text-3);
+  }
+  .listen-reveal {
+    margin-block-start: var(--space-4);
+    text-align: center;
+    font-family: var(--font-en);
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--color-text-2);
+  }
+  .listen-reveal-label {
+    display: block;
+    margin-block-end: var(--space-1);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-3);
+  }
+
+  /* Story — chat-style transcript that reveals one step at a time. */
+  .story-stage {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding-block-end: var(--space-6);
+  }
+  .story-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-block-end: var(--space-1);
+  }
+  .story-line {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    max-inline-size: 86%;
+  }
+  .story-line.tone-a {
+    align-self: flex-start;
+    align-items: flex-start;
+  }
+  .story-line.tone-b {
+    align-self: flex-end;
+    align-items: flex-end;
+  }
+  .story-line.narrator {
+    align-self: center;
+    align-items: center;
+    max-inline-size: 100%;
+  }
+  .story-speaker {
+    padding-inline: var(--space-2);
+    font-family: var(--font-en);
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--color-text-3);
+  }
+  .story-bubble {
+    position: relative;
+    padding: var(--space-3) var(--space-10) var(--space-3) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-1);
+  }
+  .story-line.tone-a .story-bubble {
+    background: var(--color-surface);
+    border-end-start-radius: var(--radius-xs);
+  }
+  .story-line.tone-b .story-bubble {
+    background: var(--color-primary-tint);
+    border-color: var(--color-primary);
+    border-end-end-radius: var(--radius-xs);
+  }
+  .story-line.narrator .story-bubble {
+    padding: var(--space-1) var(--space-2);
+    border: none;
+    box-shadow: none;
+    background: transparent;
+    text-align: center;
+  }
+  .story-en {
+    font-family: var(--font-en);
+    font-weight: 700;
+    font-size: 17px;
+    line-height: 1.4;
+    color: var(--color-text-1);
+  }
+  .story-line.narrator .story-en {
+    font-weight: 600;
+    font-style: italic;
+    color: var(--color-text-2);
+  }
+  .story-fa {
+    margin-block-start: var(--space-1);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-text-2);
+  }
+  .story-say {
+    position: absolute;
+    inset-block-start: var(--space-2);
+    inset-inline-end: var(--space-2);
+    appearance: none;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    inline-size: 30px;
+    block-size: 30px;
+    border: none;
+    border-radius: var(--radius-pill);
+    color: var(--color-primary);
+    background: var(--color-surface-2);
+    transition:
+      transform var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
+  }
+  .story-say svg {
+    inline-size: 17px;
+    block-size: 17px;
+  }
+  .story-say:hover {
+    color: var(--color-primary-ink);
+  }
+  .story-say:active {
+    transform: scale(0.92);
+  }
+  .story-say:focus-visible {
+    outline: var(--focus-ring) solid var(--color-primary);
+    outline-offset: 2px;
+  }
+  .story-line.narrator .story-say {
+    display: none;
+  }
+  .story-q {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-block: var(--space-2);
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-1);
+  }
+  .story-fb {
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+  }
+  .story-fb.is-correct {
+    background: var(--color-correct-tint);
+  }
+  .story-fb.is-incorrect {
+    background: var(--color-error-tint);
+  }
+  .story-fb-title {
+    font-family: var(--font-en);
+    font-weight: 800;
+    font-size: 15px;
+  }
+  .story-fb.is-correct .story-fb-title {
+    color: var(--color-correct-ink);
+  }
+  .story-fb.is-incorrect .story-fb-title {
+    color: var(--color-error-ink);
+  }
+  .story-fb-correct {
+    margin-block-start: var(--space-1);
+    font-size: 14px;
+    color: var(--color-text-2);
+  }
+  .story-fb-correct b {
+    color: var(--color-text-1);
+    font-weight: 700;
+  }
+  .story-fb-explain {
+    margin-block-start: var(--space-1);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--color-text-2);
+  }
+  .story-end {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    padding-block: var(--space-6) var(--space-2);
+    text-align: center;
+  }
+}
+
 /* ─── Phase 6 — route fade + lesson-complete confetti ─── */
 @layer components {
   /* Per-navigation fade-up (app/template.tsx re-mounts this on every route). */
@@ -4025,8 +4319,7 @@
     position: relative;
     overflow: hidden;
     background:
-      radial-gradient(92% 46% at 50% 6%, var(--color-parrot-tint), transparent 62%),
-      var(--color-bg);
+      radial-gradient(92% 46% at 50% 6%, var(--color-parrot-tint), transparent 62%), var(--color-bg);
   }
   .scr-welcome .welcome-hero {
     flex: 1;
@@ -4146,8 +4439,7 @@
     position: relative;
     overflow: hidden;
     background:
-      radial-gradient(92% 42% at 50% 4%, var(--color-parrot-tint), transparent 62%),
-      var(--color-bg);
+      radial-gradient(92% 42% at 50% 4%, var(--color-parrot-tint), transparent 62%), var(--color-bg);
   }
   .auth-head {
     display: flex;

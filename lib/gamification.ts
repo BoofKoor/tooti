@@ -8,6 +8,7 @@ export const XP_LESSON_COMPLETE = 20;
 export const XP_PERFECT_BONUS = 10; // 0 hearts lost
 export const XP_REVIEW = 5; // flat XP for replaying an already-completed lesson
 export const XP_LEARN_STAGE = 15; // flat, first completion of a Learn (LESSON) stage only
+export const XP_STORY = 20; // flat, first completion of a Story (STORY) stage — interactive, > passive reading
 export const TEST_PASS_PCT = 0.8; // SECTION_TEST pass threshold
 export const TOTAL_HEARTS = 5;
 export const DAILY_GOAL_OPTIONS = [10, 20, 30, 50] as const;
