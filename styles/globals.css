@@ -10,45 +10,48 @@
  */
 @layer base {
   :root {
-    /* Color · functional */
-    --color-primary: #0a84ff;
-    --color-primary-ink: #0066d6;
-    --color-primary-tint: #e5f1ff;
-    --color-correct: #34c759;
-    --color-correct-ink: #1f9d45;
-    --color-correct-tint: #e3f8e9;
-    --color-streak: #ff9500;
-    --color-streak-ink: #d97700;
-    --color-streak-tint: #fff1dd;
-    --color-xp: #f2a81c;
-    --color-xp-ink: #c9820a;
-    --color-xp-tint: #fff3d6;
-    --grad-xp: linear-gradient(180deg, #ffc93d, #e09a12);
-    --color-error: #ff3b30;
-    --color-error-ink: #d7271d;
-    --color-error-tint: #ffe5e3;
+    /* Color · functional — Tooti brand (teal-led, tropical) */
+    --color-primary: #0fa294; /* brand teal — primary actions, active nav, brand moments */
+    --color-primary-ink: #0a7268; /* deep teal — pressed edge, links/text on light */
+    --color-primary-tint: #d8f3ef; /* pale teal wash — selected bg, tints */
+    --color-correct: #2fbd62; /* fresh leaf-green — correct/success (distinct from teal) */
+    --color-correct-ink: #1f9b48;
+    --color-correct-tint: #e2f7e8;
+    --color-streak: #ff8a34; /* warm papaya-orange — streak / fire */
+    --color-streak-ink: #db6a16;
+    --color-streak-tint: #ffeeda;
+    --color-xp: #f5b317; /* gold — XP */
+    --color-xp-ink: #c98a0a;
+    --color-xp-tint: #fff2d2;
+    --grad-xp: linear-gradient(180deg, #ffce4d, #e79e12);
+    --color-error: #f5483c; /* warm red */
+    --color-error-ink: #d22a20;
+    --color-error-tint: #ffe5e2;
 
-    /* Color · playful (categories, medals, accents) */
-    --color-purple: #bf5af2;
-    --color-pink: #ff375f;
-    --color-pink-ink: #c71f40;
-    --color-pink-tint: #ffe4eb;
-    --color-teal: #64d2ff;
-    --color-yellow: #ffd60a;
-    --color-parrot: #2bb7a3;
-    --color-parrot-ink: #1f9c8b;
-    --color-parrot-tint: #dcf3ee;
+    /* Color · playful (categories, medals, accents) — tropical */
+    --color-coral: #ff6f61; /* coral — warm pop / secondary accent */
+    --color-coral-ink: #e24b3d;
+    --color-coral-tint: #ffe6e1;
+    --color-purple: #a06bf2; /* crest violet */
+    --color-pink: #ff4d79;
+    --color-pink-ink: #d72a55;
+    --color-pink-tint: #ffe1e9;
+    --color-teal: #46c8e0; /* sky-teal accent */
+    --color-yellow: #ffd23f;
+    --color-parrot: #0fa294; /* aligned to primary — the "Tooti" brand wash */
+    --color-parrot-ink: #0a7268;
+    --color-parrot-tint: #dcf4f0;
 
-    /* Color · neutrals (light theme only) */
-    --color-bg: #f6f8fb;
+    /* Color · neutrals (warm-leaning, light theme) */
+    --color-bg: #f4f6f4; /* soft warm off-white */
     --color-surface: #ffffff;
-    --color-surface-2: #f1f4f9;
-    --color-surface-3: #e7ecf3;
-    --color-border: #e2e7ee;
-    --color-border-strong: #c9d0dc;
-    --color-text-1: #14171d;
-    --color-text-2: #4b5260;
-    --color-text-3: #8a909c;
+    --color-surface-2: #eef1ee;
+    --color-surface-3: #e4e8e3;
+    --color-border: #e2e6e0;
+    --color-border-strong: #ccd2cb;
+    --color-text-1: #18211d; /* dark charcoal, faint warmth */
+    --color-text-2: #4d564f;
+    --color-text-3: #888f87;
     --color-text-inverse: #ffffff;
 
     /* Spacing (4-base) */
@@ -112,8 +115,8 @@
 
     /* Badge gradients + inks */
     --grad-streak: linear-gradient(180deg, #ffb459, var(--color-streak));
-    --grad-unit: linear-gradient(180deg, #d27ef7, var(--color-purple));
-    --color-purple-ink: #9134cc;
+    --grad-unit: linear-gradient(180deg, #c08bf7, var(--color-purple));
+    --color-purple-ink: #7c3fe0;
 
     /* Focus ring */
     --focus-ring: 3px;
@@ -1668,7 +1671,7 @@
     border: 0;
     /* same pressable-edge DNA as Stage 3 buttons */
     box-shadow:
-      0 var(--press-edge) 0 #6b23a0,
+      0 var(--press-edge) 0 var(--color-purple-ink),
       var(--shadow-1);
     position: relative;
     transition:
@@ -1678,7 +1681,7 @@
   .scr-path .path-topbar .unit-pill:active {
     transform: translateY(var(--press-edge));
     box-shadow:
-      0 0 0 #6b23a0,
+      0 0 0 var(--color-purple-ink),
       var(--shadow-1);
   }
   .scr-path .path-topbar.en .unit-pill {
@@ -1702,14 +1705,14 @@
     overflow-y: auto;
     overflow-x: hidden;
     padding-block-end: var(--tabbar-inset); /* clear the floating tab bar */
-    /* organic sky/garden — warm cream gradient with subtle warmth shifts */
+    /* tropical "canopy journey" — fresh mint-teal sky fading into the warm
+       neutral, with soft brand glows for depth (no Duolingo cream-yellow). */
     background:
-      radial-gradient(70px 28px at 18% 6%, rgba(255, 255, 255, 0.55), transparent 70%),
-      radial-gradient(90px 32px at 84% 22%, rgba(255, 255, 255, 0.45), transparent 70%),
-      radial-gradient(90px 32px at 8% 48%, rgba(255, 255, 255, 0.5), transparent 70%),
-      radial-gradient(100px 36px at 90% 64%, rgba(255, 255, 255, 0.4), transparent 70%),
-      radial-gradient(80px 28px at 6% 88%, rgba(255, 255, 255, 0.5), transparent 70%),
-      linear-gradient(180deg, #fff4cf 0%, #ffe9a8 55%, #f4dc8a 100%);
+      radial-gradient(150px 90px at 14% 4%, rgba(15, 162, 148, 0.12), transparent 72%),
+      radial-gradient(170px 120px at 90% 26%, rgba(255, 111, 97, 0.08), transparent 72%),
+      radial-gradient(150px 110px at 6% 60%, rgba(15, 162, 148, 0.09), transparent 72%),
+      radial-gradient(160px 120px at 94% 86%, rgba(160, 107, 242, 0.06), transparent 72%),
+      linear-gradient(180deg, #e7f6f1 0%, #eef6f1 46%, #f4f6f4 100%);
   }
   .path-bg-decor {
     position: absolute;
@@ -1719,7 +1722,7 @@
   }
   .path-bg-decor .bg-cloud {
     position: absolute;
-    filter: drop-shadow(0 2px 4px rgba(200, 150, 30, 0.12));
+    filter: drop-shadow(0 2px 5px rgba(18, 60, 54, 0.1));
   }
   .path-bg-decor .bg-flower {
     position: absolute;
@@ -1740,7 +1743,7 @@
     stroke-dasharray: 0 14;
   }
   .path-canvas .trail .trail-rest {
-    stroke: rgba(96, 70, 20, 0.32);
+    stroke: rgba(28, 50, 46, 0.22);
   }
   .path-canvas .trail .trail-done {
     stroke: var(--color-streak);
