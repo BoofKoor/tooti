@@ -11,12 +11,13 @@ export interface TabItem {
   icon: ComponentType<IconProps>;
 }
 
-// Three destinations: the Learn path (the whole learn→practice→test journey),
-// the Vocabulary section, and the Profile. `id` doubles as the route segment.
+// Three destinations: the Profile, the Learn path (the whole learn→practice→test
+// journey, the home tab in the center), and the Vocabulary section. `id` doubles
+// as the route segment.
 export const defaultTabs: TabItem[] = [
+  { id: 'profile', label: 'Profile', icon: User },
   { id: 'learn', label: 'Learn', icon: House },
   { id: 'vocab', label: 'Vocab', icon: Cards },
-  { id: 'profile', label: 'Profile', icon: User },
 ];
 
 export interface TabBarProps {
