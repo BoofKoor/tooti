@@ -1650,8 +1650,11 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 18px;
-    background: var(--color-surface);
+    gap: var(--space-3);
+    padding: 12px 16px;
+    background: color-mix(in srgb, var(--color-surface) 85%, transparent);
+    -webkit-backdrop-filter: saturate(160%) blur(12px);
+    backdrop-filter: saturate(160%) blur(12px);
     border-bottom: 1px solid var(--color-border);
     position: sticky;
     top: 0;
@@ -1818,7 +1821,7 @@
     color: #fff;
     box-shadow:
       0 8px 0 var(--color-primary-ink),
-      0 0 0 10px rgba(10, 132, 255, 0.16);
+      0 0 0 10px color-mix(in srgb, var(--color-primary) 18%, transparent);
     animation: path-current-pulse-v2 2.2s ease-in-out infinite;
   }
   .path-node-v2.current::before {
@@ -1870,7 +1873,11 @@
   /* "START" label · sits above Tooti's head, bobs WITH Tooti in sync */
   .path-start-pill {
     position: absolute;
-    background: linear-gradient(180deg, #3ba0ff 0%, var(--color-primary) 100%);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-primary) 76%, white) 0%,
+      var(--color-primary) 100%
+    );
     color: #fff;
     font-family: var(--font-body-fa);
     font-weight: 800;
@@ -1881,7 +1888,7 @@
     z-index: 4;
     box-shadow:
       0 3px 0 var(--color-primary-ink),
-      0 4px 10px -2px rgba(10, 132, 255, 0.4);
+      0 4px 10px -2px color-mix(in srgb, var(--color-primary) 42%, transparent);
     white-space: nowrap;
     /* same timing + amplitude as Tooti's bob, so they move as one */
     animation: start-bob 3s ease-in-out infinite;
@@ -1912,7 +1919,7 @@
     font-family: var(--font-body-fa);
     font-weight: 600;
     font-size: 12px;
-    color: rgba(96, 70, 20, 0.75);
+    color: var(--color-text-2);
     white-space: nowrap;
     z-index: 4;
     transform: translateX(-50%);
@@ -1939,7 +1946,7 @@
     font-family: var(--font-body-fa);
     font-weight: 800;
     font-size: 12px;
-    border: 3px solid #ffe9a8;
+    border: 3px solid var(--color-surface);
     box-shadow: 0 2px 0 var(--color-streak-ink);
     z-index: 2;
     font-variant-numeric: tabular-nums;
@@ -1966,19 +1973,30 @@
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-pill);
-    padding: 6px 16px;
+    padding: 8px 18px;
     font-family: var(--font-en);
-    font-weight: 800;
-    font-size: 11px;
-    letter-spacing: 0.12em;
+    font-weight: 900;
+    font-size: 11.5px;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--color-text-2);
+    color: var(--color-text-1);
     box-shadow: var(--shadow-2);
     z-index: 4;
     white-space: nowrap;
+  }
+  .path-section-header::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    flex-shrink: 0;
   }
   .path-section-header.fa {
     font-family: var(--font-body-fa);

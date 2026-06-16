@@ -43,7 +43,8 @@ const START_PILL_OFFSET = { top: -74, left: 44 };
 const TOOTI_OFFSET = { top: -50, left: -10 };
 const CURRENT_LABEL_OFFSET = { top: 100, left: 44 };
 
-// Decorative garden art (verbatim from the styleguide #bg-* defs + positions).
+// Decorative "tropical canopy" art — soft clouds + Tooti-brand leaves, parrot
+// feathers and berries scattered behind the trail (low-opacity, aria-hidden).
 const cloudArt = (
   <>
     <ellipse cx="22" cy="22" rx="14" ry="9" fill="#FFFFFF" />
@@ -52,85 +53,106 @@ const cloudArt = (
     <ellipse cx="34" cy="14" rx="9" ry="6" fill="#FFFFFF" opacity="0.7" />
   </>
 );
-const flowerArt = (
+const leafArt = (
   <>
-    <circle cx="8" cy="3" r="2" fill="#FFFFFF" />
-    <circle cx="13" cy="8" r="2" fill="#FFFFFF" />
-    <circle cx="8" cy="13" r="2" fill="#FFFFFF" />
-    <circle cx="3" cy="8" r="2" fill="#FFFFFF" />
-    <circle cx="8" cy="8" r="2.3" fill="#FFB459" />
+    <path
+      d="M22 2C9 8 3 22 6 42c4 1 10-1 15-5C33 28 33 13 22 2Z"
+      fill="#9fe0d1"
+      opacity="0.55"
+    />
+    <path
+      d="M20 8C15 18 12 30 9 40"
+      stroke="#4fbda7"
+      strokeWidth="1.5"
+      fill="none"
+      opacity="0.5"
+      strokeLinecap="round"
+    />
   </>
 );
-const sparkArt = (
-  <path
-    d="M 7 1 V 13 M 1 7 H 13 M 2.5 2.5 L 11.5 11.5 M 11.5 2.5 L 2.5 11.5"
-    stroke="#E8A82A"
-    strokeWidth="1.4"
-    strokeLinecap="round"
-    opacity="0.55"
-  />
+const featherArt = (
+  <>
+    <path
+      d="M11 1C4 9 2 22 6 38c0 0 8-7 9-19 1-8-2-14-4-18Z"
+      fill="#ffb3a8"
+      opacity="0.5"
+    />
+    <path
+      d="M11 6 8 35"
+      stroke="#ff8475"
+      strokeWidth="1.3"
+      fill="none"
+      opacity="0.5"
+      strokeLinecap="round"
+    />
+  </>
 );
+const berryArt = <circle cx="6" cy="6" r="4.5" fill="#ffce4d" opacity="0.55" />;
 
 const DECOR: Array<{ cls: string; viewBox: string; art: ReactNode; style: CSSProperties }> = [
+  // soft clouds (sky)
   {
     cls: 'bg-cloud',
     viewBox: '0 0 100 36',
     art: cloudArt,
-    style: { top: 46, left: -22, width: 110, height: 38 },
-  },
-  {
-    cls: 'bg-cloud',
-    viewBox: '0 0 100 36',
-    art: cloudArt,
-    style: { top: 360, right: -18, width: 96, height: 34 },
+    style: { top: 56, left: -24, width: 104, height: 36 },
   },
   {
     cls: 'bg-cloud',
     viewBox: '0 0 100 36',
     art: cloudArt,
-    style: { top: 720, left: -26, width: 104, height: 36 },
+    style: { top: 540, right: -20, width: 92, height: 32 },
+  },
+  // tropical leaves
+  {
+    cls: 'bg-flower',
+    viewBox: '0 0 44 46',
+    art: leafArt,
+    style: { top: 150, right: 16, width: 40, height: 42, transform: 'rotate(8deg)' },
   },
   {
     cls: 'bg-flower',
-    viewBox: '0 0 16 16',
-    art: flowerArt,
-    style: { top: 160, right: 34, width: 14, height: 14 },
+    viewBox: '0 0 44 46',
+    art: leafArt,
+    style: { top: 430, left: 12, width: 34, height: 36, transform: 'scaleX(-1) rotate(18deg)' },
   },
   {
     cls: 'bg-flower',
-    viewBox: '0 0 16 16',
-    art: flowerArt,
-    style: { top: 455, left: 22, width: 12, height: 12 },
+    viewBox: '0 0 44 46',
+    art: leafArt,
+    style: { top: 815, right: 28, width: 38, height: 40, transform: 'rotate(-22deg)' },
   },
+  // parrot feathers
   {
-    cls: 'bg-flower',
-    viewBox: '0 0 16 16',
-    art: flowerArt,
-    style: { top: 680, right: 50, width: 14, height: 14 },
-  },
-  {
-    cls: 'bg-flower',
-    viewBox: '0 0 16 16',
-    art: flowerArt,
-    style: { top: 880, left: 40, width: 12, height: 12 },
+    cls: 'bg-spark',
+    viewBox: '0 0 22 40',
+    art: featherArt,
+    style: { top: 300, left: 26, width: 20, height: 36, transform: 'rotate(20deg)' },
   },
   {
     cls: 'bg-spark',
-    viewBox: '0 0 14 14',
-    art: sparkArt,
-    style: { top: 240, left: 30, width: 10, height: 10 },
+    viewBox: '0 0 22 40',
+    art: featherArt,
+    style: { top: 690, left: 40, width: 18, height: 32, transform: 'rotate(-12deg)' },
+  },
+  // berries / dots
+  {
+    cls: 'bg-flower',
+    viewBox: '0 0 12 12',
+    art: berryArt,
+    style: { top: 240, left: 62, width: 9, height: 9 },
   },
   {
-    cls: 'bg-spark',
-    viewBox: '0 0 14 14',
-    art: sparkArt,
-    style: { top: 570, right: 24, width: 11, height: 11 },
+    cls: 'bg-flower',
+    viewBox: '0 0 12 12',
+    art: berryArt,
+    style: { top: 600, right: 56, width: 10, height: 10 },
   },
   {
-    cls: 'bg-spark',
-    viewBox: '0 0 14 14',
-    art: sparkArt,
-    style: { top: 820, left: 60, width: 9, height: 9 },
+    cls: 'bg-flower',
+    viewBox: '0 0 12 12',
+    art: berryArt,
+    style: { top: 880, left: 70, width: 8, height: 8 },
   },
 ];
 
