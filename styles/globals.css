@@ -2840,6 +2840,10 @@
     transform: translateY(2px);
     box-shadow: none;
   }
+  .prof-icon-btn:focus-visible {
+    outline: var(--focus-ring) solid var(--color-primary);
+    outline-offset: 2px;
+  }
   .prof-icon-btn svg {
     width: 18px;
     height: 18px;
@@ -3717,6 +3721,11 @@
     transition: border-color 200ms;
   }
   .prof-input:focus {
+    border-color: var(--color-primary);
+  }
+  .prof-input:focus-visible {
+    outline: var(--focus-ring) solid var(--color-primary);
+    outline-offset: 2px;
     border-color: var(--color-primary);
   }
   .prof-field .err {
