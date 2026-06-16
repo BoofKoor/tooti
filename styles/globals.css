@@ -2424,7 +2424,7 @@
   }
   .ex-header {
     display: grid;
-    grid-template-columns: 56px 1fr auto;
+    grid-template-columns: 60px 1fr;
     gap: var(--space-4);
     align-items: center;
     padding-bottom: var(--space-4);
@@ -2432,20 +2432,23 @@
     border-bottom: 1px dashed var(--color-border);
   }
   .ex-header .ex-mascot {
-    width: 56px;
-    height: 56px;
-    background: var(--color-parrot-tint);
-    border-radius: var(--radius-md);
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(120% 120% at 50% 18%, #fff, var(--color-parrot-tint));
+    border-radius: 50%;
     display: grid;
     place-items: center;
     flex-shrink: 0;
     overflow: visible;
+    box-shadow:
+      inset 0 0 0 2px color-mix(in srgb, var(--color-primary) 24%, transparent),
+      0 4px 10px -4px color-mix(in srgb, var(--color-primary-ink) 35%, transparent);
   }
   .ex-header .ex-mascot svg {
-    width: 60px;
-    height: 60px;
+    width: 62px;
+    height: 64px;
     display: block;
-    transform: translate(2px, -4px);
+    transform: translateY(-2px);
   }
   .ex-header .ex-instruct {
     display: flex;
@@ -2639,21 +2642,25 @@
      never gets crushed by the wide 3-column layout. */
   @media (max-width: 480px) {
     .fb-banner {
-      grid-template-columns: 56px 1fr;
+      grid-template-columns: 68px 1fr;
       grid-template-areas:
         'mascot text'
         'action action';
-      gap: var(--space-3);
+      gap: var(--space-1) var(--space-4);
       align-items: center;
+      padding: var(--space-5) var(--space-5) var(--space-4);
     }
     .fb-banner .fb-mascot {
-      inline-size: 56px;
-      block-size: 56px;
-      margin: -20px 0 -12px;
+      inline-size: 68px;
+      block-size: 68px;
+      margin: -28px 0 -8px;
     }
     .fb-banner .fb-mascot svg {
-      width: 64px;
-      height: 70px;
+      width: 80px;
+      height: 86px;
+    }
+    .fb-banner .fb-action {
+      margin-block-start: var(--space-3);
     }
     .fb-banner .fb-action .btn {
       inline-size: 100%;
@@ -2667,24 +2674,37 @@
   .scr-lesson .lesson-bar {
     display: flex;
     align-items: center;
-    padding: 12px 16px 14px;
-    gap: 12px;
+    padding: 14px 16px;
+    gap: 14px;
     background: var(--color-surface);
-    border-bottom: 1px solid var(--color-border);
+    box-shadow:
+      0 1px 0 var(--color-border),
+      0 4px 12px -8px rgba(20, 28, 50, 0.12);
     flex-shrink: 0;
   }
   .scr-lesson .lesson-bar .close {
-    width: 30px;
-    height: 30px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     background: var(--color-surface-2);
     display: grid;
     place-items: center;
     color: var(--color-text-2);
-    font-size: 16px;
+    font-size: 17px;
     cursor: pointer;
     flex-shrink: 0;
     border: 1px solid var(--color-border);
+    transition:
+      background var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
+  }
+  .scr-lesson .lesson-bar .close:hover {
+    background: var(--color-surface-3);
+    color: var(--color-text-1);
+  }
+  .scr-lesson .lesson-bar .close:focus-visible {
+    outline: var(--focus-ring) solid var(--color-primary);
+    outline-offset: 2px;
   }
   .scr-lesson .lesson-bar .progress {
     flex: 1;

@@ -463,9 +463,6 @@ export function LessonRunner({
         </button>
         <div className="progress">
           <div className="progress-fill" style={{ width: `${progressPct}%` }} />
-          <span className="progress-label">
-            {index + 1}/{questions.length}
-          </span>
         </div>
         <div className="lb-stats">
           <div className="hearts">
@@ -483,8 +480,6 @@ export function LessonRunner({
               <Mascot pose="encourage" />
             </div>
             <div className="ex-instruct">
-              {/* dir="ltr": the -en slot is the Persian secondary, -fa the English primary. */}
-              <div className="ex-instruct-en">{q.instructionFa}</div>
               <div className="ex-instruct-fa">{q.instructionEn}</div>
             </div>
           </div>
@@ -518,17 +513,12 @@ export function LessonRunner({
                   </span>
                 </div>
               ) : (
-                <>
-                  <div className="fb-correct-line">
-                    Correct:{' '}
-                    <bdi>
-                      <b>{correctText}</b>
-                    </bdi>
-                  </div>
-                  <div className="fb-explain fa" dir="rtl">
-                    {q.explanationFa}
-                  </div>
-                </>
+                <div className="fb-correct-line">
+                  Correct:{' '}
+                  <bdi>
+                    <b>{correctText}</b>
+                  </bdi>
+                </div>
               )}
             </div>
             <div className="fb-action">
