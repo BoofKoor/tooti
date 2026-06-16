@@ -257,12 +257,13 @@ type ExerciseSeed = {
   answer: string | null; // canonical answer for the typed/builder types
   data: { accept: string[] } | null; // FILL_BLANK extra accepted answers
   explanationFa: string;
+  explanationEn: string;
 };
 
 function mcqSet(
   instructionEn: string,
   instructionFa: string,
-  items: Array<{ prompt: string; options: string[]; explanationFa: string }>,
+  items: Array<{ prompt: string; options: string[]; explanationFa: string; explanationEn: string }>,
 ): ExerciseSeed[] {
   return items.map((it, i) => ({
     order: i + 1,
@@ -275,12 +276,13 @@ function mcqSet(
     answer: null,
     data: null,
     explanationFa: it.explanationFa,
+    explanationEn: it.explanationEn,
   }));
 }
 
 function fillBlankItems(
   startOrder: number,
-  items: Array<{ prompt: string; answer: string; accept?: string[]; explanationFa: string }>,
+  items: Array<{ prompt: string; answer: string; accept?: string[]; explanationFa: string; explanationEn: string }>,
 ): ExerciseSeed[] {
   return items.map((it, i) => ({
     order: startOrder + i,
@@ -293,6 +295,7 @@ function fillBlankItems(
     answer: it.answer,
     data: it.accept ? { accept: it.accept } : null,
     explanationFa: it.explanationFa,
+    explanationEn: it.explanationEn,
   }));
 }
 
@@ -301,7 +304,7 @@ function builderItems(
   type: ExerciseType,
   instructionEn: string,
   instructionFa: string,
-  items: Array<{ prompt?: string; options: string[]; answer: string; explanationFa: string }>,
+  items: Array<{ prompt?: string; options: string[]; answer: string; explanationFa: string; explanationEn: string }>,
 ): ExerciseSeed[] {
   return items.map((it, i) => ({
     order: startOrder + i,
@@ -314,6 +317,7 @@ function builderItems(
     answer: it.answer,
     data: null,
     explanationFa: it.explanationFa,
+    explanationEn: it.explanationEn,
   }));
 }
 
@@ -324,31 +328,37 @@ const exercisesByLesson: Record<string, ExerciseSeed[]> = {
       prompt: 'Maryam ___ in Shiraz.',
       options: ['lives', 'live', 'is living', 'lived'],
       explanationFa: 'سوم‌شخصِ مفرد در حالِ ساده s می‌گیرد.',
+      explanationEn: "Third-person singular adds -s in the present simple.",
     },
     {
       prompt: 'She ___ a big breakfast.',
       options: ['doesn’t eat', 'don’t eat', 'not eats', 'doesn’t eats'],
       explanationFa: 'منفیِ سوم‌شخص: doesn’t + فعلِ ساده.',
+      explanationEn: "Third-person negative: doesn’t + base verb.",
     },
     {
       prompt: 'Maryam and her friends ___ volleyball after school.',
       options: ['play', 'plays', 'is playing', 'played'],
       explanationFa: 'فاعلِ جمع → فعل بدونِ s.',
+      explanationEn: "Plural subject → verb with no -s.",
     },
     {
       prompt: '___ Maryam like her busy life? — Yes, she does.',
       options: ['Does', 'Do', 'Is', 'Has'],
       explanationFa: 'سؤالِ سوم‌شخص با Does ساخته می‌شود.',
+      explanationEn: "Third-person questions are formed with Does.",
     },
     {
       prompt: 'Ali ___ TV; he plays video games.',
       options: ['doesn’t watch', 'don’t watch', 'doesn’t watches', 'isn’t watch'],
       explanationFa: 'بعد از doesn’t فعلِ ساده می‌آید.',
+      explanationEn: "After doesn’t, use the base verb.",
     },
     {
       prompt: 'School ___ at eight.',
       options: ['starts', 'start', 'is start', 'starting'],
       explanationFa: 'برنامهٔ ثابت → حالِ ساده با s.',
+      explanationEn: "A fixed schedule → present simple with -s.",
     },
   ]),
   'present-simple-practice-2': mcqSet('Choose the correct form.', 'شکلِ درست را انتخاب کن', [
@@ -356,31 +366,37 @@ const exercisesByLesson: Record<string, ExerciseSeed[]> = {
       prompt: 'He ___ to work by car.',
       options: ['goes', 'go', 'gos', 'going'],
       explanationFa: 'go → goes.',
+      explanationEn: "go ends in -o → goes.",
     },
     {
       prompt: 'She ___ English every day.',
       options: ['studies', 'studys', 'study', 'studying'],
       explanationFa: 'حرفِ بی‌صدا + y → ies.',
+      explanationEn: "Consonant + y → -ies (study → studies).",
     },
     {
       prompt: 'My father ___ TV in the evening.',
       options: ['watches', 'watchs', 'watch', 'watching'],
       explanationFa: 'watch → watches.',
+      explanationEn: "watch ends in -ch → watches.",
     },
     {
       prompt: 'I ___ coffee. I prefer tea.',
       options: ['don’t drink', 'doesn’t drink', 'not drink', 'don’t drinks'],
       explanationFa: 'اول‌شخص → don’t + فعلِ ساده.',
+      explanationEn: "First person → don’t + base verb.",
     },
     {
       prompt: 'The sun ___ in the east.',
       options: ['rises', 'rise', 'rising', 'is rise'],
       explanationFa: 'حقیقتِ کلی → حالِ ساده.',
+      explanationEn: "A general truth → present simple.",
     },
     {
       prompt: 'We ___ in Tehran.',
       options: ['live', 'lives', 'living', 'are live'],
       explanationFa: 'با we فعل بدونِ s می‌آید.',
+      explanationEn: "With we, the verb takes no -s.",
     },
   ]),
   'present-simple-practice-3': mcqSet('Pick the correct option.', 'گزینهٔ درست را انتخاب کن', [
@@ -388,31 +404,37 @@ const exercisesByLesson: Record<string, ExerciseSeed[]> = {
       prompt: '___ you speak English? — Yes, I do.',
       options: ['Do', 'Does', 'Are', 'Is'],
       explanationFa: 'با you سؤال با Do ساخته می‌شود.',
+      explanationEn: "With you, form questions with Do.",
     },
     {
       prompt: '___ your sister play volleyball?',
       options: ['Does', 'Do', 'Is', 'Has'],
       explanationFa: 'سوم‌شخصِ مفرد → Does.',
+      explanationEn: "Third-person singular → Does.",
     },
     {
       prompt: 'They ___ on Sundays.',
       options: ['don’t work', 'doesn’t work', 'not work', 'don’t works'],
       explanationFa: 'فاعلِ جمع → don’t + فعلِ ساده.',
+      explanationEn: "Plural subject → don’t + base verb.",
     },
     {
       prompt: 'Does he like football? — No, he ___.',
       options: ['doesn’t', 'don’t', 'isn’t', 'not'],
       explanationFa: 'جوابِ کوتاهِ منفی: No, he doesn’t.',
+      explanationEn: "Negative short answer: No, he doesn’t.",
     },
     {
       prompt: 'Where ___ she live?',
       options: ['does', 'do', 'is', 'are'],
       explanationFa: 'سؤالِ Wh با does برای سوم‌شخص.',
+      explanationEn: "Wh- questions use does for the third person.",
     },
     {
       prompt: 'He doesn’t ___ TV at night.',
       options: ['watch', 'watches', 'watching', 'watched'],
       explanationFa: 'بعد از doesn’t فعلِ ساده.',
+      explanationEn: "After doesn’t, use the base verb.",
     },
   ]),
   'present-simple-practice-4': [
@@ -421,17 +443,20 @@ const exercisesByLesson: Record<string, ExerciseSeed[]> = {
         prompt: 'She ___ (go) to school by bus.',
         answer: 'goes',
         explanationFa: 'go با -o تمام می‌شود → goes.',
+        explanationEn: "go ends in -o → goes.",
       },
       {
         prompt: 'My parents ___ (not / like) loud music.',
         answer: 'don’t like',
         accept: ['do not like'],
         explanationFa: 'فاعلِ جمع → don’t + فعلِ ساده.',
+        explanationEn: "Plural subject → don’t + base verb.",
       },
       {
         prompt: 'He ___ (study) English every night.',
         answer: 'studies',
         explanationFa: 'حرفِ بی‌صدا + y → ies.',
+        explanationEn: "Consonant + y → -ies (study → studies).",
       },
     ]),
     ...builderItems(4, ExerciseType.WORD_BANK, 'Build the sentence.', 'جمله را بساز', [
@@ -439,16 +464,19 @@ const exercisesByLesson: Record<string, ExerciseSeed[]> = {
         options: ['She', 'drinks', 'tea', 'every', 'morning', 'drink'],
         answer: 'She drinks tea every morning',
         explanationFa: 'سوم‌شخصِ مفرد s می‌گیرد: drinks.',
+        explanationEn: "Third-person singular adds -s: drinks.",
       },
       {
         options: ['Does', 'he', 'like', 'football', 'Do', 'likes'],
         answer: 'Does he like football',
         explanationFa: 'سؤالِ سوم‌شخص: Does + فعلِ ساده.',
+        explanationEn: "Third-person question: Does + base verb.",
       },
       {
         options: ['They', 'don’t', 'watch', 'TV', 'at', 'night', 'doesn’t'],
         answer: 'They don’t watch TV at night',
         explanationFa: 'فاعلِ جمع → don’t.',
+        explanationEn: "Plural subject → don’t.",
       },
     ]),
     ...builderItems(7, ExerciseType.TRANSLATE, 'Translate into English.', 'به انگلیسی ترجمه کن', [
@@ -457,12 +485,14 @@ const exercisesByLesson: Record<string, ExerciseSeed[]> = {
         options: ['She', 'studies', 'English', 'every', 'day', 'study', 'days'],
         answer: 'She studies English every day',
         explanationFa: 'عادتِ روزانه → حالِ ساده با s.',
+        explanationEn: "A daily habit → present simple with -s.",
       },
       {
         prompt: 'من قهوه دوست ندارم.',
         options: ['I', 'don’t', 'like', 'coffee', 'doesn’t', 'likes'],
         answer: 'I don’t like coffee',
         explanationFa: 'اول‌شخص → don’t + فعلِ ساده.',
+        explanationEn: "First person → don’t + base verb.",
       },
     ]),
   ],
@@ -472,103 +502,123 @@ const exercisesByLesson: Record<string, ExerciseSeed[]> = {
       prompt: 'Sara ___ up at 6 every day.',
       options: ['wakes', 'wake', 'is waking', 'woke'],
       explanationFa: 'عادتِ روزانه → حالِ ساده با s.',
+      explanationEn: "A daily habit → present simple with -s.",
     },
     {
       prompt: 'I ___ like cold weather.',
       options: ['don’t', 'doesn’t', 'am not', 'not'],
       explanationFa: 'اول‌شخص → don’t.',
+      explanationEn: "First person → don’t.",
     },
     {
       prompt: '___ they live near you? — Yes, they do.',
       options: ['Do', 'Does', 'Are', 'Is'],
       explanationFa: 'با they سؤال با Do.',
+      explanationEn: "With they, ask with Do.",
     },
     {
       prompt: 'My brother ___ his homework after dinner.',
       options: ['does', 'do', 'doing', 'is do'],
       explanationFa: 'سوم‌شخص → does.',
+      explanationEn: "Third person → does.",
     },
     {
       prompt: 'Water ___ at 100 degrees.',
       options: ['boils', 'boil', 'is boiling', 'boiled'],
       explanationFa: 'حقیقتِ کلی → حالِ ساده.',
+      explanationEn: "A general truth → present simple.",
     },
     {
       prompt: 'She ___ to music on the bus.',
       options: ['listens', 'listen', 'listening', 'is listen'],
       explanationFa: 'سوم‌شخص s می‌گیرد.',
+      explanationEn: "Third person takes -s.",
     },
     {
       prompt: 'We ___ TV on school nights.',
       options: ['don’t watch', 'doesn’t watch', 'don’t watches', 'not watch'],
       explanationFa: 'جمع → don’t + فعلِ ساده.',
+      explanationEn: "Plural → don’t + base verb.",
     },
     {
       prompt: 'What time ___ the film start?',
       options: ['does', 'do', 'is', 'will'],
       explanationFa: 'سؤالِ Wh دربارهٔ برنامهٔ ثابت → does.',
+      explanationEn: "Wh- question about a fixed schedule → does.",
     },
     {
       prompt: 'Does Maryam read before bed? — Yes, she ___.',
       options: ['does', 'do', 'is', 'reads'],
       explanationFa: 'جوابِ کوتاه: Yes, she does.',
+      explanationEn: "Short answer: Yes, she does.",
     },
     {
       prompt: 'He usually ___ tea, but today he is drinking coffee.',
       options: ['drinks', 'drink', 'is drinking', 'drank'],
       explanationFa: 'عادت → حالِ ساده؛ «امروز» استثناست.',
+      explanationEn: "Habit → present simple; “today” is the exception.",
     },
     {
       prompt:
         'Our new apartment is awful. The heater doesn’t work, the sink leaks, and the refrigerator ___ a loud noise every time it comes on.',
       options: ['makes', 'will make', 'has made', 'made'],
       explanationFa: 'اتفاقِ تکراری (هر بار که روشن می‌شود) → حالِ ساده با s.',
+      explanationEn: "A repeated event (every time it turns on) → present simple with -s.",
     },
     {
       prompt:
         'According to recent advertisements, the new program ___ a dictionary and a spell checker.',
       options: ['includes', 'include', 'is including', 'including'],
       explanationFa: 'ویژگیِ ثابتِ محصول → حالِ ساده؛ سوم‌شخص s می‌گیرد.',
+      explanationEn: "A fixed feature of the product → present simple; third person adds -s.",
     },
     {
       prompt: 'Mr. Lee often ___ his car to work in the morning.',
       options: ['drives', 'drive', 'is driving', 'driving'],
       explanationFa: 'قیدِ تکرارِ often + سوم‌شخص → drives.',
+      explanationEn: "Frequency adverb often + third person → drives.",
     },
     {
       prompt: '“Do they ever go on a picnic at the weekends?” “No, they ___ go on a picnic.”',
       options: ['hardly ever', 'sometimes', 'usually', 'always'],
       explanationFa: 'جوابِ منفی: hardly ever یعنی تقریباً هیچ‌وقت.',
+      explanationEn: "Negative answer: hardly ever means almost never.",
     },
     {
       prompt: '“Do you clean up your room every day?” “No. My mom says my room is ___ untidy.”',
       options: ['always', 'hardly', 'seldom', 'never'],
       explanationFa: 'هر روز تمیز نمی‌کند → اتاق همیشه نامرتب است: always.',
+      explanationEn: "Doesn’t clean it daily → the room is always untidy: always.",
     },
     {
       prompt: 'My little brother always ___ me when I study my lessons.',
       options: ['bothers', 'bothering', 'bothered', 'bother'],
       explanationFa: 'قیدِ تکرار قبل از فعلِ اصلی، و فعل s می‌گیرد: always bothers.',
+      explanationEn: "Frequency adverb before the main verb, and the verb takes -s: always bothers.",
     },
     {
       prompt: '“Does she ever talk on the phone?” “Yes, ___.”',
       options: ['she usually does', 'she does usually', 'usually she does', 'does she usually'],
       explanationFa: 'در جوابِ کوتاه، قیدِ تکرار قبل از does می‌آید: she usually does.',
+      explanationEn: "In a short answer the frequency adverb comes before does: she usually does.",
     },
     {
       prompt: 'My brother is very lazy. He ___ helps our parents.',
       options: ['never', 'ever', 'often', 'always'],
       explanationFa: 'تنبل است → هیچ‌وقت کمک نمی‌کند: never. (ever در جملهٔ مثبت به‌کار نمی‌رود.)',
+      explanationEn: "He’s lazy → he never helps: never. (ever isn’t used in positive statements.)",
     },
     {
       prompt: 'Does she ever ___ her mom around the house?',
       options: ['help', 'helps', 'helping', 'helped'],
       explanationFa: 'بعد از Does فعلِ ساده می‌آید: help.',
+      explanationEn: "After Does, use the base verb: help.",
     },
     {
       prompt: 'Tom is a vegetarian, so he ___ meat.',
       options: ['doesn’t eat', 'don’t eat', 'doesn’t eats', 'isn’t eat'],
       explanationFa: 'گیاه‌خوار است → doesn’t + فعلِ ساده.',
+      explanationEn: "He’s a vegetarian → doesn’t + base verb.",
     },
   ]),
 };
@@ -677,6 +727,7 @@ async function main() {
         answer: e.answer,
         data: e.data ? (e.data as Prisma.InputJsonValue) : Prisma.DbNull,
         explanationFa: e.explanationFa,
+        explanationEn: e.explanationEn,
       })),
     });
 

@@ -513,12 +513,15 @@ export function LessonRunner({
                   </span>
                 </div>
               ) : (
-                <div className="fb-correct-line">
-                  Correct:{' '}
-                  <bdi>
-                    <b>{correctText}</b>
-                  </bdi>
-                </div>
+                <>
+                  <div className="fb-correct-line">
+                    Correct:{' '}
+                    <bdi>
+                      <b>{correctText}</b>
+                    </bdi>
+                  </div>
+                  {q.explanationEn ? <div className="fb-explain">{q.explanationEn}</div> : null}
+                </>
               )}
             </div>
             <div className="fb-action">

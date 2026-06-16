@@ -35,6 +35,7 @@ export default async function LessonPage({ params }: { params: Promise<{ id: str
       instructionFa: e.instructionFa,
       prompt: e.prompt,
       explanationFa: e.explanationFa,
+      explanationEn: e.explanationEn,
     };
     if (e.type === 'MCQ' && e.correctIndex !== null) {
       pool.push({ type: 'MCQ', ...base, options: e.options, correctIndex: e.correctIndex });

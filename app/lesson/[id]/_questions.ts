@@ -13,6 +13,7 @@ export type Question =
       options: string[];
       correctIndex: number;
       explanationFa: string;
+      explanationEn: string;
     }
   | {
       type: 'FILL_BLANK';
@@ -22,6 +23,7 @@ export type Question =
       answer: string;
       accept: string[];
       explanationFa: string;
+      explanationEn: string;
     }
   | {
       type: 'WORD_BANK' | 'TRANSLATE';
@@ -31,6 +33,7 @@ export type Question =
       options: string[];
       answer: string;
       explanationFa: string;
+      explanationEn: string;
     };
 
 /** Tile count a question needs a shuffled display order for (0 = typed answer). */

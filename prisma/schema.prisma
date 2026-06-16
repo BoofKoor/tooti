@@ -150,7 +150,8 @@ model Exercise {
   options       String[] // MCQ choices / word-bank tokens
   correctIndex  Int? // MCQ
   answer        String? // fill-blank / translate canonical answer (Phase 5)
-  explanationFa String // shown on right/wrong feedback
+  explanationFa String // legacy Persian tip (kept; not shown in the English-only runner)
+  explanationEn String  @default("") // English grammar tip shown on wrong-answer feedback
   data          Json? // reserved for richer Phase 5 exercise types
   createdAt     DateTime     @default(now())
 
