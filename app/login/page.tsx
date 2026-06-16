@@ -1,14 +1,14 @@
 import Link from 'next/link';
 import { EnvelopeSimple, GoogleLogo, SignOut } from '@phosphor-icons/react/dist/ssr';
 import { auth, signIn, signOut } from '@/lib/auth';
-import { Button, Card, Mascot, Text } from '@/components/ui';
+import { Button, Mascot } from '@/components/ui';
 
 /**
- * Sign-in / sign-out — public (outside the (app) group). Both providers:
- * Google OAuth + email magic-link (in dev the link is logged to the server
- * console). Login is a sanctioned Persian island (handoff §2), so a short
- * Persian welcome line sits beside the English action labels. Composed from the
- * UI primitives in the welcome-screen style; tokens only, logical CSS.
+ * Sign-in / sign-out — public (outside the (app) group), styled to match the
+ * Welcome hero: teal-glow background, bold brand header, and an elevated auth
+ * panel. Both providers: Google OAuth + email magic-link (in dev the link is
+ * logged to the server console). Login is a sanctioned Persian island
+ * (handoff §2) — a short Persian welcome sits under the English header.
  */
 export default async function LoginPage() {
   const session = await auth();
@@ -30,39 +30,35 @@ export default async function LoginPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-app flex-col items-center justify-center gap-8 px-6 py-12">
-      {/* Brand header */}
-      <div className="flex flex-col items-center gap-4 text-center">
-        <Mascot pose={session?.user ? 'celebrate' : 'encourage'} size={112} />
-        <div className="flex flex-col items-center gap-1">
-          <Text variant="display" as="h1">
-            Tooti
-          </Text>
-          <Text variant="body" fa>
-            خوش آمدی
-          </Text>
+    <main className="scr-auth" dir="ltr">
+      <div className="auth-head">
+        <div className="auth-mascot">
+          <Mascot pose={session?.user ? 'celebrate' : 'encourage'} size={104} />
         </div>
+        <h1 className="auth-title">Welcome to Tooti</h1>
+        <p className="auth-sub">
+          {session?.user ? "You're signed in." : 'Sign in to start learning.'}
+        </p>
+        <p className="auth-fa fa">خوش آمدی</p>
       </div>
 
       {session?.user ? (
-        <Card className="flex w-full max-w-xs flex-col items-center gap-5 text-center" padding="lg">
-          <Text variant="body">
-            Signed in as <span className="font-extrabold text-text-1">{session.user.email}</span>
-          </Text>
-          <div className="flex w-full flex-col gap-3">
-            <Link href="/learn" className="btn btn--primary btn--md w-full no-underline">
-              <span className="btn__label">Go to app</span>
-            </Link>
-            <form action={doSignOut} className="w-full">
-              <Button type="submit" variant="secondary" className="w-full">
-                <SignOut weight="bold" />
-                Sign out
-              </Button>
-            </form>
-          </div>
-        </Card>
+        <div className="auth-card">
+          <p className="auth-signed">
+            Signed in as <span>{session.user.email}</span>
+          </p>
+          <Link href="/learn" className="btn btn--primary btn--md no-underline">
+            <span className="btn__label">Go to app</span>
+          </Link>
+          <form action={doSignOut}>
+            <Button type="submit" variant="secondary" className="w-full">
+              <SignOut weight="bold" />
+              Sign out
+            </Button>
+          </form>
+        </div>
       ) : (
-        <Card className="flex w-full max-w-xs flex-col gap-5" padding="lg">
+        <div className="auth-card">
           <form action={googleSignIn}>
             <Button type="submit" variant="secondary" className="w-full">
               <GoogleLogo weight="bold" />
@@ -70,15 +66,13 @@ export default async function LoginPage() {
             </Button>
           </form>
 
-          <div className="flex items-center gap-3">
-            <span className="flex-1 border-t border-border" aria-hidden="true" />
-            <Text variant="caption" className="text-text-3">
-              or
-            </Text>
-            <span className="flex-1 border-t border-border" aria-hidden="true" />
+          <div className="auth-divider">
+            <span aria-hidden="true" />
+            or
+            <span aria-hidden="true" />
           </div>
 
-          <form action={emailSignIn} className="flex flex-col gap-3">
+          <form action={emailSignIn} className="auth-email-form">
             <label htmlFor="email" className="sr-only">
               Email address
             </label>
@@ -96,12 +90,10 @@ export default async function LoginPage() {
               Email me a magic link
             </Button>
           </form>
-        </Card>
+        </div>
       )}
 
-      <Text variant="caption" className="max-w-xs text-center text-text-3">
-        Tooti keeps your progress synced across devices.
-      </Text>
+      <p className="auth-foot">Tooti keeps your progress synced across all your devices.</p>
     </main>
   );
 }

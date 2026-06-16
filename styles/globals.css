@@ -3984,6 +3984,109 @@
   }
 }
 
+/* ─── Sign-in / Login — brand entry, cohesive with the Welcome hero. ─── */
+@layer components {
+  .scr-auth {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-block-size: 100dvh;
+    padding: var(--space-12) var(--space-6) calc(env(safe-area-inset-bottom) + var(--space-8));
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(92% 42% at 50% 4%, var(--color-parrot-tint), transparent 62%),
+      var(--color-bg);
+  }
+  .auth-head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-2);
+  }
+  .auth-mascot {
+    margin-block-end: var(--space-2);
+    filter: drop-shadow(0 12px 22px color-mix(in srgb, var(--color-primary-ink) 22%, transparent));
+  }
+  .auth-title {
+    font-family: var(--font-en);
+    font-weight: 900;
+    font-size: 30px;
+    letter-spacing: -0.02em;
+    color: var(--color-text-1);
+    margin: 0;
+  }
+  .auth-sub {
+    font-size: 14px;
+    color: var(--color-text-2);
+    max-inline-size: 30ch;
+    line-height: 1.5;
+    margin: 0;
+  }
+  .auth-fa {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-primary-ink);
+    margin: var(--space-1) 0 0;
+  }
+  .auth-card {
+    inline-size: 100%;
+    max-inline-size: 360px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-3);
+    margin-block-start: var(--space-8);
+  }
+  .auth-card .btn {
+    inline-size: 100%;
+  }
+  .auth-signed {
+    font-family: var(--font-en);
+    font-size: 14px;
+    color: var(--color-text-2);
+    text-align: center;
+    margin: 0;
+  }
+  .auth-signed span {
+    font-weight: 800;
+    color: var(--color-text-1);
+  }
+  .auth-divider {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--color-text-3);
+    font-family: var(--font-en);
+    font-size: 12px;
+    font-weight: 800;
+  }
+  .auth-divider span {
+    flex: 1;
+    block-size: 1px;
+    background: var(--color-border);
+  }
+  .auth-email-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .auth-foot {
+    font-size: 12px;
+    color: var(--color-text-3);
+    text-align: center;
+    max-inline-size: 34ch;
+    line-height: 1.5;
+    margin-block-start: var(--space-5);
+  }
+}
+
 /* ─── Batch 2b — Edit-profile sheet (ported from design/styleguide.html
    .prof-sheet; Name field only this batch). Scrim/sheet sit above the floating
    tab bar (z-index:30): scrim 40, sheet 41. ─── */
