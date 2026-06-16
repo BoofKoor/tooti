@@ -2,14 +2,14 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { BookOpenText, Flame, Microphone } from '@phosphor-icons/react/dist/ssr';
 import { Button, Mascot } from '@/components/ui';
 
 /*
- * Welcome / entry — ported faithfully from design/styleguide.html (.scr-welcome,
- * English version). Centered celebrate-mascot hero with the "Hi, I'm Tooti!"
- * greeting + sub-line, and a full-width "Let's go!" CTA with a "Log in" link
- * beneath. English-only (handoff §2): the styleguide's UI-language picker is
- * intentionally omitted. Both CTAs route to /login (Auth.js magic-link + Google).
+ * Welcome / entry — the first impression. A brand hero (celebrate mascot on a
+ * teal glow) with a benefit-led headline, sub-line and three pillar highlights
+ * (lessons · speaking · streak), over a primary "Get started" CTA + Log in.
+ * English-only (handoff §2). Both CTAs route to /login (magic-link + Google).
  */
 export default function WelcomePage() {
   const router = useRouter();
@@ -20,15 +20,39 @@ export default function WelcomePage() {
         <div className="welcome-mascot">
           <Mascot pose="celebrate" />
         </div>
-        <h2 className="en">Hi, I&apos;m Tooti!</h2>
+        <h1 className="welcome-title">
+          Learn English
+          <br />
+          with <span className="accent">Tooti</span>
+        </h1>
         <p className="welcome-sub">
-          Your buddy for learning English — a tiny step a day is all it takes.
+          Bite-sized lessons, real conversations, and a streak that keeps you going.
         </p>
+        <ul className="welcome-features">
+          <li>
+            <span className="ic">
+              <BookOpenText weight="fill" />
+            </span>
+            Bite-sized lessons
+          </li>
+          <li>
+            <span className="ic">
+              <Microphone weight="fill" />
+            </span>
+            Speak &amp; listen
+          </li>
+          <li>
+            <span className="ic">
+              <Flame weight="fill" />
+            </span>
+            Build a daily streak
+          </li>
+        </ul>
       </div>
 
       <div className="welcome-actions">
-        <Button variant="confirm" size="lg" onClick={() => router.push('/login')}>
-          Let&apos;s go!
+        <Button variant="primary" size="lg" onClick={() => router.push('/login')}>
+          Get started
         </Button>
         <div className="alt-link">
           Have an account? <Link href="/login">Log in</Link>
