@@ -1651,14 +1651,56 @@
     justify-content: space-between;
     align-items: center;
     gap: var(--space-3);
-    padding: 12px 16px;
-    background: color-mix(in srgb, var(--color-surface) 85%, transparent);
-    -webkit-backdrop-filter: saturate(160%) blur(12px);
-    backdrop-filter: saturate(160%) blur(12px);
-    border-bottom: 1px solid var(--color-border);
-    position: sticky;
-    top: 0;
-    z-index: 4;
+    padding: 16px 18px 18px;
+    background:
+      radial-gradient(130% 130% at 88% -25%, rgba(255, 255, 255, 0.2), transparent 58%),
+      linear-gradient(135deg, var(--color-primary), var(--color-primary-ink));
+    color: var(--color-text-inverse);
+    position: relative;
+    z-index: 5;
+    flex-shrink: 0;
+    box-shadow: 0 6px 18px -8px color-mix(in srgb, var(--color-primary-ink) 70%, transparent);
+  }
+  .scr-path .path-unit {
+    min-inline-size: 0;
+  }
+  .scr-path .path-unit-title {
+    font-family: var(--font-en);
+    font-weight: 900;
+    font-size: 22px;
+    line-height: 1.05;
+    color: var(--color-text-inverse);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .scr-path .path-unit-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .scr-path .path-unit-bar {
+    width: 92px;
+    height: 7px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.3);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .scr-path .path-unit-bar .fill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--color-text-inverse);
+  }
+  .scr-path .path-unit-count {
+    font-family: var(--font-en);
+    font-weight: 800;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.92);
+    white-space: nowrap;
   }
   .scr-path .path-topbar .unit-pill {
     display: inline-flex;
@@ -1693,8 +1735,10 @@
   }
   .scr-path .path-topbar .stats {
     display: inline-flex;
+    flex-direction: column;
     gap: 6px;
-    align-items: center;
+    align-items: flex-end;
+    flex-shrink: 0;
   }
   .scr-path .path-topbar .badge.badge-sm {
     padding: 5px 10px;

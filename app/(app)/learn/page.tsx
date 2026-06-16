@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import type { LessonKind } from '@prisma/client';
-import { BookOpen, Flame, Lightning } from '@phosphor-icons/react/dist/ssr';
+import { Flame, Lightning } from '@phosphor-icons/react/dist/ssr';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { Badge } from '@/components/ui';
@@ -293,20 +293,31 @@ export default async function LearnPage() {
   const lastActiveDay = progress?.lastActiveDate ? localDay(progress.lastActiveDate, tz) : null;
   const streak = effectiveStreak(progress?.streak ?? 0, lastActiveDay, today);
   const totalXp = progress?.xp ?? 0;
-  const activeUnitTitle = units.find((u) => !u.comingSoon)?.title ?? 'Tooti';
+  const activeUnit = units.find((u) => !u.comingSoon);
+  const activeUnitTitle = activeUnit?.title ?? 'Tooti';
+  const unitTotal = activeUnit?.lessons.length ?? 0;
+  const unitDone = activeUnit?.lessons.filter((l) => l.completed).length ?? 0;
+  const unitPct = unitTotal ? Math.round((unitDone / unitTotal) * 100) : 0;
 
   return (
     <div className="scr-path en flex flex-1 flex-col" dir="ltr">
-      <div className="path-topbar en">
-        <span className="unit-pill">
-          <BookOpen weight="bold" />
-          {activeUnitTitle}
-        </span>
+      <header className="path-topbar en">
+        <div className="path-unit">
+          <h1 className="path-unit-title">{activeUnitTitle}</h1>
+          <div className="path-unit-progress">
+            <span className="path-unit-bar">
+              <span className="fill" style={{ width: `${unitPct}%` }} />
+            </span>
+            <span className="path-unit-count">
+              {unitDone} of {unitTotal} lessons
+            </span>
+          </div>
+        </div>
         <div className="stats">
           <Badge variant="streak" size="sm" icon={<Flame weight="fill" />} value={streak} />
           <Badge variant="xp" size="sm" icon={<Lightning weight="fill" />} value={totalXp} />
         </div>
-      </div>
+      </header>
 
       <div className="path-canvas">
         <div className="path-bg-decor" aria-hidden="true">
