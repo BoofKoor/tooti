@@ -2159,9 +2159,9 @@
     width: 0%;
     background: linear-gradient(
       180deg,
-      #5bba6f,
-      var(--color-correct) 60%,
-      var(--color-correct-ink)
+      color-mix(in srgb, var(--color-primary) 80%, white),
+      var(--color-primary) 58%,
+      var(--color-primary-ink)
     );
     border-radius: var(--radius-pill);
     box-shadow:
@@ -2228,11 +2228,12 @@
     margin-bottom: var(--space-2);
   }
   .ex-prompt {
-    font-family: var(--font-body-fa);
-    font-weight: 500;
-    font-size: 16px;
-    color: var(--color-text-2);
-    margin-bottom: var(--space-3);
+    font-family: var(--font-en);
+    font-weight: 700;
+    font-size: 19px;
+    color: var(--color-text-1);
+    line-height: 1.35;
+    margin-bottom: var(--space-4);
   }
   .mcq-grid {
     display: grid;
