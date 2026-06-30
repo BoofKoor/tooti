@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SpeakerHigh, X } from '@phosphor-icons/react/dist/ssr';
 import { Button, ConfirmDialog, Mascot, Text } from '@/components/ui';
 import { shuffledOrder } from '@/lib/gamification';
-import type { StoryStep } from '@/lib/lesson-content';
-import { useSpeech } from '@/lib/use-speech';
+import type { StoryStep, StoryTone } from '@/lib/lesson-content';
+import { useSpeech, type SpeakOptions } from '@/lib/use-speech';
 import { cn } from '@/lib/utils';
 import { StoryCompleteButton } from './_complete-button';
 
@@ -26,7 +26,47 @@ import { StoryCompleteButton } from './_complete-button';
 
 type QState = { order: number[]; selected: number | null; checked: boolean };
 type LineStep = Extract<StoryStep, { kind: 'line' }>;
+type ImageStep = Extract<StoryStep, { kind: 'image' }>;
 type QuestionStep = Extract<StoryStep, { kind: 'q' }>;
+
+/** `**…**` spans mark grammar highlights inside a spoken line. */
+function highlightSpans(text: string) {
+  return text.split(/\*\*(.+?)\*\*/g).map((part, i) =>
+    i % 2 === 1 ? (
+      <mark key={i} className="hl-grammar">
+        {part}
+      </mark>
+    ) : (
+      <Fragment key={i}>{part}</Fragment>
+    ),
+  );
+}
+
+/** Drop the highlight markers before a line is spoken aloud. */
+const stripMarks = (text: string) => text.replace(/\*\*/g, '');
+
+/** Two related TTS voices + a slower learner rate: the man (tone a) reads low,
+ *  the boy (tone b) reads high on a second voice, narration stays neutral. */
+function voiceForTone(tone: StoryTone): SpeakOptions {
+  if (tone === 'a') return { rate: 0.8, pitch: 0.8 };
+  if (tone === 'b') return { rate: 0.84, pitch: 1.35, alt: true };
+  return { rate: 0.8 };
+}
+
+function StoryImage({ step }: { step: ImageStep }) {
+  return (
+    <figure className="story-illus">
+      {/* A static scene photo (not the app's optimized art pipeline). */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={step.src} alt={step.alt} loading="lazy" />
+      {step.fa ? (
+        <figcaption className="fa" dir="rtl">
+          {step.fa}
+        </figcaption>
+      ) : null}
+    </figure>
+  );
+}
 
 function LineBubble({
   step,
@@ -41,7 +81,7 @@ function LineBubble({
     <div className={cn('story-line', `tone-${step.tone}`)}>
       {step.speaker ? <span className="story-speaker">{step.speaker}</span> : null}
       <div className="story-bubble">
-        <p className="story-en en">{step.en}</p>
+        <p className="story-en en">{highlightSpans(step.en)}</p>
         {step.fa ? (
           <p className="story-fa fa" dir="rtl">
             {step.fa}
@@ -147,7 +187,7 @@ export function StoryPlayer({
     const step = steps[cursor];
     if (step?.kind === 'line' && speechStatus === 'ready' && spokenRef.current !== cursor) {
       spokenRef.current = cursor;
-      speak(step.en);
+      speak(stripMarks(step.en), voiceForTone(step.tone));
     }
   }, [cursor, steps, speechStatus, speak]);
 
@@ -231,25 +271,29 @@ export function StoryPlayer({
             </Text>
           </header>
 
-          {steps
-            .slice(0, cursor + 1)
-            .map((step, i) =>
-              step.kind === 'line' ? (
+          {steps.slice(0, cursor + 1).map((step, i) => {
+            if (step.kind === 'line') {
+              return (
                 <LineBubble
                   key={i}
                   step={step}
                   canSpeak={speechStatus === 'ready'}
-                  onSpeak={() => speak(step.en)}
+                  onSpeak={() => speak(stripMarks(step.en), voiceForTone(step.tone))}
                 />
-              ) : (
-                <QuestionCard
-                  key={i}
-                  step={step}
-                  cs={answers[i] ?? null}
-                  onSelect={(display) => selectOption(i, display)}
-                />
-              ),
-            )}
+              );
+            }
+            if (step.kind === 'image') {
+              return <StoryImage key={i} step={step} />;
+            }
+            return (
+              <QuestionCard
+                key={i}
+                step={step}
+                cs={answers[i] ?? null}
+                onSelect={(display) => selectOption(i, display)}
+              />
+            );
+          })}
 
           {isLastStep && !needsCheck ? (
             <div className="story-end">
