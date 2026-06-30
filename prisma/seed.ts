@@ -275,25 +275,25 @@ const storySection: SectionSeed = {
           kind: 'line',
           tone: 'a',
           speaker: 'Tom',
-          en: '"Hello! My name **is** Tom," he **says**. "What **is** your name?"',
+          en: '"Hello! My name **is** Tom. What **is** your name?"',
         },
         {
           kind: 'line',
           tone: 'b',
           speaker: 'Ben',
-          en: '"My name **is** Ben," the boy **answers**.',
+          en: '"My name **is** Ben."',
         },
         {
           kind: 'line',
           tone: 'a',
           speaker: 'Tom',
-          en: '"**Do** you **play** football?" Tom **asks**.',
+          en: '"**Do** you **play** football?"',
         },
         {
           kind: 'line',
           tone: 'b',
           speaker: 'Ben',
-          en: '"Yes, I **do**," Ben **says**. "I **play** football twice a week."',
+          en: '"Yes, I **do**. I **play** football twice a week."',
         },
         {
           kind: 'line',
@@ -311,7 +311,7 @@ const storySection: SectionSeed = {
           kind: 'line',
           tone: 'a',
           speaker: 'Tom',
-          en: 'Tom **smiles**. "You **are** in the right place. Football practice **starts** at 4:00 p.m. every day."',
+          en: '"You **are** in the right place. Football practice **starts** at 4:00 p.m. every day."',
         },
         // Closing narration — not part of the dialogue. Stage 1 ends here.
         {

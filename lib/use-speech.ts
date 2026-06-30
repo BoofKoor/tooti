@@ -28,12 +28,14 @@ function pickEnglishVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice 
   );
 }
 
-// Voice-name heuristics — the Web Speech API exposes no gender, so we match the
-// common platform voice names (Windows/macOS/iOS/Android/Chrome).
+// Voice-name heuristics — the Web Speech API exposes no gender, so match the
+// common platform voice names (Windows / macOS / iOS / Android / Chrome). Kept
+// broad so the man actually lands on a male voice instead of a pitched-down
+// female one ("a deep woman").
 const MALE_RE =
-  /\b(male|man|david|mark|guy|james|daniel|alex|fred|george|aaron|arthur|oliver|thomas|rishi|reed|eddy)\b/i;
+  /\b(male|man|boy|david|mark|guy|christopher|roger|eric|steffan|james|john|aaron|arthur|albert|daniel|fred|gordon|lee|oliver|reed|rishi|rocko|ralph|junior|alex|bruce|thomas|george)\b/i;
 const FEMALE_RE =
-  /\b(female|woman|zira|samantha|karen|moira|tessa|victoria|susan|hazel|fiona|serena|allison|ava|joanna|salli|kendra|nicky|sandy)\b/i;
+  /\b(female|woman|girl|samantha|karen|moira|tessa|victoria|susan|hazel|fiona|serena|allison|ava|joanna|salli|kendra|nicky|sandy|martha|catherine|zoe|zira|linda)\b/i;
 
 function pickGenderedVoice(
   voices: SpeechSynthesisVoice[],
@@ -41,6 +43,8 @@ function pickGenderedVoice(
 ): SpeechSynthesisVoice | null {
   const english = voices.filter((v) => v.lang?.toLowerCase().startsWith('en'));
   const re = gender === 'male' ? MALE_RE : FEMALE_RE;
+  // Positive name match only — a null result lets the caller fall back to a
+  // *distinct* voice rather than mislabel a neutral/other-gender one.
   return english.find((v) => re.test(v.name) || re.test(v.voiceURI)) ?? null;
 }
 
@@ -112,9 +116,22 @@ export function useSpeech() {
     };
   }, []);
 
+  const englishVoices = useMemo(
+    () => voices.filter((v) => v.lang?.toLowerCase().startsWith('en')),
+    [voices],
+  );
   const primaryVoice = useMemo(() => pickEnglishVoice(voices), [voices]);
   const maleVoice = useMemo(() => pickGenderedVoice(voices, 'male'), [voices]);
   const femaleVoice = useMemo(() => pickGenderedVoice(voices, 'female'), [voices]);
+  // The boy reads on a light/female voice we pitch up (locked — it sounds right).
+  const boyVoice = useMemo(() => femaleVoice ?? primaryVoice, [femaleVoice, primaryVoice]);
+  // The man prefers a real male voice; if the device has none, take ANY voice
+  // that isn't the boy's so the two still read as different people (rather than
+  // the same voice pitched down into "a deep woman").
+  const manVoice = useMemo(
+    () => maleVoice ?? englishVoices.find((v) => v.voiceURI !== boyVoice?.voiceURI) ?? primaryVoice,
+    [maleVoice, englishVoices, boyVoice, primaryVoice],
+  );
 
   const speak = useCallback(
     (text: string, opts?: SpeakOptions) => {
@@ -122,14 +139,8 @@ export function useSpeech() {
       const synth = window.speechSynthesis;
       synth.cancel(); // restart cleanly on every tap (and de-dupe React strict re-fires)
       const utterance = new SpeechSynthesisUtterance(text);
-      // The man gets a deeper voice, the boy a lighter voice we pitch up; both
-      // fall back to the primary voice (pitch still keeps the two speakers apart).
       const v =
-        opts?.character === 'man'
-          ? (maleVoice ?? primaryVoice)
-          : opts?.character === 'boy'
-            ? (femaleVoice ?? maleVoice ?? primaryVoice)
-            : primaryVoice;
+        opts?.character === 'man' ? manVoice : opts?.character === 'boy' ? boyVoice : primaryVoice;
       utterance.lang = v?.lang ?? 'en-US';
       if (v) utterance.voice = v;
       utterance.rate = opts?.rate ?? (opts?.slow ? SLOW_RATE : NORMAL_RATE);
@@ -139,7 +150,7 @@ export function useSpeech() {
       utterance.onerror = () => setSpeaking(false);
       synth.speak(utterance);
     },
-    [primaryVoice, maleVoice, femaleVoice],
+    [primaryVoice, manVoice, boyVoice],
   );
 
   // Stop any in-flight speech — callers invoke this when leaving an item so audio
