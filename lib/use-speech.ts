@@ -87,5 +87,13 @@ export function useSpeech() {
     [voice],
   );
 
-  return { status, speaking, speak };
+  // Stop any in-flight speech — callers invoke this when leaving an item so audio
+  // doesn't bleed into the next question (e.g. skipping a LISTEN mid-sentence).
+  const cancel = useCallback(() => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    setSpeaking(false);
+  }, []);
+
+  return { status, speaking, speak, cancel };
 }

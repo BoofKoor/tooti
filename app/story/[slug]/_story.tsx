@@ -128,6 +128,18 @@ export function StoryPlayer({
 
   const { status: speechStatus, speak } = useSpeech();
 
+  // L4: the authoring contract says step 0 is a line. If a deck violates it, the
+  // step-0 question's state is never seeded (advance() only seeds the NEXT step),
+  // so the check is unanswerable and the story dead-locks. Seed it on the client
+  // (not during render — a server/client shuffle mismatch would break hydration).
+  useEffect(() => {
+    setAnswers((m) => {
+      const first = steps[0];
+      if (first?.kind !== 'q' || m[0]) return m;
+      return { 0: { order: shuffledOrder(first.options.length), selected: null, checked: false } };
+    });
+  }, [steps]);
+
   // Auto-speak each line as it's revealed; the ref guards re-speaks on re-render
   // (and on the late voices-resolve that flips status to ready).
   const spokenRef = useRef<number | null>(null);
