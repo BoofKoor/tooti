@@ -48,6 +48,10 @@ export type StoryStep =
       speaker?: string; // shown above the bubble; omitted for narration
       en: string; // spoken aloud; **double-asterisk** spans mark grammar highlights
       fa?: string; // Persian gloss (sanctioned island)
+      // Pre-recorded narration (a /public path). When set, the player plays this
+      // clip instead of browser TTS — used for voices the device can't produce
+      // (e.g. a real male voice). Falls back to TTS when absent.
+      audio?: string;
     }
   | {
       kind: 'image';

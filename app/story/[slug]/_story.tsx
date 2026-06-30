@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SpeakerHigh, X } from '@phosphor-icons/react/dist/ssr';
 import { Button, ConfirmDialog, Mascot, Text } from '@/components/ui';
@@ -170,7 +170,33 @@ export function StoryPlayer({
   const [answers, setAnswers] = useState<Record<number, QState>>({});
   const [confirmExit, setConfirmExit] = useState(false);
 
-  const { status: speechStatus, speak } = useSpeech();
+  const { status: speechStatus, speak, cancel: cancelSpeech } = useSpeech();
+
+  // A line is "played" either by its pre-recorded clip (step.audio — e.g. Tom's
+  // real male voice) or by browser TTS. One <audio> at a time; stop the old one
+  // (and any TTS) before starting the next so nothing overlaps.
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const playLine = useCallback(
+    (step: LineStep) => {
+      cancelSpeech();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      if (step.audio) {
+        const a = new Audio(step.audio);
+        audioRef.current = a;
+        void a.play().catch(() => {
+          /* autoplay blocked until a gesture — the replay button still works */
+        });
+      } else {
+        speak(stripMarks(step.en), voiceForTone(step.tone));
+      }
+    },
+    [cancelSpeech, speak],
+  );
+  // Stop audio if the player unmounts mid-clip (close / navigate away).
+  useEffect(() => () => audioRef.current?.pause(), []);
 
   // L4: the authoring contract says step 0 is a line. If a deck violates it, the
   // step-0 question's state is never seeded (advance() only seeds the NEXT step),
@@ -189,11 +215,13 @@ export function StoryPlayer({
   const spokenRef = useRef<number | null>(null);
   useEffect(() => {
     const step = steps[cursor];
-    if (step?.kind === 'line' && speechStatus === 'ready' && spokenRef.current !== cursor) {
+    if (step?.kind !== 'line' || spokenRef.current === cursor) return;
+    // A recorded line plays right away; a TTS line waits until a voice is ready.
+    if (step.audio || speechStatus === 'ready') {
       spokenRef.current = cursor;
-      speak(stripMarks(step.en), voiceForTone(step.tone));
+      playLine(step);
     }
-  }, [cursor, steps, speechStatus, speak]);
+  }, [cursor, steps, speechStatus, playLine]);
 
   const top = steps[cursor];
   const topQuestion: QuestionStep | null = top && top.kind === 'q' ? top : null;
@@ -283,8 +311,8 @@ export function StoryPlayer({
                 <LineBubble
                   key={i}
                   step={step}
-                  canSpeak={speechStatus === 'ready'}
-                  onSpeak={() => speak(stripMarks(step.en), voiceForTone(step.tone))}
+                  canSpeak={!!step.audio || speechStatus === 'ready'}
+                  onSpeak={() => playLine(step)}
                 />
               );
             }

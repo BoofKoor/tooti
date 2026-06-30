@@ -276,6 +276,7 @@ const storySection: SectionSeed = {
           tone: 'a',
           speaker: 'Tom',
           en: '"Hello! My name **is** Tom. What **is** your name?"',
+          audio: '/stories/sports-club/tom-1.mp3',
         },
         {
           kind: 'line',
@@ -288,6 +289,7 @@ const storySection: SectionSeed = {
           tone: 'a',
           speaker: 'Tom',
           en: '"**Do** you **play** football?"',
+          audio: '/stories/sports-club/tom-2.mp3',
         },
         {
           kind: 'line',
@@ -300,6 +302,7 @@ const storySection: SectionSeed = {
           tone: 'a',
           speaker: 'Tom',
           en: '"Great! **Do** you **like** sports?"',
+          audio: '/stories/sports-club/tom-3.mp3',
         },
         {
           kind: 'line',
@@ -312,6 +315,7 @@ const storySection: SectionSeed = {
           tone: 'a',
           speaker: 'Tom',
           en: '"You **are** in the right place. Football practice **starts** at 4:00 p.m. every day."',
+          audio: '/stories/sports-club/tom-4.mp3',
         },
         // Closing narration — not part of the dialogue. Stage 1 ends here.
         {
