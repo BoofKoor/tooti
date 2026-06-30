@@ -15,6 +15,8 @@ export async function GET() {
     ]);
     return NextResponse.json({ status: 'ok', units, lessons, exercises, medals });
   } catch (e) {
-    return NextResponse.json({ status: 'error', message: String(e) }, { status: 503 });
+    // Log the real cause server-side; never leak DB/connection details to clients.
+    console.error('[health/db] check failed:', e);
+    return NextResponse.json({ status: 'error', message: 'database unavailable' }, { status: 503 });
   }
 }
