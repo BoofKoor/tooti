@@ -4225,6 +4225,133 @@
   }
 }
 
+/* ─── Usage stage — illustrated grammar-usage reference (single scroll) ─── */
+@layer components {
+  .usage-guide {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    max-inline-size: 40rem;
+    margin-inline: auto;
+  }
+  .usage-heading {
+    font-family: var(--font-en);
+    font-weight: 900;
+    font-size: 22px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--color-text-1);
+  }
+  .usage-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  /* One reference card: illustration chip on top, text below. */
+  .usage-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-1);
+  }
+  /* Compact illustration chip — a soft mint band kept light in both themes so
+     the brand-teal flat art always reads clearly. */
+  .usage-illus {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-5);
+    background: linear-gradient(180deg, #eafaf7, #dff5f1);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .usage-illus img {
+    display: block;
+    inline-size: auto;
+    block-size: 96px;
+    max-inline-size: 80%;
+    object-fit: contain;
+  }
+  .usage-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-4);
+  }
+  /* Title — green (the success/correct token), theme-aware. */
+  .usage-title {
+    font-family: var(--font-en);
+    font-weight: 800;
+    font-size: 17px;
+    line-height: 1.25;
+    color: var(--color-correct);
+  }
+  .usage-explain {
+    font-family: var(--font-en);
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--color-text-1);
+  }
+  /* "Examples:" label — gold (the XP token), theme-aware. */
+  .usage-ex-label {
+    margin-top: var(--space-1);
+    font-family: var(--font-en);
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    color: var(--color-xp);
+  }
+  .usage-examples {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .usage-examples li {
+    position: relative;
+    padding-inline-start: var(--space-4);
+    font-family: var(--font-en);
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--color-text-2);
+  }
+  .usage-examples li::before {
+    content: '•';
+    position: absolute;
+    inset-inline-start: 0;
+    color: var(--color-primary);
+    font-weight: 900;
+  }
+  /* "Additional Uses" divider — body text color (black in light, white in dark). */
+  .usage-divider {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-block: var(--space-2);
+  }
+  .usage-divider::before,
+  .usage-divider::after {
+    content: '';
+    flex: 1;
+    block-size: 1px;
+    background: var(--color-border);
+  }
+  .usage-divider span {
+    font-family: var(--font-en);
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    color: var(--color-text-1);
+  }
+}
+
 /* ─── Phase 6 — route fade + lesson-complete confetti ─── */
 @layer components {
   /* Per-navigation fade-up (app/template.tsx re-mounts this on every route). */

@@ -32,6 +32,26 @@ export type SectionContent = {
   // on a single section, so no new SectionKind / migration is needed. The Story
   // player (/story/[slug]) renders it; the Learn-stage reader never sees it.
   story?: StoryContent;
+  // A LESSON whose section carries a `usage` guide renders the scrollable
+  // illustrated reference (UsageGuide) instead of the paged reader.
+  usage?: UsageGuide;
+};
+
+/**
+ * Illustrated grammar-usage reference (e.g. "Simple Present: Usage") — a single
+ * scrollable screen of cards. Each card pairs a themed illustration with a green
+ * title, a one-line explanation, and gold-labelled examples. English-only.
+ */
+export type UsageCard = {
+  image: string; // illustration /public path (e.g. '/illustrations/usage/routine.svg')
+  title: string; // rendered green
+  explanation: string; // one sentence
+  examples: string[]; // bullet examples under a gold "Examples:" label
+  group?: 'additional'; // cards under the "Additional Uses" divider
+};
+export type UsageGuide = {
+  heading: string;
+  cards: UsageCard[];
 };
 
 /**

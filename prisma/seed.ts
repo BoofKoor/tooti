@@ -42,6 +42,12 @@ const lessons = [
     order: 1,
     kind: LessonKind.STORY,
   },
+  {
+    slug: 'present-simple-usage',
+    title: 'Usage',
+    order: 2,
+    kind: LessonKind.LESSON,
+  },
 ];
 
 // ── Learn-stage sections (present-simple-learn) — content shapes are the
@@ -339,12 +345,86 @@ const storySection: SectionSeed = {
   },
 };
 
-// Sections by lesson — the Learn stage's teaching sections and the Story stage's
-// single narrative section. The main loop creates whatever a lesson lists here
-// (practice/test/listening lessons have none).
+// ── Usage stage (present-simple-usage) — Stage 2: a single scrollable screen of
+// illustrated reference cards (no paging, no checks). Each card pairs a themed
+// flat illustration with a green title, a one-line explanation and gold-labelled
+// examples; the last two sit under an "Additional Uses" divider. English-only;
+// rendered by the dedicated UsageGuide view (not the paged reader). ──
+const usageSection: SectionSeed = {
+  order: 1,
+  kind: SectionKind.READING,
+  titleEn: 'Usage',
+  titleFa: '',
+  content: {
+    usage: {
+      heading: 'Simple Present: Usage',
+      cards: [
+        {
+          image: '/illustrations/usage/routine.svg',
+          title: 'Habits and Routines',
+          explanation: 'We use the Simple Present to talk about things we do regularly.',
+          examples: [
+            'Tom usually gets up at 6:00 a.m.',
+            'I brush my teeth every morning.',
+            'She goes to school by bus.',
+          ],
+        },
+        {
+          image: '/illustrations/usage/facts.svg',
+          title: 'Facts and General Truths',
+          explanation: 'We use the Simple Present to talk about facts that are always true.',
+          examples: ['Water boils at 100°C.', 'The sun rises in the east.', 'Birds fly in the sky.'],
+        },
+        {
+          image: '/illustrations/usage/feelings.svg',
+          title: 'States, Feelings, and Opinions',
+          explanation:
+            'We use the Simple Present to talk about feelings, likes, dislikes, thoughts, and opinions.',
+          examples: [
+            'He likes his job because he loves sports.',
+            "I love football, but I don't like basketball.",
+            'They think English is useful.',
+          ],
+        },
+        {
+          image: '/illustrations/usage/schedule.svg',
+          title: 'Schedules and Timetables',
+          explanation: 'We use the Simple Present to talk about fixed schedules and timetables.',
+          examples: [
+            'Football practice starts at 4:00 p.m. every day.',
+            'The train leaves at 8:00 a.m.',
+            'Our class starts at 9:00 a.m.',
+          ],
+        },
+        {
+          image: '/illustrations/usage/commentary.svg',
+          title: 'In narrations or Sports Commentary',
+          explanation: 'We sometimes use the Simple Present in sports commentary.',
+          examples: [
+            'Ben passes the ball, runs past two players, and scores!',
+            'Anna opens the door, walks into the room, and sits down.',
+          ],
+          group: 'additional',
+        },
+        {
+          image: '/illustrations/usage/instructions.svg',
+          title: 'Instructions and Directions',
+          explanation: 'We often use the Simple Present to give instructions.',
+          examples: ['First, you enter your email address.', 'You turn left at the traffic light.'],
+          group: 'additional',
+        },
+      ],
+    },
+  },
+};
+
+// Sections by lesson — the Learn stage's teaching sections, the Story stage's
+// single narrative section and the Usage stage's illustrated reference. The main
+// loop creates whatever a lesson lists here (practice/test/listening have none).
 const sectionsByLesson: Record<string, SectionSeed[]> = {
   'present-simple-learn': learnSections,
   'present-simple-story': [storySection],
+  'present-simple-usage': [usageSection],
 };
 
 type ExerciseSeed = {
@@ -464,6 +544,7 @@ function listenItems(
 const exercisesByLesson: Record<string, ExerciseSeed[]> = {
   'present-simple-learn': [],
   'present-simple-story': [],
+  'present-simple-usage': [],
   'present-simple-listening': listenItems(1, [
     {
       sentence: 'She drinks a glass of milk.',

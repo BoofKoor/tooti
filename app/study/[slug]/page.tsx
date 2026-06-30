@@ -4,6 +4,7 @@ import { shuffledOrder } from '@/lib/gamification';
 import type { SectionContent } from '@/lib/lesson-content';
 import { getLearnPath, getLessonWithExercises } from '@/lib/learn-data';
 import { StudyReader, type ReaderSection } from './_reader';
+import { UsageGuide } from './_usage-guide';
 
 /*
  * Learn-stage page (Phase 5B) — server wrapper for the sectioned reader. Keeps
@@ -26,6 +27,20 @@ export default async function StudyPage({ params }: { params: Promise<{ slug: st
   const path = await getLearnPath(session.user.id);
   const node = path.flatMap((u) => u.lessons).find((l) => l.slug === slug);
   if (!node?.unlocked) redirect('/learn');
+
+  // A Usage guide owns the whole screen (its own scrollable illustrated view),
+  // so it short-circuits the paged reader.
+  const usage = (lesson.sections[0]?.content as SectionContent | undefined)?.usage;
+  if (usage) {
+    return (
+      <UsageGuide
+        slug={slug}
+        unitTitle={lesson.unit.title}
+        completed={node.completed}
+        guide={usage}
+      />
+    );
+  }
 
   // VIDEO sections without a url are dropped here so the client never sees them.
   const sections: ReaderSection[] = lesson.sections
