@@ -41,6 +41,9 @@ export type SectionContent = {
  */
 export type StoryTone = 'a' | 'b' | 'narrator'; // drives the bubble's side + accent
 
+// `page` groups steps into the screens the player tabs through with Continue
+// (e.g. 0 = the reading + image, 1 = the dialogue). Steps without a page are
+// page 0. Each page is shown all at once with a single "Listen" button.
 export type StoryStep =
   | {
       kind: 'line';
@@ -52,6 +55,10 @@ export type StoryStep =
       // clip instead of browser TTS — used for voices the device can't produce
       // (e.g. a real male voice). Falls back to TTS when absent.
       audio?: string;
+      page?: number;
+      // Shown as text but excluded from the page's Listen playback (e.g. the
+      // closing narration that the author wants silent).
+      noAudio?: boolean;
     }
   | {
       kind: 'image';
@@ -59,6 +66,7 @@ export type StoryStep =
       src: string; // /public path, e.g. '/stories/sports-club.png'
       alt: string; // accessible description (English)
       fa?: string; // optional Persian caption
+      page?: number;
     }
   | {
       kind: 'q';
@@ -67,6 +75,7 @@ export type StoryStep =
       options: string[];
       correctIndex: number;
       explanationFa: string;
+      page?: number;
     };
 
 export type StoryContent = {

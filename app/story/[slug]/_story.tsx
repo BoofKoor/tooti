@@ -1,35 +1,31 @@
 'use client';
 
-import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SpeakerHigh, X } from '@phosphor-icons/react/dist/ssr';
-import { Button, ConfirmDialog, Mascot, Text } from '@/components/ui';
-import { shuffledOrder } from '@/lib/gamification';
+import { Button, ConfirmDialog, Text } from '@/components/ui';
 import type { StoryStep, StoryTone } from '@/lib/lesson-content';
 import { useSpeech, type SpeakOptions } from '@/lib/use-speech';
 import { cn } from '@/lib/utils';
 import { StoryCompleteButton } from './_complete-button';
 
 /*
- * Story player (LessonKind.STORY) — a paged, runner-style narrative under the
- * lesson-bar shell. Spoken lines reveal one tap at a time (auto-spoken via
- * browser TTS, with a per-line replay button), and inline comprehension checks
- * gate progression. Checks are hearts-free (a story is never "failed") — exactly
- * like the Learn-stage micro-checks. State is client-side; the final step reuses
- * the Story completion island. Persian appears only in the sanctioned islands
- * (the title gloss, line `fa` subtitles, and the check explanation).
- *
- * Authoring contract: step 0 is always a `line`, so the first paint never has a
- * question (whose option order is shuffled client-side, which would otherwise
- * risk a hydration mismatch).
+ * Story player (LessonKind.STORY) — a paged narrative under the lesson-bar shell.
+ * Content is grouped into PAGES (the `page` field): the learner taps Continue to
+ * move between them, and each page shows all its content at once. Playback is
+ * OPTIONAL via one "Listen" button per page — it plays the page's lines in order
+ * (Tom's pre-recorded male clips + the browser-TTS lines) with a standard pause
+ * between speakers. The closing narration is shown as text but kept silent
+ * (`noAudio`). Persian only appears in sanctioned islands (line `fa` subtitles).
  */
 
-type QState = { order: number[]; selected: number | null; checked: boolean };
 type LineStep = Extract<StoryStep, { kind: 'line' }>;
 type ImageStep = Extract<StoryStep, { kind: 'image' }>;
-type QuestionStep = Extract<StoryStep, { kind: 'q' }>;
+type PlayItem = { audio: string } | { text: string; opts: SpeakOptions };
 
-/** `**…**` spans mark grammar highlights inside a spoken line. */
+const PAUSE_MS = 700; // standard gap between spoken lines so it doesn't feel rushed
+
+/** `**…**` spans mark grammar highlights inside a line. */
 function highlightSpans(text: string) {
   return text.split(/\*\*(.+?)\*\*/g).map((part, i) =>
     i % 2 === 1 ? (
@@ -46,12 +42,10 @@ function highlightSpans(text: string) {
 const stripMarks = (text: string) => text.replace(/\*\*/g, '');
 
 /** A man's voice and a boy's voice, at a slower learner rate: the coach (tone a)
- *  reads on the deeper voice, low pitch; the boy (tone b) reads on a lighter
- *  voice, pitched up; narration stays neutral. */
+ *  reads on the deeper voice, low pitch; the boy (tone b) on a lighter voice,
+ *  pitched up; narration stays neutral. (Tom's lines carry recorded audio and
+ *  bypass TTS entirely; this only shapes the TTS lines.) */
 function voiceForTone(tone: StoryTone): SpeakOptions {
-  // Pitch is gentle now: the man rides a real male voice (≈natural, only a touch
-  // low) instead of a female voice forced down into "a deep woman"; the boy is
-  // locked high on the light voice.
   if (tone === 'a') return { rate: 0.85, pitch: 0.95, character: 'man' };
   if (tone === 'b') return { rate: 0.92, pitch: 1.5, character: 'boy' };
   return { rate: 0.85, character: 'narrator' };
@@ -72,15 +66,7 @@ function StoryImage({ step }: { step: ImageStep }) {
   );
 }
 
-function LineBubble({
-  step,
-  canSpeak,
-  onSpeak,
-}: {
-  step: LineStep;
-  canSpeak: boolean;
-  onSpeak: () => void;
-}) {
+function LineBubble({ step }: { step: LineStep }) {
   return (
     <div className={cn('story-line', `tone-${step.tone}`)}>
       {step.speaker ? <span className="story-speaker">{step.speaker}</span> : null}
@@ -91,59 +77,6 @@ function LineBubble({
             {step.fa}
           </p>
         ) : null}
-        {canSpeak ? (
-          <button type="button" className="story-say" aria-label="Play this line" onClick={onSpeak}>
-            <SpeakerHigh weight="fill" />
-          </button>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
-function questionTileClass(cs: QState | null, correctIndex: number, display: number): string {
-  if (!cs) return '';
-  if (!cs.checked) return display === cs.selected ? 'is-selected' : '';
-  if (cs.order[display] === correctIndex) return 'is-correct';
-  if (display === cs.selected) return 'is-incorrect';
-  return '';
-}
-
-function QuestionCard({
-  step,
-  cs,
-  onSelect,
-}: {
-  step: QuestionStep;
-  cs: QState | null;
-  onSelect: (display: number) => void;
-}) {
-  // Identity order until the player initializes (and shuffles) this step's state.
-  const order = cs?.order ?? step.options.map((_, i) => i);
-  const checked = !!cs?.checked;
-  // The verdict + explanation render in the sticky footer panel (see the player
-  // footer), so the card itself only colours the tiles once answered.
-  return (
-    <div className="story-q">
-      <Text variant="caption" className="uppercase tracking-wider text-text-3">
-        Quick check
-      </Text>
-      <div className="ex-prompt">{step.prompt}</div>
-      <div className="mcq-grid">
-        {order.map((orig, display) => (
-          <button
-            key={display}
-            type="button"
-            className={cn('mcq-tile', questionTileClass(cs, step.correctIndex, display))}
-            disabled={checked}
-            aria-pressed={cs?.selected === display}
-            onClick={() => onSelect(display)}
-          >
-            <span className="mcq-num">{display + 1}</span>
-            <span className="mcq-state-ic" aria-hidden="true" />
-            <span className="mcq-label-en">{step.options[orig]}</span>
-          </button>
-        ))}
       </div>
     </div>
   );
@@ -165,110 +98,90 @@ export function StoryPlayer({
   steps: StoryStep[];
 }) {
   const router = useRouter();
-  const total = Math.max(steps.length, 1);
-  const [cursor, setCursor] = useState(0); // index of the last revealed step
-  const [answers, setAnswers] = useState<Record<number, QState>>({});
+  const { speak, cancel: cancelSpeech } = useSpeech();
+  const [page, setPage] = useState(0);
   const [confirmExit, setConfirmExit] = useState(false);
-
-  const { status: speechStatus, speak, cancel: cancelSpeech } = useSpeech();
-
-  // A line is "played" either by its pre-recorded clip (step.audio — e.g. Tom's
-  // real male voice) or by browser TTS. One <audio> at a time; stop the old one
-  // (and any TTS) before starting the next so nothing overlaps.
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const playLine = useCallback(
-    (step: LineStep) => {
-      cancelSpeech();
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-      if (step.audio) {
-        const a = new Audio(step.audio);
-        audioRef.current = a;
-        void a.play().catch(() => {
-          /* autoplay blocked until a gesture — the replay button still works */
-        });
-      } else {
-        speak(stripMarks(step.en), voiceForTone(step.tone));
-      }
-    },
-    [cancelSpeech, speak],
-  );
-  // Stop audio if the player unmounts mid-clip (close / navigate away).
-  useEffect(() => () => audioRef.current?.pause(), []);
-
-  // L4: the authoring contract says step 0 is a line. If a deck violates it, the
-  // step-0 question's state is never seeded (advance() only seeds the NEXT step),
-  // so the check is unanswerable and the story dead-locks. Seed it on the client
-  // (not during render — a server/client shuffle mismatch would break hydration).
-  useEffect(() => {
-    setAnswers((m) => {
-      const first = steps[0];
-      if (first?.kind !== 'q' || m[0]) return m;
-      return { 0: { order: shuffledOrder(first.options.length), selected: null, checked: false } };
-    });
-  }, [steps]);
-
-  // Auto-speak each line as it's revealed; the ref guards re-speaks on re-render
-  // (and on the late voices-resolve that flips status to ready).
-  const spokenRef = useRef<number | null>(null);
-  useEffect(() => {
-    const step = steps[cursor];
-    if (step?.kind !== 'line' || spokenRef.current === cursor) return;
-    // A recorded line plays right away; a TTS line waits until a voice is ready.
-    if (step.audio || speechStatus === 'ready') {
-      spokenRef.current = cursor;
-      playLine(step);
-    }
-  }, [cursor, steps, speechStatus, playLine]);
-
-  const top = steps[cursor];
-  const topQuestion: QuestionStep | null = top && top.kind === 'q' ? top : null;
-  const topCs = answers[cursor] ?? null;
-  const needsCheck = !!topQuestion && !topCs?.checked;
-  const isLastStep = cursor >= total - 1;
-  const topChecked = !!topQuestion && !!topCs?.checked;
-  const topCorrect =
-    topChecked &&
-    topCs != null &&
-    topCs.selected != null &&
-    topCs.order[topCs.selected] === topQuestion?.correctIndex;
-
-  // Chat-style auto-scroll: keep the newest revealed line/check (and its footer
-  // verdict) in view, like a messaging thread, so nothing hides under the fold.
+  const [playing, setPlaying] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
-  }, [cursor, topChecked]);
+  const stopRef = useRef<(() => void) | null>(null);
 
-  function advance() {
-    const next = cursor + 1;
-    if (next >= total) return;
-    setAnswers((m) => {
-      const step = steps[next];
-      if (step.kind !== 'q' || m[next]) return m;
-      return {
-        ...m,
-        [next]: { order: shuffledOrder(step.options.length), selected: null, checked: false },
-      };
-    });
-    setCursor(next);
-  }
+  // Page list (in order); the current page's steps render together.
+  const pageNums = useMemo(
+    () => Array.from(new Set(steps.map((s) => s.page ?? 0))).sort((a, b) => a - b),
+    [steps],
+  );
+  const totalPages = Math.max(pageNums.length, 1);
+  const currentPageNum = pageNums[page] ?? 0;
+  const pageSteps = useMemo(
+    () => steps.filter((s) => (s.page ?? 0) === currentPageNum),
+    [steps, currentPageNum],
+  );
+  const isLastPage = page >= totalPages - 1;
+  // Lines on this page that the Listen button plays (closing narration is silent).
+  const playable = useMemo(
+    () => pageSteps.filter((s): s is LineStep => s.kind === 'line' && !s.noAudio),
+    [pageSteps],
+  );
 
-  function selectOption(stepIdx: number, display: number) {
-    setAnswers((m) => (m[stepIdx] ? { ...m, [stepIdx]: { ...m[stepIdx], selected: display } } : m));
-  }
+  const stopPlayback = useCallback(() => {
+    stopRef.current?.();
+    stopRef.current = null;
+    setPlaying(false);
+  }, []);
 
-  function confirmCheck(stepIdx: number) {
-    setAnswers((m) =>
-      m[stepIdx]?.selected == null ? m : { ...m, [stepIdx]: { ...m[stepIdx], checked: true } },
+  // Play the page's lines in order — recorded clips and TTS chained on completion,
+  // with a standard pause between each so the two speakers don't run together.
+  function playPage() {
+    stopPlayback();
+    const items: PlayItem[] = playable.map((s) =>
+      s.audio ? { audio: s.audio } : { text: stripMarks(s.en), opts: voiceForTone(s.tone) },
     );
+    if (items.length === 0) return;
+
+    let i = 0;
+    let stopped = false;
+    let audio: HTMLAudioElement | null = null;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    setPlaying(true);
+
+    const next = () => {
+      if (stopped) return;
+      if (i >= items.length) {
+        setPlaying(false);
+        stopRef.current = null;
+        return;
+      }
+      const item = items[i++];
+      const after = () => {
+        if (!stopped) timer = setTimeout(next, PAUSE_MS);
+      };
+      if ('audio' in item) {
+        audio = new Audio(item.audio);
+        audio.onended = after;
+        audio.onerror = after;
+        void audio.play().catch(after);
+      } else {
+        speak(item.text, { ...item.opts, onEnd: after });
+      }
+    };
+
+    stopRef.current = () => {
+      stopped = true;
+      audio?.pause();
+      cancelSpeech();
+      if (timer) clearTimeout(timer);
+    };
+    next();
   }
 
-  const canConfirm = !!topCs && topCs.selected !== null;
-  const progressPct = (Math.min(cursor + 1, total) / total) * 100;
+  // Changing page (Continue) stops playback and resets scroll; unmount stops too.
+  useEffect(() => {
+    stopPlayback();
+    scrollRef.current?.scrollTo({ top: 0 });
+  }, [page, stopPlayback]);
+  useEffect(() => () => stopPlayback(), [stopPlayback]);
+
+  const progressPct = ((page + 1) / totalPages) * 100;
 
   return (
     <div className="scr-lesson h-dvh" dir="ltr">
@@ -277,14 +190,14 @@ export function StoryPlayer({
           type="button"
           className="close"
           aria-label="Close story"
-          onClick={() => (cursor > 0 ? setConfirmExit(true) : router.push('/learn'))}
+          onClick={() => (page > 0 ? setConfirmExit(true) : router.push('/learn'))}
         >
           <X weight="bold" />
         </button>
         <div className="progress">
           <div className="progress-fill" style={{ width: `${progressPct}%` }} />
           <span className="progress-label">
-            {Math.min(cursor + 1, total)}/{total}
+            {page + 1}/{totalPages}
           </span>
         </div>
         <div className="lb-stats">
@@ -305,91 +218,36 @@ export function StoryPlayer({
             ) : null}
           </header>
 
-          {steps.slice(0, cursor + 1).map((step, i) => {
-            if (step.kind === 'line') {
-              return (
-                <LineBubble
-                  key={i}
-                  step={step}
-                  canSpeak={!!step.audio || speechStatus === 'ready'}
-                  onSpeak={() => playLine(step)}
-                />
-              );
-            }
-            if (step.kind === 'image') {
-              return <StoryImage key={i} step={step} />;
-            }
-            return (
-              <QuestionCard
-                key={i}
-                step={step}
-                cs={answers[i] ?? null}
-                onSelect={(display) => selectOption(i, display)}
-              />
-            );
-          })}
-
-          {isLastStep && !needsCheck ? (
-            <div className="story-end">
-              <Mascot pose="celebrate" />
-              <Text variant="section" as="p" className="en">
-                Story complete!
-              </Text>
-              <Text variant="body" className="text-text-2">
-                {titleEn}
-              </Text>
-            </div>
+          {playable.length > 0 ? (
+            <button
+              type="button"
+              className={cn('story-listen', playing && 'is-playing')}
+              aria-pressed={playing}
+              onClick={() => (playing ? stopPlayback() : playPage())}
+            >
+              <SpeakerHigh weight="fill" />
+              {playing ? 'Stop' : 'Listen'}
+            </button>
           ) : null}
+
+          {pageSteps.map((step, i) => {
+            if (step.kind === 'line') return <LineBubble key={i} step={step} />;
+            if (step.kind === 'image') return <StoryImage key={i} step={step} />;
+            return null;
+          })}
         </article>
       </div>
 
       <div className="lesson-foot shrink-0 border-t border-border bg-surface px-4 pt-3 pb-[max(var(--space-4),env(safe-area-inset-bottom))]">
-        {/* Answered check → verdict panel pinned in the footer (mirrors the
-            runner/study), always fully visible above the nav. The Continue /
-            Finish action lives inside the panel. */}
-        {topChecked && topQuestion ? (
-          <div className={cn('fb-banner', topCorrect ? 'fb-correct' : 'fb-incorrect')}>
-            <div className="fb-mascot">
-              <Mascot pose={topCorrect ? 'celebrate' : 'reassure'} />
-            </div>
-            <div className="fb-text">
-              <div className="fb-title en">{topCorrect ? 'Nice!' : 'Not quite'}</div>
-              {!topCorrect ? (
-                <div className="fb-correct-line">
-                  Correct:{' '}
-                  <bdi>
-                    <b>{topQuestion.options[topQuestion.correctIndex]}</b>
-                  </bdi>
-                </div>
-              ) : null}
-              <div className="fb-explain fa" dir="rtl">
-                {topQuestion.explanationFa}
-              </div>
-            </div>
-            <div className="fb-action">
-              {isLastStep ? (
-                <StoryCompleteButton slug={slug} completed={completed} />
-              ) : (
-                <Button variant="primary" size="lg" onClick={advance}>
-                  Continue
-                </Button>
-              )}
-            </div>
-          </div>
-        ) : needsCheck ? (
-          <Button
-            variant="confirm"
-            size="lg"
-            className="w-full"
-            disabled={!canConfirm}
-            onClick={() => confirmCheck(cursor)}
-          >
-            Check
-          </Button>
-        ) : isLastStep ? (
+        {isLastPage ? (
           <StoryCompleteButton slug={slug} completed={completed} />
         ) : (
-          <Button variant="primary" size="lg" className="w-full" onClick={advance}>
+          <Button
+            variant="primary"
+            size="lg"
+            className="w-full"
+            onClick={() => setPage((p) => p + 1)}
+          >
             Continue
           </Button>
         )}

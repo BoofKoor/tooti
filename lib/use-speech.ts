@@ -57,6 +57,8 @@ export type SpeakOptions = {
   rate?: number;
   pitch?: number;
   character?: SpeakCharacter;
+  // Fires when this utterance finishes (or errors) — lets callers chain a queue.
+  onEnd?: () => void;
 };
 
 export function useSpeech() {
@@ -146,8 +148,14 @@ export function useSpeech() {
       utterance.rate = opts?.rate ?? (opts?.slow ? SLOW_RATE : NORMAL_RATE);
       if (opts?.pitch != null) utterance.pitch = opts.pitch;
       utterance.onstart = () => setSpeaking(true);
-      utterance.onend = () => setSpeaking(false);
-      utterance.onerror = () => setSpeaking(false);
+      utterance.onend = () => {
+        setSpeaking(false);
+        opts?.onEnd?.();
+      };
+      utterance.onerror = () => {
+        setSpeaking(false);
+        opts?.onEnd?.();
+      };
       synth.speak(utterance);
     },
     [primaryVoice, manVoice, boyVoice],

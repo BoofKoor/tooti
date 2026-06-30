@@ -264,17 +264,20 @@ const storySection: SectionSeed = {
           src: '/stories/sports-club.png',
           alt: 'A friendly coach crouches and talks with a young player on the field of an indoor sports club.',
         },
-        // Dialogue header (narration, not spoken by a character), then the
-        // dialogue — Tom (coach) = tone a, Ben (boy) = tone b.
+        // ── Page 1: the dialogue, shown all at once. Header narration first
+        // (plays as part of Listen), then Tom (coach) = tone a, Ben (boy) = tone
+        // b. Tom's lines carry recorded male-voice clips; Ben/narration use TTS. ──
         {
           kind: 'line',
           tone: 'narrator',
+          page: 1,
           en: 'One afternoon, a new student **comes** to the club.',
         },
         {
           kind: 'line',
           tone: 'a',
           speaker: 'Tom',
+          page: 1,
           en: '"Hello! My name **is** Tom. What **is** your name?"',
           audio: '/stories/sports-club/tom-1.mp3',
         },
@@ -282,12 +285,14 @@ const storySection: SectionSeed = {
           kind: 'line',
           tone: 'b',
           speaker: 'Ben',
+          page: 1,
           en: '"My name **is** Ben."',
         },
         {
           kind: 'line',
           tone: 'a',
           speaker: 'Tom',
+          page: 1,
           en: '"**Do** you **play** football?"',
           audio: '/stories/sports-club/tom-2.mp3',
         },
@@ -295,12 +300,14 @@ const storySection: SectionSeed = {
           kind: 'line',
           tone: 'b',
           speaker: 'Ben',
+          page: 1,
           en: '"Yes, I **do**. I **play** football twice a week."',
         },
         {
           kind: 'line',
           tone: 'a',
           speaker: 'Tom',
+          page: 1,
           en: '"Great! **Do** you **like** sports?"',
           audio: '/stories/sports-club/tom-3.mp3',
         },
@@ -308,19 +315,23 @@ const storySection: SectionSeed = {
           kind: 'line',
           tone: 'b',
           speaker: 'Ben',
+          page: 1,
           en: '"Yes, I **do**. I **love** football, but I **don\'t like** basketball."',
         },
         {
           kind: 'line',
           tone: 'a',
           speaker: 'Tom',
+          page: 1,
           en: '"You **are** in the right place. Football practice **starts** at 4:00 p.m. every day."',
           audio: '/stories/sports-club/tom-4.mp3',
         },
-        // Closing narration — not part of the dialogue. Stage 1 ends here.
+        // Closing narration — shown below the dialogue, but silent (no Listen).
         {
           kind: 'line',
           tone: 'narrator',
+          page: 1,
+          noAudio: true,
           en: 'Ben **looks** happy. He **wants** to join the team and make new friends.',
         },
       ],
