@@ -1,11 +1,13 @@
 'use server';
 import { revalidatePath } from 'next/cache';
-import type { Progress } from '@prisma/client';
+import { Prisma, type Progress } from '@prisma/client';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import {
   COMEBACK_GAP_DAYS,
   DAILY_GOAL_OPTIONS,
+  TEST_SAMPLE_SIZE,
+  TOTAL_HEARTS,
   XP_LEARN_STAGE,
   XP_STORY,
   computeLessonXp,
@@ -17,6 +19,12 @@ import {
   streakMilestoneHit,
   testPassed,
 } from '@/lib/gamification';
+
+/** Coerce a client-supplied number into a trusted integer in [lo, hi]. */
+function clampInt(v: unknown, lo: number, hi: number): number {
+  const n = typeof v === 'number' && Number.isFinite(v) ? Math.trunc(v) : lo;
+  return Math.max(lo, Math.min(hi, n));
+}
 
 const DEFAULT_TZ = 'Asia/Tehran';
 
@@ -31,26 +39,35 @@ export type CompleteResult = {
   streakMilestone: number | null;
 };
 
+/** One calendar day before a "YYYY-MM-DD" key (UTC math on the key — never on a
+ *  wall-clock instant, which off-by-ones across DST and fractional tz offsets). */
+function prevDayKey(dayKey: string): string {
+  return localDay(new Date(Date.parse(`${dayKey}T00:00:00Z`) - 86_400_000), 'UTC');
+}
+
 /** Consecutive local days (ending today/yesterday) whose DailyXp ≥ dailyGoal. */
-async function computeGoalStreak(userId: string, dailyGoal: number, tz: string): Promise<number> {
-  const rows = await prisma.dailyXp.findMany({
+async function computeGoalStreak(
+  db: Prisma.TransactionClient,
+  userId: string,
+  dailyGoal: number,
+  tz: string,
+  today: string,
+): Promise<number> {
+  const rows = await db.dailyXp.findMany({
     where: { userId },
     select: { day: true, xp: true },
   });
   const perDay = new Map(rows.map((r) => [r.day, r.xp]));
-  const today = localDay(new Date(), tz);
   // Allow the run to end today OR yesterday (so it doesn't vanish before today's activity).
   let cursor = (perDay.get(today) ?? 0) >= dailyGoal ? today : null;
   if (!cursor) {
-    const y = new Date(Date.now() - 86_400_000);
-    const yday = localDay(y, tz);
+    const yday = prevDayKey(today);
     if ((perDay.get(yday) ?? 0) >= dailyGoal) cursor = yday;
   }
   let run = 0;
   while (cursor && (perDay.get(cursor) ?? 0) >= dailyGoal) {
     run += 1;
-    const prev = new Date(Date.parse(`${cursor}T00:00:00Z`) - 86_400_000);
-    cursor = localDay(prev, 'UTC'); // step one calendar day back (UTC math on the YYYY-MM-DD key)
+    cursor = prevDayKey(cursor); // step one calendar day back
   }
   return run;
 }
@@ -62,6 +79,7 @@ async function computeGoalStreak(userId: string, dailyGoal: number, tz: string):
  * medals.
  */
 async function awardXp(o: {
+  tx: Prisma.TransactionClient;
   userId: string;
   prior: Progress | null;
   xp: number;
@@ -74,13 +92,13 @@ async function awardXp(o: {
   newMedals: { key: string; name: string }[];
   streakMilestone: number | null;
 }> {
-  const { userId, prior, xp, tz, now } = o;
+  const { tx, userId, prior, xp, tz, now } = o;
   const today = localDay(now, tz);
   const prevLastDay = prior?.lastActiveDate ? localDay(prior.lastActiveDate, tz) : null;
   const cameBack = prevLastDay ? daysBetween(prevLastDay, today) >= COMEBACK_GAP_DAYS : false;
   const newStreak = nextStreak({ streak: prior?.streak ?? 0, lastActiveDay: prevLastDay }, today);
 
-  const progress = await prisma.progress.upsert({
+  const progress = await tx.progress.upsert({
     where: { userId },
     create: {
       userId,
@@ -99,18 +117,18 @@ async function awardXp(o: {
     },
   });
 
-  // DailyXp ledger — credited to TODAY (first completions and replays alike).
-  await prisma.dailyXp.upsert({
+  // DailyXp ledger — credited to TODAY (the caller already gates same-day replays).
+  await tx.dailyXp.upsert({
     where: { userId_day: { userId, day: today } },
     create: { userId, day: today, xp },
     update: { xp: { increment: xp } },
   });
 
   const [lessonsCompleted, perfectCount] = await Promise.all([
-    prisma.lessonCompletion.count({ where: { userId } }),
-    prisma.lessonCompletion.count({ where: { userId, perfect: true } }),
+    tx.lessonCompletion.count({ where: { userId } }),
+    tx.lessonCompletion.count({ where: { userId, perfect: true } }),
   ]);
-  const goalStreakDays = await computeGoalStreak(userId, progress.dailyGoal, tz);
+  const goalStreakDays = await computeGoalStreak(tx, userId, progress.dailyGoal, tz, today);
 
   const evals = evaluateMedals({
     xp: progress.xp,
@@ -122,17 +140,17 @@ async function awardXp(o: {
     cameBackFromBreak: cameBack,
   });
 
-  const catalog = await prisma.medal.findMany();
+  const catalog = await tx.medal.findMany();
   const byKey = new Map(catalog.map((m) => [m.key, m]));
   const newMedals: { key: string; name: string }[] = [];
   for (const e of evals) {
     const medal = byKey.get(e.key);
     if (!medal) continue;
-    const um = await prisma.userMedal.findUnique({
+    const um = await tx.userMedal.findUnique({
       where: { userId_medalId: { userId, medalId: medal.id } },
     });
     const earnNow = e.earned && !um?.earnedAt;
-    await prisma.userMedal.upsert({
+    await tx.userMedal.upsert({
       where: { userId_medalId: { userId, medalId: medal.id } },
       create: { userId, medalId: medal.id, progress: e.progress, earnedAt: e.earned ? now : null },
       update: {
@@ -143,8 +161,6 @@ async function awardXp(o: {
     if (earnNow) newMedals.push({ key: medal.key, name: medal.name });
   }
 
-  revalidatePath('/profile');
-  revalidatePath('/learn');
   return {
     totalXp: progress.xp,
     streak: newStreak,
@@ -206,10 +222,15 @@ export async function completeLesson(input: {
   const userId = session.user.id;
 
   const prior = await prisma.progress.findUnique({ where: { userId } });
-  const tz = input.timezone || prior?.timezone || DEFAULT_TZ;
+  // The stored tz is authoritative once set, so a client can't shift the local
+  // day boundary (and farm streak/goal) by sending a different tz each call.
+  const tz = prior?.timezone || input.timezone || DEFAULT_TZ;
+  // Never trust raw client counts: hearts are bounded here, the per-lesson
+  // question counts are bounded against the real lesson below.
+  const heartsLeft = clampInt(input.heartsLeft, 0, TOTAL_HEARTS);
 
   // Hearts depleted → failed: persist tz only, no completion / no XP.
-  if (input.heartsLeft <= 0) {
+  if (heartsLeft <= 0) {
     await persistTimezone(userId, tz, prior);
     return {
       ok: true,
@@ -224,16 +245,28 @@ export async function completeLesson(input: {
 
   const lesson = await prisma.lesson.findUnique({
     where: { slug: input.slug },
-    include: { unit: { select: { comingSoon: true } } },
+    include: { unit: { select: { comingSoon: true } }, _count: { select: { exercises: true } } },
   });
   if (!lesson) return empty;
 
   // Locked (coming-soon unit or ladder not reached) → no writes at all.
   if (lesson.unit.comingSoon || !(await lessonUnlocked(userId, lesson))) return empty;
 
+  // B1: the lesson's real question count is the ceiling — a SECTION_TEST plays a
+  // fixed sample, every other kind plays its whole exercise set. Clamp the
+  // client's self-reported score into [0, ceiling] so it can't mint XP/medals or
+  // forge a checkpoint pass with correctCount: 1_000_000.
+  // totalCount is taken from the lesson, NOT the client — otherwise a caller could
+  // send totalCount: 1 and "pass" a SECTION_TEST with a single correct answer.
+  const totalCount =
+    lesson.kind === 'SECTION_TEST'
+      ? Math.min(TEST_SAMPLE_SIZE, lesson._count.exercises)
+      : lesson._count.exercises;
+  const correctCount = clampInt(input.correctCount, 0, totalCount);
+
   // SECTION_TEST below the pass bar (even with hearts left) → not passed:
   // persist tz only — no completion, no XP, no streak/medal updates.
-  if (lesson.kind === 'SECTION_TEST' && !testPassed(input.correctCount, input.totalCount)) {
+  if (lesson.kind === 'SECTION_TEST' && !testPassed(correctCount, totalCount)) {
     await persistTimezone(userId, tz, prior);
     return {
       ok: true,
@@ -247,43 +280,58 @@ export async function completeLesson(input: {
   }
 
   const now = new Date();
+  const today = localDay(now, tz);
   const existing = await prisma.lessonCompletion.findUnique({
     where: { userId_lessonId: { userId, lessonId: lesson.id } },
   });
   const isFirst = !existing;
-  const perfect = isPerfect(input.heartsLeft);
-  const xp = computeLessonXp({
-    correctCount: input.correctCount,
-    heartsLeft: input.heartsLeft,
-    isFirstCompletion: isFirst,
+  const perfect = isPerfect(heartsLeft);
+  // B3: a replay earns review XP at most once per local day for a given lesson —
+  // re-finishing the same lesson on the same day awards nothing (no streak
+  // refresh, no daily-goal padding). First play and the day's first replay still
+  // count.
+  const replayedToday = !!existing && localDay(existing.completedAt, tz) === today;
+  const xp = replayedToday
+    ? 0
+    : computeLessonXp({ correctCount, heartsLeft, isFirstCompletion: isFirst });
+
+  // B2: the completion row + every award write commit atomically, so a double-tap
+  // / concurrent finish can't read a stale streak snapshot or double-count medals.
+  const award = await prisma.$transaction(async (tx) => {
+    await tx.lessonCompletion.upsert({
+      where: { userId_lessonId: { userId, lessonId: lesson.id } },
+      create: {
+        userId,
+        lessonId: lesson.id,
+        xpEarned: xp,
+        heartsLeft,
+        perfect,
+        crownLevel: perfect ? 2 : 1,
+      },
+      update: {
+        heartsLeft: Math.max(existing?.heartsLeft ?? 0, heartsLeft),
+        perfect: (existing?.perfect ?? false) || perfect,
+        crownLevel: Math.min(5, (existing?.crownLevel ?? 0) + (perfect ? 1 : 0)),
+        completedAt: now,
+      },
+    });
+    if (xp === 0) return null; // same-day replay: row touched, no ledger/streak/medals
+    return awardXp({ tx, userId, prior, xp, correctCount, tz, now });
   });
 
-  await prisma.lessonCompletion.upsert({
-    where: { userId_lessonId: { userId, lessonId: lesson.id } },
-    create: {
-      userId,
-      lessonId: lesson.id,
-      xpEarned: xp,
-      heartsLeft: input.heartsLeft,
-      perfect,
-      crownLevel: perfect ? 2 : 1,
-    },
-    update: {
-      heartsLeft: Math.max(existing?.heartsLeft ?? 0, input.heartsLeft),
-      perfect: (existing?.perfect ?? false) || perfect,
-      crownLevel: Math.min(5, (existing?.crownLevel ?? 0) + (perfect ? 1 : 0)),
-      completedAt: now,
-    },
-  });
-
-  const award = await awardXp({
-    userId,
-    prior,
-    xp,
-    correctCount: input.correctCount,
-    tz,
-    now,
-  });
+  revalidatePath('/profile');
+  revalidatePath('/learn');
+  if (!award) {
+    return {
+      ok: true,
+      passed: true,
+      xpEarned: 0,
+      totalXp: prior?.xp ?? 0,
+      streak: prior?.streak ?? 0,
+      newMedals: [],
+      streakMilestone: null,
+    };
+  }
   return { ok: true, passed: true, xpEarned: xp, ...award };
 }
 
@@ -317,7 +365,7 @@ export async function completeLearnStage(input: {
   if (lesson.unit.comingSoon || !(await lessonUnlocked(userId, lesson))) return empty;
 
   const prior = await prisma.progress.findUnique({ where: { userId } });
-  const tz = input.timezone || prior?.timezone || DEFAULT_TZ;
+  const tz = prior?.timezone || input.timezone || DEFAULT_TZ;
 
   const existing = await prisma.lessonCompletion.findUnique({
     where: { userId_lessonId: { userId, lessonId: lesson.id } },
@@ -337,18 +385,22 @@ export async function completeLearnStage(input: {
   }
 
   const now = new Date();
-  await prisma.lessonCompletion.create({
-    data: {
-      userId,
-      lessonId: lesson.id,
-      xpEarned: XP_LEARN_STAGE,
-      heartsLeft: 0,
-      perfect: false,
-      crownLevel: 1,
-    },
+  // B2: first-completion row + award commit atomically (double-tap safe).
+  const award = await prisma.$transaction(async (tx) => {
+    await tx.lessonCompletion.create({
+      data: {
+        userId,
+        lessonId: lesson.id,
+        xpEarned: XP_LEARN_STAGE,
+        heartsLeft: 0,
+        perfect: false,
+        crownLevel: 1,
+      },
+    });
+    return awardXp({ tx, userId, prior, xp: XP_LEARN_STAGE, correctCount: 0, tz, now });
   });
-
-  const award = await awardXp({ userId, prior, xp: XP_LEARN_STAGE, correctCount: 0, tz, now });
+  revalidatePath('/profile');
+  revalidatePath('/learn');
   return { ok: true, passed: true, xpEarned: XP_LEARN_STAGE, ...award };
 }
 
@@ -383,7 +435,7 @@ export async function completeStory(input: {
   if (lesson.unit.comingSoon || !(await lessonUnlocked(userId, lesson))) return empty;
 
   const prior = await prisma.progress.findUnique({ where: { userId } });
-  const tz = input.timezone || prior?.timezone || DEFAULT_TZ;
+  const tz = prior?.timezone || input.timezone || DEFAULT_TZ;
 
   const existing = await prisma.lessonCompletion.findUnique({
     where: { userId_lessonId: { userId, lessonId: lesson.id } },
@@ -403,18 +455,22 @@ export async function completeStory(input: {
   }
 
   const now = new Date();
-  await prisma.lessonCompletion.create({
-    data: {
-      userId,
-      lessonId: lesson.id,
-      xpEarned: XP_STORY,
-      heartsLeft: 0,
-      perfect: false,
-      crownLevel: 1,
-    },
+  // B2: first-completion row + award commit atomically (double-tap safe).
+  const award = await prisma.$transaction(async (tx) => {
+    await tx.lessonCompletion.create({
+      data: {
+        userId,
+        lessonId: lesson.id,
+        xpEarned: XP_STORY,
+        heartsLeft: 0,
+        perfect: false,
+        crownLevel: 1,
+      },
+    });
+    return awardXp({ tx, userId, prior, xp: XP_STORY, correctCount: 0, tz, now });
   });
-
-  const award = await awardXp({ userId, prior, xp: XP_STORY, correctCount: 0, tz, now });
+  revalidatePath('/profile');
+  revalidatePath('/learn');
   return { ok: true, passed: true, xpEarned: XP_STORY, ...award };
 }
 
