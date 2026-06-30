@@ -46,8 +46,15 @@ export type StoryStep =
       kind: 'line';
       tone: StoryTone;
       speaker?: string; // shown above the bubble; omitted for narration
-      en: string; // spoken aloud
+      en: string; // spoken aloud; **double-asterisk** spans mark grammar highlights
       fa?: string; // Persian gloss (sanctioned island)
+    }
+  | {
+      kind: 'image';
+      // An illustration revealed between beats (e.g. a scene photo); not spoken.
+      src: string; // /public path, e.g. '/stories/sports-club.png'
+      alt: string; // accessible description (English)
+      fa?: string; // optional Persian caption
     }
   | {
       kind: 'q';

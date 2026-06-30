@@ -30,47 +30,17 @@ const units = [
   { slug: 'vocabulary', title: 'Vocabulary', order: 5, comingSoon: true },
 ];
 
-// The Present Simple topic: Learn stage → Story → practice sets (with a
-// Listening set) → checkpoint test (recognition → production: "Build & write"
-// sits after the MCQ/listening sets, before the test).
+// Present Simple — rebuilt as a staged teaching flow. Stage 1 is the story
+// ("At the sports club"): a reading, a scene image, then a two-voice dialogue.
+// The earlier learn/practice/test lessons were removed; the seed deletes any
+// lesson whose slug is not listed here, so the unit now holds just this one.
+// (Later stages re-add the rest.)
 const lessons = [
   {
-    slug: 'present-simple-learn',
-    title: 'Learn: Present Simple',
-    order: 1,
-    kind: LessonKind.LESSON,
-  },
-  {
     slug: 'present-simple-story',
-    title: 'Story: At the bus stop',
-    order: 2,
+    title: 'At the sports club',
+    order: 1,
     kind: LessonKind.STORY,
-  },
-  { slug: 'present-simple-practice-1', title: 'From the story', order: 3, kind: LessonKind.REVIEW },
-  { slug: 'present-simple-practice-2', title: 'Verb forms', order: 4, kind: LessonKind.REVIEW },
-  {
-    slug: 'present-simple-practice-3',
-    title: 'Questions & negatives',
-    order: 5,
-    kind: LessonKind.REVIEW,
-  },
-  {
-    slug: 'present-simple-listening',
-    title: 'Listening',
-    order: 6,
-    kind: LessonKind.REVIEW,
-  },
-  {
-    slug: 'present-simple-practice-4',
-    title: 'Build & write',
-    order: 7,
-    kind: LessonKind.REVIEW,
-  },
-  {
-    slug: 'present-simple-test',
-    title: 'Checkpoint test',
-    order: 8,
-    kind: LessonKind.SECTION_TEST,
   },
 ];
 
@@ -258,95 +228,107 @@ const learnSections: SectionSeed[] = [
   },
 ];
 
-// ── Story stage (present-simple-story) — an interactive narrative whose whole
-// script lives on a single section's content.story (no extra SectionKind, so no
-// migration). Authored correct-first (the player shuffles); step 0 is always a
-// line so first paint has no client-shuffled question. Tones: Maryam = a (start
-// side), Sara = b (end side), narration = narrator. ──
+// ── Story stage (present-simple-story) — Stage 1 of the rebuilt Present Simple
+// flow: a reading (narration), a scene image, then a two-voice dialogue. The
+// whole script lives on one section's content.story (no extra SectionKind, so no
+// migration). **double-asterisk** spans highlight the present-simple verbs. The
+// player reads each line aloud with browser TTS at a slower learner rate and two
+// related voices: Tom the coach = tone a (low pitch, left side), Ben the boy =
+// tone b (high pitch, right side); narration = narrator. Step 0 is a line so the
+// first paint has no client-shuffled question. No comprehension checks yet —
+// stage 1 ends after the closing narration. ──
 const storySection: SectionSeed = {
   order: 1,
   kind: SectionKind.READING,
-  titleEn: 'At the bus stop',
-  titleFa: 'سرِ ایستگاهِ اتوبوس',
+  titleEn: 'At the sports club',
+  titleFa: 'در باشگاهِ ورزشی',
   content: {
     story: {
-      titleEn: 'At the bus stop',
-      titleFa: 'سرِ ایستگاهِ اتوبوس',
+      titleEn: 'At the sports club',
+      titleFa: 'در باشگاهِ ورزشی',
       steps: [
+        // Reading — two paragraphs of narration (present simple in context).
         {
           kind: 'line',
           tone: 'narrator',
-          en: 'Every morning, Maryam waits for the bus. Today her friend Sara is there too.',
-          fa: 'هر صبح، مریم منتظرِ اتوبوس می‌ماند. امروز دوستش سارا هم آنجاست.',
-        },
-        {
-          kind: 'line',
-          tone: 'b',
-          speaker: 'Sara',
-          en: 'Good morning, Maryam! Do you take this bus every day?',
-          fa: 'صبح بخیر مریم! هر روز این اتوبوس را سوار می‌شوی؟',
-        },
-        {
-          kind: 'line',
-          tone: 'a',
-          speaker: 'Maryam',
-          en: 'Yes, I do. My school starts at eight.',
-          fa: 'آره. مدرسه‌ام ساعتِ هشت شروع می‌شود.',
-        },
-        {
-          kind: 'q',
-          prompt: 'How often does Maryam take this bus?',
-          options: ['Every day', 'Never', 'Tomorrow', 'Only today'],
-          correctIndex: 0,
-          explanationFa: '«هر روز» یک عادتِ تکراری است؛ برای همین حالِ ساده به‌کار می‌رود.',
-        },
-        {
-          kind: 'line',
-          tone: 'b',
-          speaker: 'Sara',
-          en: 'Does your brother Ali come with you?',
-          fa: 'برادرت علی هم با تو می‌آید؟',
-        },
-        {
-          kind: 'line',
-          tone: 'a',
-          speaker: 'Maryam',
-          en: "No, he doesn't. He walks to school.",
-          fa: 'نه. او پیاده به مدرسه می‌رود.',
-        },
-        {
-          kind: 'q',
-          prompt: 'Ali ___ to school.',
-          options: ['walks', 'walk', 'is walking', 'walked'],
-          correctIndex: 0,
-          explanationFa: 'سوم‌شخصِ مفرد (he) در حالِ ساده s می‌گیرد: walk → walks.',
-        },
-        {
-          kind: 'line',
-          tone: 'b',
-          speaker: 'Sara',
-          en: 'Look — the bus is here!',
-          fa: 'ببین — اتوبوس رسید!',
-        },
-        {
-          kind: 'line',
-          tone: 'a',
-          speaker: 'Maryam',
-          en: 'We always sit at the front. Come on!',
-          fa: 'ما همیشه جلو می‌نشینیم. بیا بریم!',
-        },
-        {
-          kind: 'q',
-          prompt: 'Which word signals the present simple here?',
-          options: ['always', 'now', 'yesterday', 'soon'],
-          correctIndex: 0,
-          explanationFa: '«always» از نشانه‌های حالِ ساده است و قبل از فعلِ اصلی می‌آید.',
+          en: "Tom **works** at a sports club. He usually **gets up** at 6:00 a.m. and **goes** to work by bus. He **likes** his job because he **loves** sports. He **doesn't drink** coffee, but he **drinks** tea every morning.",
+          fa: 'تام در یک باشگاهِ ورزشی کار می‌کند. او معمولاً ساعتِ ۶ صبح بیدار می‌شود و با اتوبوس به سرِ کار می‌رود. شغلش را دوست دارد، چون عاشقِ ورزش است. او قهوه نمی‌نوشد، اما هر صبح چای می‌نوشد.',
         },
         {
           kind: 'line',
           tone: 'narrator',
-          en: 'They get on the bus together and ride to school.',
-          fa: 'با هم سوارِ اتوبوس می‌شوند و به مدرسه می‌روند.',
+          en: 'Tom **knows** many students at the club. He often **watches** their games and **helps** them learn new skills.',
+          fa: 'تام بسیاری از شاگردانِ باشگاه را می‌شناسد. او اغلب بازی‌هایشان را تماشا می‌کند و کمکشان می‌کند مهارت‌های تازه یاد بگیرند.',
+        },
+        // Scene image between the reading and the dialogue.
+        {
+          kind: 'image',
+          src: '/stories/sports-club.png',
+          alt: 'A friendly coach crouches and talks with a young player on the field of an indoor sports club.',
+          fa: 'تام (مربی) با بن در باشگاهِ ورزشی صحبت می‌کند.',
+        },
+        // Dialogue — Tom (coach) = tone a, Ben (boy) = tone b.
+        {
+          kind: 'line',
+          tone: 'narrator',
+          en: 'One afternoon, a new student **comes** to the club.',
+          fa: 'یک بعدازظهر، یک شاگردِ تازه به باشگاه می‌آید.',
+        },
+        {
+          kind: 'line',
+          tone: 'a',
+          speaker: 'Tom',
+          en: '"Hello! My name **is** Tom," he **says**. "What **is** your name?"',
+          fa: '«سلام! اسمِ من تام است،» او می‌گوید. «اسمِ تو چیست؟»',
+        },
+        {
+          kind: 'line',
+          tone: 'b',
+          speaker: 'Ben',
+          en: '"My name **is** Ben," the boy **answers**.',
+          fa: '«اسمِ من بن است،» پسر جواب می‌دهد.',
+        },
+        {
+          kind: 'line',
+          tone: 'a',
+          speaker: 'Tom',
+          en: '"**Do** you **play** football?" Tom **asks**.',
+          fa: '«تو فوتبال بازی می‌کنی؟» تام می‌پرسد.',
+        },
+        {
+          kind: 'line',
+          tone: 'b',
+          speaker: 'Ben',
+          en: '"Yes, I **do**," Ben **says**. "I **play** football twice a week."',
+          fa: '«بله،» بن می‌گوید. «من هفته‌ای دو بار فوتبال بازی می‌کنم.»',
+        },
+        {
+          kind: 'line',
+          tone: 'a',
+          speaker: 'Tom',
+          en: '"Great! **Do** you **like** sports?"',
+          fa: '«عالیه! تو ورزش را دوست داری؟»',
+        },
+        {
+          kind: 'line',
+          tone: 'b',
+          speaker: 'Ben',
+          en: '"Yes, I **do**. I **love** football, but I **don\'t like** basketball."',
+          fa: '«بله. من عاشقِ فوتبالم، اما بسکتبال را دوست ندارم.»',
+        },
+        {
+          kind: 'line',
+          tone: 'a',
+          speaker: 'Tom',
+          en: 'Tom **smiles**. "You **are** in the right place. Football practice **starts** at 4:00 p.m. every day."',
+          fa: 'تام لبخند می‌زند. «تو جای درستی هستی. تمرینِ فوتبال هر روز ساعتِ ۴ بعدازظهر شروع می‌شود.»',
+        },
+        // Closing narration — not part of the dialogue. Stage 1 ends here.
+        {
+          kind: 'line',
+          tone: 'narrator',
+          en: 'Ben **looks** happy. He **wants** to join the team and make new friends.',
+          fa: 'بن خوشحال به‌نظر می‌رسد. او می‌خواهد به تیم بپیوندد و دوستانِ تازه پیدا کند.',
         },
       ],
     },

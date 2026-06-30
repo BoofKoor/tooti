@@ -28,6 +28,21 @@ function pickEnglishVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice 
   );
 }
 
+/** A second, distinct English voice for two-speaker stories — a different voice
+ *  if the platform has one, otherwise the primary (callers also vary pitch, so
+ *  the two speakers still read apart even with a single installed voice). */
+function pickSecondVoice(
+  voices: SpeechSynthesisVoice[],
+  primary: SpeechSynthesisVoice | null,
+): SpeechSynthesisVoice | null {
+  const english = voices.filter((v) => v.lang?.toLowerCase().startsWith('en'));
+  return english.find((v) => v.voiceURI !== primary?.voiceURI) ?? primary;
+}
+
+/** Per-utterance shaping: a slower learner rate, an explicit rate, a pitch
+ *  (low = the man, high = the boy), and `alt` to pick the second voice. */
+export type SpeakOptions = { slow?: boolean; rate?: number; pitch?: number; alt?: boolean };
+
 export function useSpeech() {
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [status, setStatus] = useState<SpeechStatus>('pending');
@@ -69,22 +84,25 @@ export function useSpeech() {
   }, []);
 
   const voice = useMemo(() => pickEnglishVoice(voices), [voices]);
+  const altVoice = useMemo(() => pickSecondVoice(voices, voice), [voices, voice]);
 
   const speak = useCallback(
-    (text: string, opts?: { slow?: boolean }) => {
+    (text: string, opts?: SpeakOptions) => {
       if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
       const synth = window.speechSynthesis;
       synth.cancel(); // restart cleanly on every tap (and de-dupe React strict re-fires)
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = voice?.lang ?? 'en-US';
-      if (voice) utterance.voice = voice;
-      utterance.rate = opts?.slow ? SLOW_RATE : NORMAL_RATE;
+      const v = opts?.alt ? altVoice : voice;
+      utterance.lang = v?.lang ?? 'en-US';
+      if (v) utterance.voice = v;
+      utterance.rate = opts?.rate ?? (opts?.slow ? SLOW_RATE : NORMAL_RATE);
+      if (opts?.pitch != null) utterance.pitch = opts.pitch;
       utterance.onstart = () => setSpeaking(true);
       utterance.onend = () => setSpeaking(false);
       utterance.onerror = () => setSpeaking(false);
       synth.speak(utterance);
     },
-    [voice],
+    [voice, altVoice],
   );
 
   // Stop any in-flight speech — callers invoke this when leaving an item so audio
