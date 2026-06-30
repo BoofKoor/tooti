@@ -7,7 +7,9 @@ COPY package.json package-lock.json* ./
 # Prisma's `postinstall: prisma generate` (run by npm ci) needs the schema, so
 # the prisma dir must be present before install.
 COPY prisma ./prisma
-RUN npm ci
+# Cache the npm download cache across builds so re-installs don't re-fetch every
+# tarball (BuildKit persists this mount on the build host between builds).
+RUN --mount=type=cache,target=/root/.npm npm ci
 
 # ---- builder: compile the Next.js standalone output ----
 FROM node:22-alpine AS builder
@@ -15,7 +17,12 @@ WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run build
+# Persist the Next.js build cache between Docker builds. Without this every image
+# build is a cold compile that grows with the codebase (the "builds keep getting
+# slower" symptom); the cache mount lets the compiler reuse prior work so only
+# changed modules recompile. BuildKit keeps the mount on the build host — it is
+# not baked into any layer, so the runtime image stays minimal.
+RUN --mount=type=cache,target=/app/.next/cache npm run build
 
 # ---- migrator: runs prisma migrate deploy + seed on deploy (no Next build) ----
 FROM node:22-alpine AS migrator
