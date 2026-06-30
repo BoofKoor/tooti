@@ -17,7 +17,7 @@ export type SpeechStatus = 'pending' | 'ready' | 'unsupported';
 
 const SLOW_RATE = 0.6;
 const NORMAL_RATE = 0.95;
-const RESOLVE_TIMEOUT = 1500; // give voices this long to populate before giving up
+const RESOLVE_TIMEOUT = 3000; // give voices this long to populate before giving up
 
 function pickEnglishVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | null {
   return (
@@ -28,20 +28,32 @@ function pickEnglishVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice 
   );
 }
 
-/** A second, distinct English voice for two-speaker stories — a different voice
- *  if the platform has one, otherwise the primary (callers also vary pitch, so
- *  the two speakers still read apart even with a single installed voice). */
-function pickSecondVoice(
+// Voice-name heuristics — the Web Speech API exposes no gender, so we match the
+// common platform voice names (Windows/macOS/iOS/Android/Chrome).
+const MALE_RE =
+  /\b(male|man|david|mark|guy|james|daniel|alex|fred|george|aaron|arthur|oliver|thomas|rishi|reed|eddy)\b/i;
+const FEMALE_RE =
+  /\b(female|woman|zira|samantha|karen|moira|tessa|victoria|susan|hazel|fiona|serena|allison|ava|joanna|salli|kendra|nicky|sandy)\b/i;
+
+function pickGenderedVoice(
   voices: SpeechSynthesisVoice[],
-  primary: SpeechSynthesisVoice | null,
+  gender: 'male' | 'female',
 ): SpeechSynthesisVoice | null {
   const english = voices.filter((v) => v.lang?.toLowerCase().startsWith('en'));
-  return english.find((v) => v.voiceURI !== primary?.voiceURI) ?? primary;
+  const re = gender === 'male' ? MALE_RE : FEMALE_RE;
+  return english.find((v) => re.test(v.name) || re.test(v.voiceURI)) ?? null;
 }
 
-/** Per-utterance shaping: a slower learner rate, an explicit rate, a pitch
- *  (low = the man, high = the boy), and `alt` to pick the second voice. */
-export type SpeakOptions = { slow?: boolean; rate?: number; pitch?: number; alt?: boolean };
+/** Per-utterance shaping. `character` selects a voice (the man's deeper voice,
+ *  the boy on a lighter voice we pitch up, or the neutral narrator); pitch/rate
+ *  fine-tune it; the two speakers stay distinct even on a one-voice device. */
+export type SpeakCharacter = 'man' | 'boy' | 'narrator';
+export type SpeakOptions = {
+  slow?: boolean;
+  rate?: number;
+  pitch?: number;
+  character?: SpeakCharacter;
+};
 
 export function useSpeech() {
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
@@ -54,37 +66,55 @@ export function useSpeech() {
       return;
     }
     const synth = window.speechSynthesis;
-    let settled = false;
+    // Voices populate synchronously, via `voiceschanged`, or only after a delay
+    // (mobile / in-app browsers). Promote to `ready` whenever any arrive and
+    // never latch `unsupported`, so late voices can't leave the player mute.
     const resolve = () => {
       const vs = synth.getVoices();
       if (vs.length) {
         setVoices(vs);
-        if (!settled) {
-          settled = true;
-          setStatus('ready');
-        }
+        setStatus('ready');
       }
     };
     resolve();
     synth.addEventListener('voiceschanged', resolve);
-    // Some browsers populate voices late (or never, headless); fall back rather
-    // than hang in `pending` forever.
+    // Only call it unsupported if nothing has shown up by the deadline.
     const timer = window.setTimeout(() => {
-      if (settled) return;
-      const vs = synth.getVoices();
-      setVoices(vs);
-      setStatus(vs.length ? 'ready' : 'unsupported');
-      settled = true;
+      if (!synth.getVoices().length) setStatus('unsupported');
     }, RESOLVE_TIMEOUT);
+
+    // Autoplay policy: the first speak() must follow a user gesture or it is
+    // dropped silently (this is why the story read nothing). Prime the engine on
+    // the first interaction so the auto-spoken lines that follow actually play.
+    const unlock = () => {
+      try {
+        const u = new SpeechSynthesisUtterance(' ');
+        u.volume = 0;
+        synth.speak(u);
+        synth.resume();
+      } catch {
+        /* best-effort */
+      }
+      detach();
+    };
+    const detach = () => {
+      document.removeEventListener('pointerdown', unlock, true);
+      document.removeEventListener('keydown', unlock, true);
+    };
+    document.addEventListener('pointerdown', unlock, true);
+    document.addEventListener('keydown', unlock, true);
+
     return () => {
       synth.removeEventListener('voiceschanged', resolve);
       window.clearTimeout(timer);
+      detach();
       synth.cancel();
     };
   }, []);
 
-  const voice = useMemo(() => pickEnglishVoice(voices), [voices]);
-  const altVoice = useMemo(() => pickSecondVoice(voices, voice), [voices, voice]);
+  const primaryVoice = useMemo(() => pickEnglishVoice(voices), [voices]);
+  const maleVoice = useMemo(() => pickGenderedVoice(voices, 'male'), [voices]);
+  const femaleVoice = useMemo(() => pickGenderedVoice(voices, 'female'), [voices]);
 
   const speak = useCallback(
     (text: string, opts?: SpeakOptions) => {
@@ -92,7 +122,14 @@ export function useSpeech() {
       const synth = window.speechSynthesis;
       synth.cancel(); // restart cleanly on every tap (and de-dupe React strict re-fires)
       const utterance = new SpeechSynthesisUtterance(text);
-      const v = opts?.alt ? altVoice : voice;
+      // The man gets a deeper voice, the boy a lighter voice we pitch up; both
+      // fall back to the primary voice (pitch still keeps the two speakers apart).
+      const v =
+        opts?.character === 'man'
+          ? (maleVoice ?? primaryVoice)
+          : opts?.character === 'boy'
+            ? (femaleVoice ?? maleVoice ?? primaryVoice)
+            : primaryVoice;
       utterance.lang = v?.lang ?? 'en-US';
       if (v) utterance.voice = v;
       utterance.rate = opts?.rate ?? (opts?.slow ? SLOW_RATE : NORMAL_RATE);
@@ -102,7 +139,7 @@ export function useSpeech() {
       utterance.onerror = () => setSpeaking(false);
       synth.speak(utterance);
     },
-    [voice, altVoice],
+    [primaryVoice, maleVoice, femaleVoice],
   );
 
   // Stop any in-flight speech — callers invoke this when leaving an item so audio

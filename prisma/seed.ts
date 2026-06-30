@@ -241,94 +241,83 @@ const storySection: SectionSeed = {
   order: 1,
   kind: SectionKind.READING,
   titleEn: 'At the sports club',
-  titleFa: 'در باشگاهِ ورزشی',
+  titleFa: '',
   content: {
     story: {
       titleEn: 'At the sports club',
-      titleFa: 'در باشگاهِ ورزشی',
+      titleFa: '',
       steps: [
         // Reading — two paragraphs of narration (present simple in context).
         {
           kind: 'line',
           tone: 'narrator',
           en: "Tom **works** at a sports club. He usually **gets up** at 6:00 a.m. and **goes** to work by bus. He **likes** his job because he **loves** sports. He **doesn't drink** coffee, but he **drinks** tea every morning.",
-          fa: 'تام در یک باشگاهِ ورزشی کار می‌کند. او معمولاً ساعتِ ۶ صبح بیدار می‌شود و با اتوبوس به سرِ کار می‌رود. شغلش را دوست دارد، چون عاشقِ ورزش است. او قهوه نمی‌نوشد، اما هر صبح چای می‌نوشد.',
         },
         {
           kind: 'line',
           tone: 'narrator',
           en: 'Tom **knows** many students at the club. He often **watches** their games and **helps** them learn new skills.',
-          fa: 'تام بسیاری از شاگردانِ باشگاه را می‌شناسد. او اغلب بازی‌هایشان را تماشا می‌کند و کمکشان می‌کند مهارت‌های تازه یاد بگیرند.',
         },
         // Scene image between the reading and the dialogue.
         {
           kind: 'image',
           src: '/stories/sports-club.png',
           alt: 'A friendly coach crouches and talks with a young player on the field of an indoor sports club.',
-          fa: 'تام (مربی) با بن در باشگاهِ ورزشی صحبت می‌کند.',
         },
-        // Dialogue — Tom (coach) = tone a, Ben (boy) = tone b.
+        // Dialogue header (narration, not spoken by a character), then the
+        // dialogue — Tom (coach) = tone a, Ben (boy) = tone b.
         {
           kind: 'line',
           tone: 'narrator',
           en: 'One afternoon, a new student **comes** to the club.',
-          fa: 'یک بعدازظهر، یک شاگردِ تازه به باشگاه می‌آید.',
         },
         {
           kind: 'line',
           tone: 'a',
           speaker: 'Tom',
           en: '"Hello! My name **is** Tom," he **says**. "What **is** your name?"',
-          fa: '«سلام! اسمِ من تام است،» او می‌گوید. «اسمِ تو چیست؟»',
         },
         {
           kind: 'line',
           tone: 'b',
           speaker: 'Ben',
           en: '"My name **is** Ben," the boy **answers**.',
-          fa: '«اسمِ من بن است،» پسر جواب می‌دهد.',
         },
         {
           kind: 'line',
           tone: 'a',
           speaker: 'Tom',
           en: '"**Do** you **play** football?" Tom **asks**.',
-          fa: '«تو فوتبال بازی می‌کنی؟» تام می‌پرسد.',
         },
         {
           kind: 'line',
           tone: 'b',
           speaker: 'Ben',
           en: '"Yes, I **do**," Ben **says**. "I **play** football twice a week."',
-          fa: '«بله،» بن می‌گوید. «من هفته‌ای دو بار فوتبال بازی می‌کنم.»',
         },
         {
           kind: 'line',
           tone: 'a',
           speaker: 'Tom',
           en: '"Great! **Do** you **like** sports?"',
-          fa: '«عالیه! تو ورزش را دوست داری؟»',
         },
         {
           kind: 'line',
           tone: 'b',
           speaker: 'Ben',
           en: '"Yes, I **do**. I **love** football, but I **don\'t like** basketball."',
-          fa: '«بله. من عاشقِ فوتبالم، اما بسکتبال را دوست ندارم.»',
         },
         {
           kind: 'line',
           tone: 'a',
           speaker: 'Tom',
           en: 'Tom **smiles**. "You **are** in the right place. Football practice **starts** at 4:00 p.m. every day."',
-          fa: 'تام لبخند می‌زند. «تو جای درستی هستی. تمرینِ فوتبال هر روز ساعتِ ۴ بعدازظهر شروع می‌شود.»',
         },
         // Closing narration — not part of the dialogue. Stage 1 ends here.
         {
           kind: 'line',
           tone: 'narrator',
           en: 'Ben **looks** happy. He **wants** to join the team and make new friends.',
-          fa: 'بن خوشحال به‌نظر می‌رسد. او می‌خواهد به تیم بپیوندد و دوستانِ تازه پیدا کند.',
         },
       ],
     },
