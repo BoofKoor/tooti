@@ -15,6 +15,9 @@ export type { ToastProps, ToastType } from './Toast';
 
 export { ToastProvider, useToast } from './ToastProvider';
 
+export { ConfirmDialog } from './ConfirmDialog';
+export type { ConfirmDialogProps } from './ConfirmDialog';
+
 export { Spinner, PageLoader } from './Spinner';
 export type { SpinnerProps, SpinnerSize } from './Spinner';
 

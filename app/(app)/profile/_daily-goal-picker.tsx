@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { Target, Warning } from '@phosphor-icons/react/dist/ssr';
+import { useToast } from '@/components/ui';
 import { setDailyGoal } from '@/app/actions/gamification';
 import { DAILY_GOAL_OPTIONS } from '@/lib/gamification';
 import { cn } from '@/lib/utils';
@@ -11,14 +13,32 @@ import { cn } from '@/lib/utils';
  * /profile so the goal bar + this-week recompute).
  */
 export function DailyGoalPicker({ current }: { current: number }) {
+  const push = useToast();
   const [goal, setGoal] = useState(current);
   const [pending, startTransition] = useTransition();
 
   function pick(n: number) {
     if (n === goal || pending) return;
-    setGoal(n);
+    const prev = goal;
+    setGoal(n); // optimistic
     startTransition(async () => {
-      await setDailyGoal(n);
+      try {
+        await setDailyGoal(n);
+        push({
+          type: 'success',
+          title: 'Daily goal updated',
+          sub: `${n} XP a day`,
+          icon: <Target weight="fill" />,
+        });
+      } catch {
+        setGoal(prev); // roll back the optimistic highlight
+        push({
+          type: 'error',
+          title: "Couldn't update your goal",
+          sub: 'Please try again.',
+          icon: <Warning weight="fill" />,
+        });
+      }
     });
   }
 

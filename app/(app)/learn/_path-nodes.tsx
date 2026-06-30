@@ -9,7 +9,7 @@ import {
   Lock,
   Trophy,
 } from '@phosphor-icons/react/dist/ssr';
-import { Mascot } from '@/components/ui';
+import { Mascot, useToast } from '@/components/ui';
 import { cn } from '@/lib/utils';
 
 /*
@@ -80,6 +80,7 @@ export function PathNodes({
   current: CurrentCompanions;
 }) {
   const router = useRouter();
+  const push = useToast();
 
   return (
     <div className="nodes" style={{ height }}>
@@ -114,15 +115,39 @@ export function PathNodes({
 
       {nodes.map((node) => {
         const clickable = node.href != null && node.state !== 'locked';
+        // Locked/soon nodes stay tappable (just not navigable) so a tap explains
+        // why — a silent dead button reads as broken. aria-disabled conveys the
+        // unavailable state to assistive tech without removing the affordance.
+        const onNode = () => {
+          if (clickable) {
+            router.push(node.href as string);
+            return;
+          }
+          push(
+            node.glyph === 'soon'
+              ? {
+                  type: 'info',
+                  title: 'Coming soon',
+                  sub: 'This topic isn’t available yet.',
+                  icon: <Lock weight="fill" />,
+                }
+              : {
+                  type: 'info',
+                  title: 'Locked for now',
+                  sub: 'Finish the earlier steps to unlock this.',
+                  icon: <Lock weight="fill" />,
+                },
+          );
+        };
         return (
           <button
             key={node.key}
             type="button"
             className={cn('path-node-v2', node.boss && 'boss', STATE_CLASS[node.state])}
             style={{ top: node.top, left: node.left }}
-            disabled={!clickable}
+            aria-disabled={!clickable || undefined}
             aria-label={node.label}
-            onClick={clickable ? () => router.push(node.href as string) : undefined}
+            onClick={onNode}
           >
             {nodeGlyph(node)}
             {node.crown != null ? <span className="pn-crown">{node.crown}</span> : null}

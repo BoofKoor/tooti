@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Flame, Lightning } from '@phosphor-icons/react/dist/ssr';
+import { Flame, Lightning, Warning } from '@phosphor-icons/react/dist/ssr';
 import { Button, useToast } from '@/components/ui';
 import { completeLearnStage } from '@/app/actions/gamification';
 
@@ -20,26 +20,37 @@ export function ContinueButton({ slug, completed }: { slug: string; completed: b
     setBusy(true);
     // IANA tz from the browser; the action falls back to Asia/Tehran.
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const res = await completeLearnStage({ slug, timezone: tz });
-    if (res.xpEarned > 0) {
-      push({ type: 'reward', title: `+${res.xpEarned} XP`, icon: <Lightning weight="fill" /> });
-    }
-    res.newMedals.forEach((m) =>
+    try {
+      const res = await completeLearnStage({ slug, timezone: tz });
+      if (res.xpEarned > 0) {
+        push({ type: 'reward', title: `+${res.xpEarned} XP`, icon: <Lightning weight="fill" /> });
+      }
+      res.newMedals.forEach((m) =>
+        push({
+          type: 'reward',
+          title: 'Medal unlocked!',
+          sub: m.name,
+          icon: <Lightning weight="fill" />,
+        }),
+      );
+      if (res.streakMilestone) {
+        push({
+          type: 'info',
+          title: `${res.streakMilestone}-day streak!`,
+          icon: <Flame weight="fill" />,
+        });
+      }
+      router.push('/learn');
+    } catch {
+      // Network/server hiccup: don't strand the user on a spinning button.
+      setBusy(false);
       push({
-        type: 'reward',
-        title: 'Medal unlocked!',
-        sub: m.name,
-        icon: <Lightning weight="fill" />,
-      }),
-    );
-    if (res.streakMilestone) {
-      push({
-        type: 'info',
-        title: `${res.streakMilestone}-day streak!`,
-        icon: <Flame weight="fill" />,
+        type: 'error',
+        title: "Couldn't save your progress",
+        sub: 'Check your connection and try again.',
+        icon: <Warning weight="fill" />,
       });
     }
-    router.push('/learn');
   }
 
   if (completed) {
