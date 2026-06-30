@@ -1,3 +1,5 @@
+'use client';
+
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -37,6 +39,8 @@ export function Button({
   type = 'button',
   className,
   children,
+  onClick,
+  onKeyDown,
   ...props
 }: ButtonProps) {
   return (
@@ -50,9 +54,22 @@ export function Button({
         fa && 'fa',
         className,
       )}
-      disabled={disabled || loading}
+      // A4: while loading, stay focusable (don't drop out of the tab order) and
+      // keep an accessible name — use aria-disabled, not the native `disabled`,
+      // and block activation. aria-busy announces the pending state; the label
+      // remains in the a11y tree (CSS hides it with opacity, not visibility).
+      disabled={disabled}
+      aria-disabled={loading || undefined}
       aria-busy={loading || undefined}
       dir={fa ? 'rtl' : undefined}
+      onClick={loading ? (e) => e.preventDefault() : onClick}
+      onKeyDown={
+        loading
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') e.preventDefault();
+            }
+          : onKeyDown
+      }
       {...props}
     >
       <span className="btn__label">{children}</span>

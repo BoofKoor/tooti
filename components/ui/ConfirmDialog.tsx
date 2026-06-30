@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { useFocusTrap } from '@/lib/use-focus-trap';
 import { Button } from './Button';
 
 export interface ConfirmDialogProps {
@@ -31,6 +32,8 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -40,11 +43,16 @@ export function ConfirmDialog({
     return () => document.removeEventListener('keydown', onKey);
   }, [open, onCancel]);
 
+  // A1: trap Tab inside the dialog and restore focus to the trigger on close.
+  // (Focuses the first control — the Cancel button — so the safe choice leads.)
+  useFocusTrap(cardRef, open);
+
   if (!open) return null;
 
   return (
     <div className="confirm-scrim" role="presentation" onClick={onCancel}>
       <div
+        ref={cardRef}
         className="confirm-card"
         role="alertdialog"
         aria-modal="true"
@@ -61,7 +69,7 @@ export function ConfirmDialog({
           </p>
         ) : null}
         <div className="confirm-actions">
-          <Button variant="secondary" size="md" className="flex-1" autoFocus onClick={onCancel}>
+          <Button variant="secondary" size="md" className="flex-1" onClick={onCancel}>
             {cancelLabel}
           </Button>
           <Button

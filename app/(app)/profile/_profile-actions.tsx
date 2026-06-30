@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Check, Export, GearSix, SignOut } from '@phosphor-icons/react/dist/ssr';
 import { useToast } from '@/components/ui';
+import { useFocusTrap } from '@/lib/use-focus-trap';
 import { signOutAction } from '@/app/actions/auth';
 import { updateName } from '@/app/actions/profile';
 
@@ -18,6 +19,10 @@ export function ProfileActions({ currentName }: { currentName: string }) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const push = useToast();
+  const sheetRef = useRef<HTMLDivElement>(null);
+
+  // A1: trap Tab within the sheet and restore focus to the gear on close.
+  useFocusTrap(sheetRef, sheetOpen);
 
   useEffect(() => {
     if (!sheetOpen) return;
@@ -86,21 +91,29 @@ export function ProfileActions({ currentName }: { currentName: string }) {
       {sheetOpen ? (
         <>
           <div className="prof-sheet-scrim" onClick={closeSheet} />
-          <div className="prof-sheet" role="dialog" aria-modal="true" aria-label="Edit profile">
+          <div
+            ref={sheetRef}
+            className="prof-sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Edit profile"
+          >
             <div className="handle" />
             <h3 className="sh-title">Edit profile</h3>
             <form action={onSave}>
               <div className="prof-form">
                 <div className="prof-field">
-                  <span className="lbl">Name</span>
+                  <label className="lbl" htmlFor="prof-name">
+                    Name
+                  </label>
                   <input
+                    id="prof-name"
                     className="prof-input"
                     type="text"
                     name="name"
                     defaultValue={currentName}
                     maxLength={40}
                     dir="ltr"
-                    autoFocus
                   />
                   {error ? <span className="err">{error}</span> : null}
                 </div>

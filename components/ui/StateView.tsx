@@ -40,7 +40,13 @@ export function StateView({
   className,
 }: StateViewProps) {
   return (
-    <div className={cn('es', toneClass[tone], className)}>
+    // A3: an error state that swaps in dynamically must announce itself — role
+    // "alert" carries an implicit assertive live region. Empty states are not
+    // urgent, so they stay silent.
+    <div
+      className={cn('es', toneClass[tone], className)}
+      role={tone === 'error' ? 'alert' : undefined}
+    >
       {tag ? <span className="es-tag">{tag}</span> : null}
       {illustration ? <div className="es-art">{illustration}</div> : null}
       <h2 className="es-title">{title}</h2>
