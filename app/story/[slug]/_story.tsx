@@ -49,7 +49,10 @@ const stripMarks = (text: string) => text.replace(/\*\*/g, '');
  *  reads on the deeper voice, low pitch; the boy (tone b) reads on a lighter
  *  voice, pitched up; narration stays neutral. */
 function voiceForTone(tone: StoryTone): SpeakOptions {
-  if (tone === 'a') return { rate: 0.85, pitch: 0.8, character: 'man' };
+  // Pitch is gentle now: the man rides a real male voice (≈natural, only a touch
+  // low) instead of a female voice forced down into "a deep woman"; the boy is
+  // locked high on the light voice.
+  if (tone === 'a') return { rate: 0.85, pitch: 0.95, character: 'man' };
   if (tone === 'b') return { rate: 0.92, pitch: 1.5, character: 'boy' };
   return { rate: 0.85, character: 'narrator' };
 }
