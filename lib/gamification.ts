@@ -39,12 +39,17 @@ export const TEST_SAMPLE_SIZE = 10; // questions per SECTION_TEST attempt, drawn
 
 /** Forgiving on mechanics, strict on grammar (apostrophes matter: don't ≠ dont). */
 export function normalizeAnswer(s: string): string {
-  return s
-    .replace(/[’‘]/g, "'")
-    .trim()
-    .replace(/\s+/g, ' ')
-    .replace(/[.?!]$/, '')
-    .toLowerCase();
+  return (
+    s
+      .replace(/[’‘]/g, "'")
+      // Drop mechanical punctuation anywhere (→ space), not just a trailing .?!:
+      // a WORD_BANK/LISTEN sentence is built from tiles with no punctuation, so a
+      // canonical like "Yes, I do" must still match the built "Yes I do".
+      .replace(/[.,!?;:]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase()
+  );
 }
 
 export function answerMatches(input: string, canonical: string, accept: string[] = []): boolean {

@@ -154,7 +154,7 @@ export function LessonRunner({
   // Browser TTS for LISTEN items. Auto-play the sentence once when a listening
   // question first appears (and once more if voices resolve a beat late) — the
   // ref guards against re-speaking on every unrelated re-render.
-  const { status: speechStatus, speaking, speak } = useSpeech();
+  const { status: speechStatus, speaking, speak, cancel: cancelSpeech } = useSpeech();
   const autoplayedRef = useRef<number | null>(null);
   useEffect(() => {
     if (q.type === 'LISTEN' && speechStatus === 'ready' && autoplayedRef.current !== index) {
@@ -176,6 +176,24 @@ export function LessonRunner({
       correctTileRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }, [checked]);
+
+  // L1: a SECTION_TEST "Try again" re-draws questions server-side (restart() calls
+  // router.refresh(), delivering a fresh `questions`/`initialOrder`). The persisted
+  // tile order would otherwise stay bound to the OLD first question — blank /
+  // mismatched tiles and wrong scoring. Re-sync to the new draw on prop change,
+  // skipping the initial mount (state is already correct from the initializers).
+  const questionsRef = useRef(questions);
+  useEffect(() => {
+    if (questionsRef.current === questions) return;
+    questionsRef.current = questions;
+    setIndex(0);
+    setOrder(initialOrder ?? shuffledOrder(optionCount(questions[0])));
+    setSelected(null);
+    setTyped('');
+    setBuilt([]);
+    setChecked(false);
+    setLostHeart(null);
+  }, [questions, initialOrder]);
 
   const isCorrect =
     q.type === 'MCQ'
@@ -260,6 +278,7 @@ export function LessonRunner({
   }
 
   function next() {
+    cancelSpeech(); // L3: stop a still-playing LISTEN before moving on (no bleed)
     if (failed) {
       setOutOfHearts(true);
       return;
@@ -273,6 +292,7 @@ export function LessonRunner({
   }
 
   function restart() {
+    cancelSpeech();
     setIndex(0);
     resetQuestionState(questions[0]); // reshuffle — retries aren't memorizable by position
     setHearts(TOTAL_HEARTS);
