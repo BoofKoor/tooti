@@ -2525,7 +2525,11 @@
   .ex-header .ex-mascot {
     width: 60px;
     height: 60px;
-    background: radial-gradient(120% 120% at 50% 18%, #fff, var(--color-parrot-tint));
+    background: radial-gradient(
+      120% 120% at 50% 18%,
+      var(--color-surface),
+      var(--color-parrot-tint)
+    );
     border-radius: 50%;
     display: grid;
     place-items: center;
@@ -3599,20 +3603,6 @@
     align-items: center;
     gap: 10px;
   }
-  .prof-c .c-h .see-all {
-    font-family: var(--font-en);
-    font-weight: 800;
-    font-size: 11px;
-    color: var(--color-primary);
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
-  }
-  .prof[dir='rtl'] .prof-c .c-h .see-all {
-    font-family: var(--font-body-fa);
-    font-weight: 700;
-  }
 
   /* Achievements gallery — medal art only (styleguide has no per-medal labels);
      names are exposed to assistive tech via each Medal's aria-label. Scrolls
@@ -3621,10 +3611,24 @@
     display: flex;
     gap: var(--space-3);
     overflow-x: auto;
-    padding-block: var(--space-2) var(--space-1);
+    /* Generous block padding so each medal's celebratory chrome (NEW! ribbon,
+       halo, sparkles, percent pip — all overhanging the 64px piece by up to
+       14px) isn't clipped: overflow-x:auto forces overflow-y to auto too, so the
+       row would otherwise slice the top/bottom of those decorations. */
+    padding-block: var(--space-5);
+    /* Trailing room so the last medal's overhang + the fade clear the edge. */
+    padding-inline-end: var(--space-4);
+    /* Pull the row back so the extra block padding doesn't add vertical gaps. */
+    margin-block: calc(-1 * var(--space-3));
     scrollbar-width: none;
+    /* Trailing-edge fade hints "more beyond". gradient() takes only physical
+       directions, so the RTL flip is a dir-scoped override below. */
     -webkit-mask-image: linear-gradient(to right, #000 86%, transparent);
     mask-image: linear-gradient(to right, #000 86%, transparent);
+  }
+  .prof[dir='rtl'] .prof-ach-row {
+    -webkit-mask-image: linear-gradient(to left, #000 86%, transparent);
+    mask-image: linear-gradient(to left, #000 86%, transparent);
   }
   .prof-ach-row::-webkit-scrollbar {
     display: none;

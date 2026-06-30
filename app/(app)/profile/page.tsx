@@ -234,9 +234,6 @@ export default async function ProfilePage() {
           <div className="c-h">
             <span className="ttl">Achievements</span>
             <span className="ach-right">
-              <button type="button" className="see-all cursor-pointer border-0 bg-transparent">
-                See all ›
-              </button>
               <span className="sub">
                 {earnedCount} of {totalMedals}
               </span>
