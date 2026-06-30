@@ -22,11 +22,17 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   return (
     <div className="relative mx-auto flex h-dvh w-full max-w-app flex-col bg-bg">
       <main className="flex flex-1 flex-col overflow-y-auto">{children}</main>
-      {/* Floated over the scroll area so content passes under the frosted bar;
-          the wrapper is click-through except the bar itself. */}
+      {/* Docked to the VISUAL viewport bottom with position:fixed (not absolute
+          inside the h-dvh shell): in an in-app browser 100dvh can exceed the
+          visible area, the body then scrolls, and an in-flow absolute bar rides
+          up with it. Fixed pins the bar to the viewport — immune to body scroll
+          and to dynamic-toolbar jank — while mx-auto/max-w-app keeps it inside the
+          centered phone column. .app-tabbar-dock carries the z-index (fixed makes
+          its own stacking context, so it must out-rank the path node rings).
+          Click-through except the bar itself; content scrolls under the frost. */}
       <nav
         aria-label="Primary"
-        className="pointer-events-none absolute inset-x-0 bottom-0 px-4 pb-[env(safe-area-inset-bottom)]"
+        className="app-tabbar-dock pointer-events-none fixed inset-x-0 bottom-0 mx-auto max-w-app px-4 pb-[env(safe-area-inset-bottom)]"
       >
         <AppTabBar />
       </nav>

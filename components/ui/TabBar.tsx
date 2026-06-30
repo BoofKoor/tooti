@@ -51,7 +51,11 @@ export function TabBar({ tabs = defaultTabs, activeId, onTabChange, className }:
         <path d={d} />
       </svg>
       <span className="tabbar-dot" style={{ insetInlineStart: dotPos }} aria-hidden="true" />
-      <div className="tabbar-row" role="tablist">
+      {/* This is page navigation, not a tab/tabpanel widget: the buttons route
+          between screens. Use aria-current="page" on the active destination —
+          a tablist would promise roving-arrow-key semantics + tabpanels that
+          don't exist here. The wrapping <nav aria-label="Primary"> names it. */}
+      <div className="tabbar-row">
         {tabs.map((tab) => {
           const active = tab.id === activeId;
           const Icon = tab.icon;
@@ -59,8 +63,7 @@ export function TabBar({ tabs = defaultTabs, activeId, onTabChange, className }:
             <button
               key={tab.id}
               type="button"
-              role="tab"
-              aria-selected={active}
+              aria-current={active ? 'page' : undefined}
               className="tabbar-tab"
               data-active={active || undefined}
               onClick={() => onTabChange(tab.id)}
