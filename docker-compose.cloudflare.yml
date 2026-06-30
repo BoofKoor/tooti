@@ -1,0 +1,25 @@
+# Cloudflare Origin Certificate overlay.
+#
+# Serves Tooti behind a Cloudflare Origin Certificate instead of Caddy's
+# automatic Let's Encrypt. Cloudflare terminates the public TLS at its edge and
+# re-encrypts to this origin using the long-lived Origin cert you mint in the
+# Cloudflare dashboard (SSL/TLS → Origin Server → Create Certificate). Set the
+# zone's SSL/TLS mode to **Full (strict)** so the edge validates this cert.
+#
+# Use it as a second -f overlay on top of the base compose file:
+#   docker compose -f docker-compose.yml -f docker-compose.cloudflare.yml up -d --build
+#
+# scripts/install-cloudflare.sh writes the two files this references
+# (./certs/origin.{pem,key} and ./Caddyfile.cloudflare), then runs exactly that.
+#
+# `!override` replaces the base caddy `volumes` list outright (instead of the
+# default append-merge) so the Let's Encrypt Caddyfile mount is swapped for the
+# Cloudflare one with no duplicate /etc/caddy/Caddyfile mount. Requires Docker
+# Compose v2.24.4+ (the version installed by get.docker.com is newer).
+services:
+  caddy:
+    volumes: !override
+      - ./Caddyfile.cloudflare:/etc/caddy/Caddyfile:ro
+      - ./certs:/etc/caddy/certs:ro
+      - caddy-data:/data
+      - caddy-config:/config
