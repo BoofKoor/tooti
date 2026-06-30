@@ -4156,6 +4156,43 @@
     background: var(--color-surface);
     box-shadow: var(--shadow-1);
   }
+  /* Per-page "Listen" button — plays the whole page's audio (optional playback). */
+  .story-listen {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-pill);
+    border: 1.5px solid var(--color-primary);
+    background: var(--color-primary-tint);
+    color: var(--color-primary-ink);
+    font-family: var(--font-en);
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+    transition:
+      background var(--dur-fast) var(--ease-out),
+      transform var(--dur-fast) var(--ease-out);
+  }
+  .story-listen svg {
+    inline-size: 18px;
+    block-size: 18px;
+  }
+  .story-listen:hover {
+    background: color-mix(in srgb, var(--color-primary) 18%, transparent);
+  }
+  .story-listen:active {
+    transform: scale(0.97);
+  }
+  .story-listen.is-playing {
+    background: var(--color-primary);
+    color: var(--color-text-inverse);
+  }
+  .story-listen:focus-visible {
+    outline: var(--focus-ring) solid var(--color-primary);
+    outline-offset: 2px;
+  }
   /* Scene illustration revealed between story beats (kind: 'image'). */
   .story-illus {
     margin: 0;
