@@ -163,6 +163,13 @@ export function LessonRunner({
     }
   }, [index, q, speechStatus, speak]);
 
+  // Checking grows the pinned feedback panel, shrinking the question area; pull
+  // the correct option into view so it's never left hidden behind the panel.
+  const correctTileRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (checked) correctTileRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [checked]);
+
   const isCorrect =
     q.type === 'MCQ'
       ? selected !== null && order[selected] === q.correctIndex
@@ -336,6 +343,7 @@ export function LessonRunner({
               {order.map((orig, display) => (
                 <button
                   key={display}
+                  ref={checked && orig === question.correctIndex ? correctTileRef : undefined}
                   type="button"
                   className={cn('mcq-tile', tileClass(display))}
                   disabled={checked}
@@ -577,7 +585,7 @@ export function LessonRunner({
         </article>
       </div>
 
-      <div className="shrink-0 border-t border-border bg-surface px-4 pt-3 pb-[max(var(--space-4),env(safe-area-inset-bottom))]">
+      <div className="lesson-foot shrink-0 border-t border-border bg-surface px-4 pt-3 pb-[max(var(--space-4),env(safe-area-inset-bottom))]">
         {!checked ? (
           <Button
             variant="confirm"
