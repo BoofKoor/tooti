@@ -163,6 +163,20 @@ export function LessonRunner({
     }
   }, [index, q, speechStatus, speak]);
 
+  // The verdict banner lives in the sticky footer; on short screens it shrinks
+  // the question area. Start each new question at the top of the stage, and on
+  // Check scroll the correct tile into view so the answer is never below the fold.
+  const stageScrollRef = useRef<HTMLDivElement | null>(null);
+  const correctTileRef = useRef<HTMLButtonElement | null>(null);
+  useEffect(() => {
+    stageScrollRef.current?.scrollTo({ top: 0 });
+  }, [index]);
+  useEffect(() => {
+    if (checked) {
+      correctTileRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [checked]);
+
   const isCorrect =
     q.type === 'MCQ'
       ? selected !== null && order[selected] === q.correctIndex
@@ -336,6 +350,7 @@ export function LessonRunner({
               {order.map((orig, display) => (
                 <button
                   key={display}
+                  ref={orig === question.correctIndex ? correctTileRef : undefined}
                   type="button"
                   className={cn('mcq-tile', tileClass(display))}
                   disabled={checked}
@@ -562,7 +577,7 @@ export function LessonRunner({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4">
+      <div ref={stageScrollRef} className="flex-1 overflow-y-auto p-4">
         <article className="ex-stage" dir="ltr">
           <div className="ex-header">
             <div className="ex-mascot">
@@ -577,7 +592,7 @@ export function LessonRunner({
         </article>
       </div>
 
-      <div className="shrink-0 border-t border-border bg-surface px-4 pt-3 pb-[max(var(--space-4),env(safe-area-inset-bottom))]">
+      <div className="lesson-foot shrink-0 border-t border-border bg-surface px-4 pt-3 pb-[max(var(--space-4),env(safe-area-inset-bottom))]">
         {!checked ? (
           <Button
             variant="confirm"

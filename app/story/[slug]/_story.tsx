@@ -77,8 +77,8 @@ function QuestionCard({
   // Identity order until the player initializes (and shuffles) this step's state.
   const order = cs?.order ?? step.options.map((_, i) => i);
   const checked = !!cs?.checked;
-  const correct =
-    checked && cs != null && cs.selected != null && cs.order[cs.selected] === step.correctIndex;
+  // The verdict + explanation render in the sticky footer panel (see the player
+  // footer), so the card itself only colours the tiles once answered.
   return (
     <div className="story-q">
       <Text variant="caption" className="uppercase tracking-wider text-text-3">
@@ -101,22 +101,6 @@ function QuestionCard({
           </button>
         ))}
       </div>
-      {checked ? (
-        <div className={cn('story-fb', correct ? 'is-correct' : 'is-incorrect')}>
-          <div className="story-fb-title en">{correct ? 'Nice!' : 'Not quite'}</div>
-          {!correct ? (
-            <div className="story-fb-correct">
-              Correct:{' '}
-              <bdi>
-                <b>{step.options[step.correctIndex]}</b>
-              </bdi>
-            </div>
-          ) : null}
-          <div className="story-fb-explain fa" dir="rtl">
-            {step.explanationFa}
-          </div>
-        </div>
-      ) : null}
     </div>
   );
 }
@@ -156,10 +140,24 @@ export function StoryPlayer({
   }, [cursor, steps, speechStatus, speak]);
 
   const top = steps[cursor];
-  const topIsQuestion = top?.kind === 'q';
+  const topQuestion: QuestionStep | null = top && top.kind === 'q' ? top : null;
   const topCs = answers[cursor] ?? null;
-  const needsCheck = topIsQuestion && !topCs?.checked;
+  const needsCheck = !!topQuestion && !topCs?.checked;
   const isLastStep = cursor >= total - 1;
+  const topChecked = !!topQuestion && !!topCs?.checked;
+  const topCorrect =
+    topChecked &&
+    topCs != null &&
+    topCs.selected != null &&
+    topCs.order[topCs.selected] === topQuestion?.correctIndex;
+
+  // Chat-style auto-scroll: keep the newest revealed line/check (and its footer
+  // verdict) in view, like a messaging thread, so nothing hides under the fold.
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+  }, [cursor, topChecked]);
 
   function advance() {
     const next = cursor + 1;
@@ -210,7 +208,7 @@ export function StoryPlayer({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4">
         <article className="story-stage" dir="ltr">
           <header className="story-head">
             <Text variant="section" as="h1">
@@ -255,8 +253,40 @@ export function StoryPlayer({
         </article>
       </div>
 
-      <div className="shrink-0 border-t border-border bg-surface px-4 pt-3 pb-[max(var(--space-4),env(safe-area-inset-bottom))]">
-        {needsCheck ? (
+      <div className="lesson-foot shrink-0 border-t border-border bg-surface px-4 pt-3 pb-[max(var(--space-4),env(safe-area-inset-bottom))]">
+        {/* Answered check → verdict panel pinned in the footer (mirrors the
+            runner/study), always fully visible above the nav. The Continue /
+            Finish action lives inside the panel. */}
+        {topChecked && topQuestion ? (
+          <div className={cn('fb-banner', topCorrect ? 'fb-correct' : 'fb-incorrect')}>
+            <div className="fb-mascot">
+              <Mascot pose={topCorrect ? 'celebrate' : 'reassure'} />
+            </div>
+            <div className="fb-text">
+              <div className="fb-title en">{topCorrect ? 'Nice!' : 'Not quite'}</div>
+              {!topCorrect ? (
+                <div className="fb-correct-line">
+                  Correct:{' '}
+                  <bdi>
+                    <b>{topQuestion.options[topQuestion.correctIndex]}</b>
+                  </bdi>
+                </div>
+              ) : null}
+              <div className="fb-explain fa" dir="rtl">
+                {topQuestion.explanationFa}
+              </div>
+            </div>
+            <div className="fb-action">
+              {isLastStep ? (
+                <StoryCompleteButton slug={slug} completed={completed} />
+              ) : (
+                <Button variant="primary" size="lg" onClick={advance}>
+                  Continue
+                </Button>
+              )}
+            </div>
+          </div>
+        ) : needsCheck ? (
           <Button
             variant="confirm"
             size="lg"

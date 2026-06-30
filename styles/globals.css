@@ -2761,6 +2761,20 @@
       inline-size: 100%;
     }
   }
+  /* Feedback banner hosted in the sticky lesson footer (runner / study / story).
+     The footer already supplies the spacing above it, and a long explanation must
+     never grow the panel past the viewport (it would push the Continue action
+     under the browser/nav chrome), so the explanation scrolls inside the panel
+     while the verdict, correct line, and action stay pinned and always visible. */
+  .lesson-foot .fb-banner {
+    margin-top: 0;
+  }
+  .lesson-foot .fb-banner .fb-explain,
+  .lesson-foot .fb-banner .fb-correct-line {
+    overflow-y: auto;
+    max-block-size: min(28dvh, 180px);
+    overscroll-behavior: contain;
+  }
   .scr-lesson {
     display: flex;
     flex-direction: column;
@@ -4134,42 +4148,6 @@
     border-radius: var(--radius-xl);
     background: var(--color-surface);
     box-shadow: var(--shadow-1);
-  }
-  .story-fb {
-    padding: var(--space-3) var(--space-4);
-    border-radius: var(--radius-lg);
-  }
-  .story-fb.is-correct {
-    background: var(--color-correct-tint);
-  }
-  .story-fb.is-incorrect {
-    background: var(--color-error-tint);
-  }
-  .story-fb-title {
-    font-family: var(--font-en);
-    font-weight: 800;
-    font-size: 15px;
-  }
-  .story-fb.is-correct .story-fb-title {
-    color: var(--color-correct-ink);
-  }
-  .story-fb.is-incorrect .story-fb-title {
-    color: var(--color-error-ink);
-  }
-  .story-fb-correct {
-    margin-block-start: var(--space-1);
-    font-size: 14px;
-    color: var(--color-text-2);
-  }
-  .story-fb-correct b {
-    color: var(--color-text-1);
-    font-weight: 700;
-  }
-  .story-fb-explain {
-    margin-block-start: var(--space-1);
-    font-size: 13px;
-    line-height: 1.5;
-    color: var(--color-text-2);
   }
   .story-end {
     display: flex;

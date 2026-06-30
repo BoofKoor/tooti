@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { SectionKind } from '@prisma/client';
 import { ArrowSquareOut, Play, X } from '@phosphor-icons/react/dist/ssr';
@@ -100,6 +100,16 @@ export function StudyReader({
     cs.checked &&
     cs.selected !== null &&
     cs.order[cs.selected] === check.correctIndex;
+
+  // The feedback panel now lives in the sticky footer, so on Check the correct
+  // tile can fall below the (taller) footer fold on short screens. Scroll it
+  // into view so the answer is always seen without a manual scroll.
+  const correctTileRef = useRef<HTMLButtonElement | null>(null);
+  useEffect(() => {
+    if (cs?.checked) {
+      correctTileRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [cs?.checked, index]);
 
   function goTo(i: number) {
     setChecks((m) => {
@@ -290,6 +300,7 @@ export function StudyReader({
                     {cs.order.map((orig, display) => (
                       <button
                         key={display}
+                        ref={check.correctIndex === orig ? correctTileRef : undefined}
                         type="button"
                         className={cn('mcq-tile', checkTileClass(display))}
                         disabled={cs.checked}
@@ -302,27 +313,6 @@ export function StudyReader({
                       </button>
                     ))}
                   </div>
-                  {cs.checked ? (
-                    <div className={cn('fb-banner', checkCorrect ? 'fb-correct' : 'fb-incorrect')}>
-                      <div className="fb-mascot">
-                        <Mascot pose={checkCorrect ? 'celebrate' : 'reassure'} />
-                      </div>
-                      <div className="fb-text">
-                        <div className="fb-title en">{checkCorrect ? 'Nice!' : 'Not quite'}</div>
-                        {!checkCorrect ? (
-                          <div className="fb-correct-line">
-                            Correct:{' '}
-                            <bdi>
-                              <b>{check.options[check.correctIndex]}</b>
-                            </bdi>
-                          </div>
-                        ) : null}
-                        <div className="fb-explain fa" dir="rtl">
-                          {check.explanationFa}
-                        </div>
-                      </div>
-                    </div>
-                  ) : null}
                 </div>
               ) : null}
             </>
@@ -330,42 +320,76 @@ export function StudyReader({
         </article>
       </div>
 
-      <div className="shrink-0 border-t border-border bg-surface px-4 pt-3 pb-[max(var(--space-4),env(safe-area-inset-bottom))]">
-        <div className="flex items-center gap-3">
-          {index > 0 ? (
-            <Button variant="secondary" size="lg" onClick={() => goTo(index - 1)}>
-              Back
-            </Button>
-          ) : null}
-          {/* Single bottom CTA (mirrors the lesson runner / story player): a
-              section's Quick check is answered via this same button — it reads
-              "Check" until the check is confirmed, then becomes Continue/Finish.
-              No competing inline button. */}
-          {gated ? (
-            <Button
-              variant="confirm"
-              size="lg"
-              className="min-w-0 flex-1"
-              disabled={cs?.selected == null}
-              onClick={confirmCheck}
-            >
-              Check
-            </Button>
-          ) : isLast ? (
-            <div className="min-w-0 flex-1">
-              <ContinueButton slug={slug} completed={completed} />
+      <div className="lesson-foot shrink-0 border-t border-border bg-surface px-4 pt-3 pb-[max(var(--space-4),env(safe-area-inset-bottom))]">
+        {/* Once a Quick check is answered, the result + explanation live here in
+            the sticky footer (not inline in the scroll flow) so they're always
+            fully visible above the browser/nav chrome — no scrolling to read the
+            verdict. The Continue/Finish action lives inside the panel. */}
+        {check && cs?.checked ? (
+          <div className={cn('fb-banner', checkCorrect ? 'fb-correct' : 'fb-incorrect')}>
+            <div className="fb-mascot">
+              <Mascot pose={checkCorrect ? 'celebrate' : 'reassure'} />
             </div>
-          ) : (
-            <Button
-              variant="primary"
-              size="lg"
-              className="min-w-0 flex-1"
-              onClick={() => goTo(index + 1)}
-            >
-              Continue
-            </Button>
-          )}
-        </div>
+            <div className="fb-text">
+              <div className="fb-title en">{checkCorrect ? 'Nice!' : 'Not quite'}</div>
+              {!checkCorrect ? (
+                <div className="fb-correct-line">
+                  Correct:{' '}
+                  <bdi>
+                    <b>{check.options[check.correctIndex]}</b>
+                  </bdi>
+                </div>
+              ) : null}
+              <div className="fb-explain fa" dir="rtl">
+                {check.explanationFa}
+              </div>
+            </div>
+            <div className="fb-action">
+              {isLast ? (
+                <ContinueButton slug={slug} completed={completed} />
+              ) : (
+                <Button variant="primary" size="lg" onClick={() => goTo(index + 1)}>
+                  Continue
+                </Button>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3">
+            {index > 0 ? (
+              <Button variant="secondary" size="lg" onClick={() => goTo(index - 1)}>
+                Back
+              </Button>
+            ) : null}
+            {/* Single bottom CTA (mirrors the lesson runner / story player): a
+                section's Quick check is answered via this same button — it reads
+                "Check" until confirmed, then the panel above takes over. */}
+            {gated ? (
+              <Button
+                variant="confirm"
+                size="lg"
+                className="min-w-0 flex-1"
+                disabled={cs?.selected == null}
+                onClick={confirmCheck}
+              >
+                Check
+              </Button>
+            ) : isLast ? (
+              <div className="min-w-0 flex-1">
+                <ContinueButton slug={slug} completed={completed} />
+              </div>
+            ) : (
+              <Button
+                variant="primary"
+                size="lg"
+                className="min-w-0 flex-1"
+                onClick={() => goTo(index + 1)}
+              >
+                Continue
+              </Button>
+            )}
+          </div>
+        )}
       </div>
 
       <ConfirmDialog
