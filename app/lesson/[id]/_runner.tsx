@@ -10,9 +10,10 @@ import {
   Lightning,
   SpeakerHigh,
   SpeakerLow,
+  Warning,
   X,
 } from '@phosphor-icons/react/dist/ssr';
-import { Button, Mascot, Text, useToast } from '@/components/ui';
+import { Button, ConfirmDialog, Mascot, Text, useToast } from '@/components/ui';
 import { completeLesson, type CompleteResult } from '@/app/actions/gamification';
 import { TOTAL_HEARTS, answerMatches, shuffledOrder } from '@/lib/gamification';
 import { useReducedMotion } from '@/lib/use-reduced-motion';
@@ -146,6 +147,7 @@ export function LessonRunner({
   const [finishing, setFinishing] = useState(false);
   const [result, setResult] = useState<CompleteResult | null>(null);
   const [done, setDone] = useState(false);
+  const [confirmExit, setConfirmExit] = useState(false);
 
   const q = questions[index];
 
@@ -195,31 +197,43 @@ export function LessonRunner({
     setFinishing(true);
     // IANA tz from the browser; the action falls back to Asia/Tehran.
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const res = await completeLesson({
-      slug,
-      correctCount,
-      totalCount: questions.length,
-      heartsLeft: hearts,
-      timezone: tz,
-    });
-    setResult(res);
-    res.newMedals.forEach((m) =>
-      push({
-        type: 'reward',
-        title: 'Medal unlocked!',
-        sub: m.name,
-        icon: <Lightning weight="fill" />,
-      }),
-    );
-    if (res.streakMilestone) {
-      push({
-        type: 'info',
-        title: `${res.streakMilestone}-day streak!`,
-        icon: <Flame weight="fill" />,
+    try {
+      const res = await completeLesson({
+        slug,
+        correctCount,
+        totalCount: questions.length,
+        heartsLeft: hearts,
+        timezone: tz,
       });
+      setResult(res);
+      res.newMedals.forEach((m) =>
+        push({
+          type: 'reward',
+          title: 'Medal unlocked!',
+          sub: m.name,
+          icon: <Lightning weight="fill" />,
+        }),
+      );
+      if (res.streakMilestone) {
+        push({
+          type: 'info',
+          title: `${res.streakMilestone}-day streak!`,
+          icon: <Flame weight="fill" />,
+        });
+      }
+      setDone(true);
+    } catch {
+      // Network/server hiccup: surface it and let them retry instead of leaving
+      // the Continue button spinning forever.
+      push({
+        type: 'error',
+        title: "Couldn't save your lesson",
+        sub: 'Check your connection and try again.',
+        icon: <Warning weight="fill" />,
+      });
+    } finally {
+      setFinishing(false);
     }
-    setFinishing(false);
-    setDone(true);
   }
 
   function resetQuestionState(nextQuestion: Question) {
@@ -530,7 +544,9 @@ export function LessonRunner({
           type="button"
           className="close"
           aria-label="Close lesson"
-          onClick={() => router.push('/learn')}
+          onClick={() =>
+            index > 0 || checked || correctCount > 0 ? setConfirmExit(true) : router.push('/learn')
+          }
         >
           <X weight="bold" />
         </button>
@@ -611,6 +627,16 @@ export function LessonRunner({
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={confirmExit}
+        title="Leave the lesson?"
+        body="Your progress on this lesson won't be saved."
+        confirmLabel="Leave"
+        cancelLabel="Keep going"
+        onConfirm={() => router.push('/learn')}
+        onCancel={() => setConfirmExit(false)}
+      />
     </div>
   );
 }

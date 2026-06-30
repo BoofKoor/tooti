@@ -4634,6 +4634,59 @@
   }
 }
 
+/* ─── Confirm dialog (ConfirmDialog) — guards destructive navigation such as
+   quitting a lesson mid-flow. Centered card over a dimming scrim, above the
+   full-screen lesson shell. ─── */
+@layer components {
+  .confirm-scrim {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: var(--space-6);
+    background: rgba(20, 28, 50, 0.36);
+    z-index: 50;
+    animation: prof-fade-in 180ms ease-out;
+  }
+  .confirm-card {
+    inline-size: 100%;
+    max-inline-size: 360px;
+    background: var(--color-surface);
+    border: var(--border-hairline) solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-4);
+    animation: prof-sheet-up 240ms var(--ease-spring);
+  }
+  .confirm-title {
+    font-family: var(--font-en);
+    font-weight: 900;
+    font-size: 19px;
+    line-height: 1.25;
+    color: var(--color-text-1);
+    margin: 0;
+  }
+  .confirm-body {
+    font-family: var(--font-en);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-text-2);
+    margin: var(--space-2) 0 0;
+  }
+  .confirm-actions {
+    display: flex;
+    gap: var(--space-3);
+    margin-block-start: var(--space-6);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confirm-scrim,
+  .confirm-card {
+    animation: none;
+  }
+}
+
 /* ─── Lesson-complete pilot — ported verbatim from design/styleguide.html
    (.lesson-complete "the big moment"). Stat-focused celebration; medals still
    surface as toasts. Confetti (Phase 6) mounts inside data-confetti-host. ─── */

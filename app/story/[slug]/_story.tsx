@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SpeakerHigh, X } from '@phosphor-icons/react/dist/ssr';
-import { Button, Mascot, Text } from '@/components/ui';
+import { Button, ConfirmDialog, Mascot, Text } from '@/components/ui';
 import { shuffledOrder } from '@/lib/gamification';
 import type { StoryStep } from '@/lib/lesson-content';
 import { useSpeech } from '@/lib/use-speech';
@@ -140,6 +140,7 @@ export function StoryPlayer({
   const total = Math.max(steps.length, 1);
   const [cursor, setCursor] = useState(0); // index of the last revealed step
   const [answers, setAnswers] = useState<Record<number, QState>>({});
+  const [confirmExit, setConfirmExit] = useState(false);
 
   const { status: speechStatus, speak } = useSpeech();
 
@@ -194,7 +195,7 @@ export function StoryPlayer({
           type="button"
           className="close"
           aria-label="Close story"
-          onClick={() => router.push('/learn')}
+          onClick={() => (cursor > 0 ? setConfirmExit(true) : router.push('/learn'))}
         >
           <X weight="bold" />
         </button>
@@ -273,6 +274,16 @@ export function StoryPlayer({
           </Button>
         )}
       </div>
+
+      <ConfirmDialog
+        open={confirmExit}
+        title="Leave the story?"
+        body="You'll start this story from the beginning next time."
+        confirmLabel="Leave"
+        cancelLabel="Keep reading"
+        onConfirm={() => router.push('/learn')}
+        onCancel={() => setConfirmExit(false)}
+      />
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { Fragment, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { SectionKind } from '@prisma/client';
 import { ArrowSquareOut, Play, X } from '@phosphor-icons/react/dist/ssr';
-import { Button, Card, Mascot, Text } from '@/components/ui';
+import { Button, Card, ConfirmDialog, Mascot, Text } from '@/components/ui';
 import { shuffledOrder } from '@/lib/gamification';
 import type { SectionContent } from '@/lib/lesson-content';
 import { fa } from '@/lib/i18n/fa';
@@ -79,6 +79,7 @@ export function StudyReader({
 }) {
   const router = useRouter();
   const [index, setIndex] = useState(0);
+  const [confirmExit, setConfirmExit] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [checks, setChecks] = useState<Record<number, CheckState>>(
     (): Record<number, CheckState> => {
@@ -257,7 +258,7 @@ export function StudyReader({
           type="button"
           className="close"
           aria-label="Close lesson"
-          onClick={() => router.push('/learn')}
+          onClick={() => (index > 0 ? setConfirmExit(true) : router.push('/learn'))}
         >
           <X weight="bold" />
         </button>
@@ -301,17 +302,7 @@ export function StudyReader({
                       </button>
                     ))}
                   </div>
-                  {!cs.checked ? (
-                    <Button
-                      variant="confirm"
-                      size="md"
-                      className="w-full"
-                      disabled={cs.selected === null}
-                      onClick={confirmCheck}
-                    >
-                      Check
-                    </Button>
-                  ) : (
+                  {cs.checked ? (
                     <div className={cn('fb-banner', checkCorrect ? 'fb-correct' : 'fb-incorrect')}>
                       <div className="fb-mascot">
                         <Mascot pose={checkCorrect ? 'celebrate' : 'reassure'} />
@@ -331,7 +322,7 @@ export function StudyReader({
                         </div>
                       </div>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               ) : null}
             </>
@@ -346,7 +337,21 @@ export function StudyReader({
               Back
             </Button>
           ) : null}
-          {isLast && !gated ? (
+          {/* Single bottom CTA (mirrors the lesson runner / story player): a
+              section's Quick check is answered via this same button — it reads
+              "Check" until the check is confirmed, then becomes Continue/Finish.
+              No competing inline button. */}
+          {gated ? (
+            <Button
+              variant="confirm"
+              size="lg"
+              className="min-w-0 flex-1"
+              disabled={cs?.selected == null}
+              onClick={confirmCheck}
+            >
+              Check
+            </Button>
+          ) : isLast ? (
             <div className="min-w-0 flex-1">
               <ContinueButton slug={slug} completed={completed} />
             </div>
@@ -355,7 +360,6 @@ export function StudyReader({
               variant="primary"
               size="lg"
               className="min-w-0 flex-1"
-              disabled={gated}
               onClick={() => goTo(index + 1)}
             >
               Continue
@@ -363,6 +367,16 @@ export function StudyReader({
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={confirmExit}
+        title="Leave the lesson?"
+        body="You'll start this lesson from the beginning next time."
+        confirmLabel="Leave"
+        cancelLabel="Keep reading"
+        onConfirm={() => router.push('/learn')}
+        onCancel={() => setConfirmExit(false)}
+      />
     </div>
   );
 }
