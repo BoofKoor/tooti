@@ -973,14 +973,17 @@
  * generated in the component (SVG-artwork exemption); styling is token-only.
  */
 @layer components {
+  /* The fixed dock owns the stacking order now (position:fixed makes its own
+     stacking context). z-index:30 keeps the whole bar above the path node rings
+     (z-index:1). Set in CSS, not a Tailwind z-* class — this build emits no
+     z-index utility rules. */
+  .app-tabbar-dock {
+    z-index: 30;
+  }
   .tabbar {
     position: relative;
-    /* Lift the whole bar (frost + pill + dot + icons) above scrolling path
-       nodes, whose decorative ::before is promoted to z-index:1 at the root
-       stacking context. Set here in CSS, not via a Tailwind z-* class, because
-       this project's build emits no z-index utility rules. The absolute <nav>
-       wrapper is z-index:auto (no stacking context), so this 30 promotes to the
-       same root context as the node rings and wins (30 > 1). */
+    /* Inherited layering inside the dock's stacking context (frost · pill · dot ·
+       icons layer above one another via the z-index values below). */
     z-index: 30;
     width: 100%;
     max-width: var(--tabbar-w);
