@@ -45,12 +45,13 @@ function highlightSpans(text: string) {
 /** Drop the highlight markers before a line is spoken aloud. */
 const stripMarks = (text: string) => text.replace(/\*\*/g, '');
 
-/** Two related TTS voices + a slower learner rate: the man (tone a) reads low,
- *  the boy (tone b) reads high on a second voice, narration stays neutral. */
+/** A man's voice and a boy's voice, at a slower learner rate: the coach (tone a)
+ *  reads on the deeper voice, low pitch; the boy (tone b) reads on a lighter
+ *  voice, pitched up; narration stays neutral. */
 function voiceForTone(tone: StoryTone): SpeakOptions {
-  if (tone === 'a') return { rate: 0.8, pitch: 0.8 };
-  if (tone === 'b') return { rate: 0.84, pitch: 1.35, alt: true };
-  return { rate: 0.8 };
+  if (tone === 'a') return { rate: 0.85, pitch: 0.8, character: 'man' };
+  if (tone === 'b') return { rate: 0.92, pitch: 1.5, character: 'boy' };
+  return { rate: 0.85, character: 'narrator' };
 }
 
 function StoryImage({ step }: { step: ImageStep }) {
@@ -266,9 +267,11 @@ export function StoryPlayer({
             <Text variant="section" as="h1">
               {titleEn}
             </Text>
-            <Text variant="caption" fa className="text-text-2">
-              {titleFa}
-            </Text>
+            {titleFa ? (
+              <Text variant="caption" fa className="text-text-2">
+                {titleFa}
+              </Text>
+            ) : null}
           </header>
 
           {steps.slice(0, cursor + 1).map((step, i) => {
