@@ -17,6 +17,11 @@
 .DS_Store
 *.pem
 
+# TLS material + generated deploy artifacts (Cloudflare Origin install)
+/certs/
+*.key
+Caddyfile.cloudflare
+
 # debug
 npm-debug.log*
 yarn-debug.log*

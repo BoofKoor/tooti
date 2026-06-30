@@ -29,8 +29,11 @@ export interface ToastProps {
  * animation classes for that layer to apply.
  */
 export function Toast({ type, title, sub, icon, onClose, className }: ToastProps) {
+  // Each toast is its own live region (the stack is NOT, to avoid nesting):
+  // errors interrupt as an assertive alert, everything else is announced politely.
+  const role = type === 'error' ? 'alert' : 'status';
   return (
-    <div className={cn('toast', typeClass[type], className)} role="status">
+    <div className={cn('toast', typeClass[type], className)} role={role}>
       <span className="toast__chip" aria-hidden="true">
         {icon}
       </span>

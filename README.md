@@ -119,4 +119,29 @@ To do it by hand instead:
 4. **Updates:** `git pull && docker compose up -d --build` — the `migrate` one-shot
    re-runs migrations + seed each deploy (idempotent).
 
+### Behind a Cloudflare Origin Certificate
+
+If the domain is proxied through Cloudflare (orange cloud), serve a long-lived
+**Cloudflare Origin Certificate** at the origin instead of Let's Encrypt.
+Cloudflare terminates public TLS at its edge and re-encrypts to this server.
+
+```bash
+git clone https://github.com/BoofKoor/tooti.git && cd tooti && ./scripts/install-cloudflare.sh
+```
+
+The script prompts, in order, for your **domain**, the **Origin Certificate**, and
+the **Private Key** (each as a file path or pasted PEM). It validates that the key
+matches the cert, writes them to `./certs` (`0600`, git-ignored), generates
+`Caddyfile.cloudflare` with a `tls` directive (no ACME), and brings the stack up
+with the Cloudflare overlay:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.cloudflare.yml up -d --build
+```
+
+Mint the cert in Cloudflare under **SSL/TLS → Origin Server → Create Certificate**,
+add a **Proxied** `A`/`AAAA` record for the domain → this server's IP, and set the
+zone's SSL/TLS mode to **Full (strict)**. Re-running reuses the saved `.env` + certs.
+For best hygiene, restrict inbound `80`/`443` to Cloudflare's published IP ranges.
+
 The full account/DNS/OAuth runbook lives with the Phase 7 plan in [`design/`](./design).
