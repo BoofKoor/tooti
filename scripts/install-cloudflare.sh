@@ -82,13 +82,16 @@ confirm() {
   esac
 }
 
-# Read a multi-line PEM pasted on stdin, terminated by a line containing only
-# "END". Echoes the captured block on stdout.
+# Read a PEM block pasted on stdin and echo it. Stops automatically right after
+# the block's own "-----END …-----" line, so there's no sentinel to remember —
+# you just paste the cert/key. (A bare "END" line also stops it, as a fallback.)
 read_pem_paste() {
   local line block=""
   while IFS= read -r line; do
-    [ "$line" = "END" ] && break
     block+="$line"$'\n'
+    case "$line" in
+      *-----END*-----* | END) break ;;
+    esac
   done
   printf '%s' "$block"
 }
@@ -253,8 +256,46 @@ handle_env() {
 }
 
 # ── 2 + 3: Origin Certificate and Private Key ──
-# Accept either a path to an existing PEM file or a pasted PEM block. Writes
-# them to ./certs with 0600 and validates that the key matches the cert.
+# Collect one PEM (cert or key) into $2. Default is to paste it right here; the
+# paste auto-stops at the block's own -----END …----- line. You can also point
+# at a file (default path ./certs/origin.*). Robust to mis-input: a bad path
+# re-prompts, and a PEM pasted straight at the menu is detected and captured —
+# nothing is ever treated as a shell command, so a mis-paste can't crash the run.
+collect_pem() {
+  local label="$1" dest="$2" answer path
+  while true; do
+    answer="$(ask "${label} — [P]aste it here now, or give a [f]ile path?" 'P')"
+    case "$answer" in
+      [Pp] | [Pp]aste | paste | '')
+        info "Paste the ${label} now (include the BEGIN and END lines):"
+        read_pem_paste >"$dest"
+        break
+        ;;
+      [Ff] | [Ff]ile | file | path)
+        path="$(ask "Path to the ${label} file" "$dest")"
+        if [ -f "$path" ]; then
+          [ "$path" = "$dest" ] || cp "$path" "$dest"
+          break
+        fi
+        warn "No such file: $path — let's try again."
+        ;;
+      *-----BEGIN*)
+        # Someone pasted the PEM straight at the menu: keep this first line and
+        # read the rest of the block from the same paste.
+        {
+          printf '%s\n' "$answer"
+          read_pem_paste
+        } >"$dest"
+        break
+        ;;
+      *)
+        warn "Please answer P (paste) or f (file path)."
+        ;;
+    esac
+  done
+  chmod 600 "$dest"
+}
+
 collect_cert() {
   section "Cloudflare Origin Certificate"
 
@@ -267,40 +308,12 @@ collect_cert() {
   fi
 
   info "In Cloudflare: SSL/TLS → Origin Server → Create Certificate (PEM)."
-  info "You can give a file path on this server, or paste the PEM (end with a line: END)."
   mkdir -p "$CERT_DIR"
   chmod 700 "$CERT_DIR"
   umask 077
 
-  # --- Origin Certificate ---
-  local cert_path
-  cert_path="$(ask 'Path to the Origin Certificate file (Enter to paste instead)' '')"
-  if [ -n "$cert_path" ]; then
-    [ -f "$cert_path" ] || {
-      err "No such file: $cert_path"
-      exit 1
-    }
-    cp "$cert_path" "$CERT_FILE"
-  else
-    info "Paste the Origin Certificate (-----BEGIN CERTIFICATE----- … END line):"
-    read_pem_paste >"$CERT_FILE"
-  fi
-  chmod 600 "$CERT_FILE"
-
-  # --- Private Key ---
-  local key_path
-  key_path="$(ask 'Path to the Private Key file (Enter to paste instead)' '')"
-  if [ -n "$key_path" ]; then
-    [ -f "$key_path" ] || {
-      err "No such file: $key_path"
-      exit 1
-    }
-    cp "$key_path" "$KEY_FILE"
-  else
-    info "Paste the Private Key (-----BEGIN PRIVATE KEY----- … END line):"
-    read_pem_paste >"$KEY_FILE"
-  fi
-  chmod 600 "$KEY_FILE"
+  collect_pem "Origin Certificate" "$CERT_FILE"
+  collect_pem "Private Key" "$KEY_FILE"
 
   ok "Saved certificate and key to ./${CERT_DIR} (0600)."
   validate_cert
