@@ -4578,6 +4578,228 @@
   }
 }
 
+/* ─── Important-Notes stage — themed reference sections (single scroll) ─── */
+@layer components {
+  .notes-guide {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    max-inline-size: 40rem;
+    margin-inline: auto;
+  }
+  .notes-heading {
+    font-family: var(--font-en);
+    font-weight: 900;
+    font-size: 22px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--color-text-1);
+  }
+  /* Each section is a card. */
+  .notes-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-1);
+  }
+  /* Section title — green. */
+  .notes-title {
+    font-family: var(--font-en);
+    font-weight: 800;
+    font-size: 18px;
+    line-height: 1.25;
+    color: var(--color-correct);
+  }
+  .notes-text {
+    font-family: var(--font-en);
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--color-text-1);
+  }
+  /* Highlighted inline span (<b>) — a soft teal "highlighter" pen. */
+  .note-hl {
+    background: var(--color-primary-tint);
+    color: var(--color-primary-ink);
+    font-weight: 800;
+    padding: 0 3px;
+    border-radius: var(--radius-xs);
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+  .notes-ex {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  /* "Examples:" label — gold. */
+  .notes-ex-label {
+    font-family: var(--font-en);
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    color: var(--color-xp);
+  }
+  .notes-ex-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .notes-ex-list li {
+    position: relative;
+    padding-inline-start: var(--space-4);
+    font-family: var(--font-en);
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--color-text-1);
+  }
+  .notes-ex-list li::before {
+    content: '•';
+    position: absolute;
+    inset-inline-start: 0;
+    color: var(--color-primary);
+    font-weight: 900;
+  }
+  /* Spelling transformations: "study → studies" chips. */
+  .notes-transforms {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .notes-transforms li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-en);
+    font-size: 15px;
+  }
+  .notes-transforms .tf-from {
+    color: var(--color-text-2);
+  }
+  .notes-transforms .tf-arrow {
+    color: var(--color-primary);
+    font-weight: 900;
+  }
+  .notes-transforms .tf-to {
+    font-weight: 800;
+    color: var(--color-text-1);
+  }
+  /* Pattern / formula box (e.g. the negative-question structure). */
+  .notes-formula {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-2);
+    border: 1px dashed var(--color-border-strong);
+  }
+  .notes-formula-label {
+    font-family: var(--font-en);
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--color-text-3);
+  }
+  .notes-formula-text {
+    font-family: var(--font-en);
+    font-weight: 800;
+    font-size: 16px;
+    color: var(--color-text-1);
+  }
+  /* Themed illustration + optional caption. */
+  .notes-illus {
+    margin: var(--space-1) 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(180deg, #eafaf7, #dff5f1);
+    border: 1px solid var(--color-border);
+  }
+  .notes-illus img {
+    display: block;
+    inline-size: auto;
+    block-size: auto;
+    /* Cap both dimensions so the wide frequency chart stays legible while the
+       taller character illustrations don't overpower the card. */
+    max-inline-size: 100%;
+    max-block-size: 150px;
+    object-fit: contain;
+  }
+  .notes-caption {
+    font-family: var(--font-en);
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
+    /* Pinned deep-teal (not the theme-aware token): the caption sits on the
+       .notes-illus mint chip that stays light in BOTH themes, so a theme-aware
+       ink would lighten in dark mode and lose contrast on the light mint. */
+    color: #0a7268;
+  }
+  /* Nested numbered sub-rules (the spelling rules). */
+  .notes-steps {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .notes-step {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+  }
+  .notes-step-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .notes-step-num {
+    flex: none;
+    inline-size: 22px;
+    block-size: 22px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-pill);
+    background: var(--color-primary);
+    color: var(--color-text-inverse);
+    font-family: var(--font-en);
+    font-weight: 900;
+    font-size: 12px;
+  }
+  .notes-step-title {
+    font-family: var(--font-en);
+    font-weight: 800;
+    font-size: 15px;
+    color: var(--color-text-1);
+  }
+  .notes-step-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding-inline-start: calc(22px + var(--space-2));
+  }
+}
+
 /* ─── Phase 6 — route fade + lesson-complete confetti ─── */
 @layer components {
   /* Per-navigation fade-up (app/template.tsx re-mounts this on every route). */

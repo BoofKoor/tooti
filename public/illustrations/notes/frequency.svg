@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 348 206" width="348" height="206" font-family="system-ui,-apple-system,Segoe UI,Roboto,sans-serif">
+<rect x="25.0" y="92.0" width="26" height="76.0" rx="4" fill="#65cec0"/>
+<text x="38.0" y="161.0" transform="rotate(-90 38.0 161.0)" text-anchor="start" font-size="10.5" font-weight="700" fill="#ffffff" letter-spacing="0.2">Never</text>
+<text x="38.0" y="184" text-anchor="middle" font-size="9.5" font-weight="700" fill="#5a6b66">0%</text>
+<rect x="59.0" y="89.2" width="26" height="78.8" rx="4" fill="#5ac0b2"/>
+<text x="72.0" y="161.0" transform="rotate(-90 72.0 161.0)" text-anchor="start" font-size="10.5" font-weight="700" fill="#ffffff" letter-spacing="0.2">Rarely</text>
+<text x="72.0" y="184" text-anchor="middle" font-size="9.5" font-weight="700" fill="#5a6b66">5%</text>
+<rect x="93.0" y="83.6" width="26" height="84.4" rx="4" fill="#4eb1a4"/>
+<text x="106.0" y="161.0" transform="rotate(-90 106.0 161.0)" text-anchor="start" font-size="10.5" font-weight="700" fill="#ffffff" letter-spacing="0.2">Seldom</text>
+<text x="106.0" y="184" text-anchor="middle" font-size="9.5" font-weight="700" fill="#5a6b66">15%</text>
+<rect x="127.0" y="75.2" width="26" height="92.8" rx="4" fill="#42a297"/>
+<text x="140.0" y="161.0" transform="rotate(-90 140.0 161.0)" text-anchor="start" font-size="10.5" font-weight="700" fill="#ffffff" letter-spacing="0.2">Occasionally</text>
+<text x="140.0" y="184" text-anchor="middle" font-size="9.5" font-weight="700" fill="#5a6b66">30%</text>
+<rect x="161.0" y="64.0" width="26" height="104.0" rx="4" fill="#379489"/>
+<text x="174.0" y="161.0" transform="rotate(-90 174.0 161.0)" text-anchor="start" font-size="10.5" font-weight="700" fill="#ffffff" letter-spacing="0.2">Sometimes</text>
+<text x="174.0" y="184" text-anchor="middle" font-size="9.5" font-weight="700" fill="#5a6b66">50%</text>
+<rect x="195.0" y="52.8" width="26" height="115.2" rx="4" fill="#2c867b"/>
+<text x="208.0" y="161.0" transform="rotate(-90 208.0 161.0)" text-anchor="start" font-size="10.5" font-weight="700" fill="#ffffff" letter-spacing="0.2">Often</text>
+<text x="208.0" y="184" text-anchor="middle" font-size="9.5" font-weight="700" fill="#5a6b66">70%</text>
+<rect x="229.0" y="47.2" width="26" height="120.8" rx="4" fill="#20776e"/>
+<text x="242.0" y="161.0" transform="rotate(-90 242.0 161.0)" text-anchor="start" font-size="10.5" font-weight="700" fill="#ffffff" letter-spacing="0.2">Generally</text>
+<text x="242.0" y="184" text-anchor="middle" font-size="9.5" font-weight="700" fill="#5a6b66">80%</text>
+<rect x="263.0" y="41.6" width="26" height="126.4" rx="4" fill="#146860"/>
+<text x="276.0" y="161.0" transform="rotate(-90 276.0 161.0)" text-anchor="start" font-size="10.5" font-weight="700" fill="#ffffff" letter-spacing="0.2">Usually</text>
+<text x="276.0" y="184" text-anchor="middle" font-size="9.5" font-weight="700" fill="#5a6b66">90%</text>
+<rect x="297.0" y="36.0" width="26" height="132.0" rx="4" fill="#095a52"/>
+<text x="310.0" y="161.0" transform="rotate(-90 310.0 161.0)" text-anchor="start" font-size="10.5" font-weight="700" fill="#ffffff" letter-spacing="0.2">Always</text>
+<text x="310.0" y="184" text-anchor="middle" font-size="9.5" font-weight="700" fill="#5a6b66">100%</text>
+</svg>

@@ -54,6 +54,12 @@ const lessons = [
     order: 3,
     kind: LessonKind.LESSON,
   },
+  {
+    slug: 'present-simple-notes',
+    title: 'Important Notes',
+    order: 4,
+    kind: LessonKind.LESSON,
+  },
 ];
 
 // ── Learn-stage sections (present-simple-learn) — content shapes are the
@@ -550,14 +556,178 @@ const structureSection: SectionSeed = {
   },
 };
 
+// ── Important-Notes stage (present-simple-notes) — Stage 4: a single scrollable
+// reference of themed sections (frequency/time expressions, spelling rules, and
+// negative questions). Each section is a card with a green title and an ordered
+// list of blocks; two themed illustrations are embedded. English-only; <b> marks
+// a highlighted span. Rendered by the dedicated NotesGuide view. ──
+const notesSection: SectionSeed = {
+  order: 1,
+  kind: SectionKind.READING,
+  titleEn: 'Important Notes',
+  titleFa: '',
+  content: {
+    notes: {
+      heading: 'Present Simple: Important Notes',
+      sections: [
+        {
+          title: 'Adverbs of Frequency',
+          blocks: [
+            { kind: 'text', text: 'We use adverbs of frequency to show how often something happens.' },
+            {
+              kind: 'examples',
+              items: [
+                'Tom <b>usually</b> gets up at 6:00 a.m.',
+                'She <b>always</b> arrives on time.',
+                'I <b>often</b> listen to music after work.',
+              ],
+            },
+            { kind: 'image', src: '/illustrations/notes/frequency.svg' },
+          ],
+        },
+        {
+          title: 'Specific Time Expressions',
+          blocks: [
+            { kind: 'text', text: 'These expressions show a regular time or schedule.' },
+            {
+              kind: 'examples',
+              items: [
+                'Football practice starts at <b>4:00 p.m. every day</b>.',
+                'I go to the gym <b>every week</b>.',
+                'They play tennis <b>on Saturdays</b>.',
+              ],
+            },
+            { kind: 'image', src: '/illustrations/notes/schedule.svg' },
+          ],
+        },
+        {
+          title: 'Other Time Expressions',
+          blocks: [
+            { kind: 'text', text: 'These expressions are also common with the present simple.' },
+            {
+              kind: 'examples',
+              items: [
+                'I play football <b>twice a week</b>.',
+                'She studies <b>in the evening</b>.',
+                'We watch TV <b>after dinner</b>.',
+              ],
+            },
+            { kind: 'image', src: '/illustrations/notes/evening.svg' },
+          ],
+        },
+        {
+          title: 'Spelling Rules for He / She / It',
+          blocks: [
+            { kind: 'text', text: 'When the subject is he, she, or it, the verb changes.' },
+            {
+              kind: 'steps',
+              items: [
+                {
+                  title: 'Add -s',
+                  blocks: [
+                    { kind: 'text', text: 'Add -s to most verbs.' },
+                    {
+                      kind: 'transforms',
+                      items: [
+                        { from: 'work', to: 'works' },
+                        { from: 'play', to: 'plays' },
+                        { from: 'read', to: 'reads' },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  title: 'Add -es',
+                  blocks: [
+                    {
+                      kind: 'text',
+                      text: 'Add -es to verbs ending in <b>-o, -ch, -sh, -ss, -x, or -z</b>.',
+                    },
+                    {
+                      kind: 'transforms',
+                      items: [
+                        { from: 'go', to: 'goes' },
+                        { from: 'watch', to: 'watches' },
+                        { from: 'wash', to: 'washes' },
+                        { from: 'pass', to: 'passes' },
+                        { from: 'mix', to: 'mixes' },
+                        { from: 'buzz', to: 'buzzes' },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  title: 'Change y → ies',
+                  blocks: [
+                    {
+                      kind: 'text',
+                      text: 'If a verb ends in a consonant + y, change y to ies.',
+                    },
+                    {
+                      kind: 'transforms',
+                      items: [
+                        { from: 'stu<b>dy</b>', to: 'studies' },
+                        { from: 't<b>ry</b>', to: 'tries' },
+                        { from: 'rep<b>ly</b>', to: 'replies' },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  title: 'Keep y and Add -s',
+                  blocks: [
+                    {
+                      kind: 'text',
+                      text: 'If a verb ends in a vowel + y, keep y and add -s.',
+                    },
+                    {
+                      kind: 'transforms',
+                      items: [
+                        { from: 'pl<b>a</b>y', to: 'plays' },
+                        { from: 'enj<b>o</b>y', to: 'enjoys' },
+                        { from: 'b<b>u</b>y', to: 'buys' },
+                      ],
+                    },
+                    { kind: 'image', src: '/illustrations/notes/vowels.svg', caption: 'vowels' },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          title: 'Negative Questions',
+          blocks: [
+            {
+              kind: 'text',
+              text: 'We use negative questions to show <b>surprise</b> or <b>to check information</b>.',
+            },
+            { kind: 'formula', label: 'Structure:', text: "Don't/Doesn't + Subject + Verb?" },
+            {
+              kind: 'examples',
+              items: [
+                '<b>Don\'t</b> you play football?',
+                '<b>Doesn\'t</b> Tom work at a sports club?',
+                '<b>Doesn\'t</b> she live near here?',
+              ],
+            },
+            { kind: 'image', src: '/illustrations/notes/questions.svg' },
+          ],
+        },
+      ],
+    },
+  },
+};
+
 // Sections by lesson — the Learn stage's teaching sections, the Story stage's
-// narrative and the Usage / Structure references. The main loop creates whatever
-// a lesson lists here (practice/test/listening lessons have none).
+// narrative and the Usage / Structure / Notes references. The main loop creates
+// whatever a lesson lists here (practice/test/listening lessons have none).
 const sectionsByLesson: Record<string, SectionSeed[]> = {
   'present-simple-learn': learnSections,
   'present-simple-story': [storySection],
   'present-simple-usage': [usageSection],
   'present-simple-structure': [structureSection],
+  'present-simple-notes': [notesSection],
 };
 
 type ExerciseSeed = {
@@ -679,6 +849,7 @@ const exercisesByLesson: Record<string, ExerciseSeed[]> = {
   'present-simple-story': [],
   'present-simple-usage': [],
   'present-simple-structure': [],
+  'present-simple-notes': [],
   'present-simple-listening': listenItems(1, [
     {
       sentence: 'She drinks a glass of milk.',
