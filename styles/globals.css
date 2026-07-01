@@ -4520,7 +4520,10 @@
     display: inline-block;
     padding-top: 20px;
     margin-top: 2px;
-    font-weight: 700;
+    /* The phrase itself reads as plain body text — colour and weight inherit
+       from the example line; only the braced label above marks it. */
+    color: inherit;
+    font-weight: inherit;
     vertical-align: bottom;
   }
   .struct-ann::before {
@@ -4548,23 +4551,30 @@
     border-block-end: none;
     border-radius: 3px 3px 0 0;
   }
-  .struct-ann.ann-short {
-    color: var(--color-xp-ink);
-  }
+  /* Label + bracket carry the only colour — a distinct dual: Short = orange,
+     Long = violet (both differ from the teal verbs, green titles and gold
+     "Examples:" so they don't compete). */
   .struct-ann.ann-short::before {
-    color: var(--color-xp-ink);
+    color: var(--color-streak-ink);
   }
   .struct-ann.ann-short::after {
-    border-color: var(--color-xp);
-  }
-  .struct-ann.ann-long {
-    color: var(--color-primary-ink);
+    border-color: var(--color-streak);
   }
   .struct-ann.ann-long::before {
-    color: var(--color-primary-ink);
+    color: #6d28d9;
   }
   .struct-ann.ann-long::after {
-    border-color: var(--color-primary);
+    border-color: #8b5cf6;
+  }
+  /* Brighten both on dark so the small labels stay legible. */
+  html.dark .struct-ann.ann-short::before {
+    color: var(--color-streak);
+  }
+  html.dark .struct-ann.ann-long::before {
+    color: #c4b5fd;
+  }
+  html.dark .struct-ann.ann-long::after {
+    border-color: #a78bfa;
   }
 }
 
