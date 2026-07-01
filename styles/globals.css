@@ -4800,6 +4800,169 @@
   }
 }
 
+/* ─── Summary stage — end-of-unit recap (single scroll) ─── */
+@layer components {
+  .sum-guide {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    max-inline-size: 40rem;
+    margin-inline: auto;
+  }
+  .sum-heading {
+    font-family: var(--font-en);
+    font-weight: 900;
+    font-size: 22px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--color-text-1);
+  }
+  /* Themed illustration on the theme-static mint chip (legible in both themes). */
+  .sum-illus {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(180deg, #eafaf7, #dff5f1);
+    border: 1px solid var(--color-border);
+  }
+  .sum-illus img {
+    display: block;
+    block-size: auto;
+    inline-size: auto;
+    max-inline-size: 100%;
+    max-block-size: 150px;
+    object-fit: contain;
+  }
+  /* Each top section is a card. */
+  .sum-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-1);
+  }
+  /* Section title — green. */
+  .sum-title {
+    font-family: var(--font-en);
+    font-weight: 800;
+    font-size: 18px;
+    line-height: 1.25;
+    color: var(--color-correct);
+  }
+  .sum-entry {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  /* Entry sub-heading — orange. */
+  .sum-label {
+    font-family: var(--font-en);
+    font-weight: 800;
+    font-size: 15px;
+    color: var(--color-streak-ink);
+  }
+  /* A compact pattern chip (e.g. "S + V", "Do + S + V?"). */
+  .sum-pattern {
+    align-self: flex-start;
+    padding: 3px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--color-primary-tint);
+    color: var(--color-primary-ink);
+    font-family: var(--font-en);
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.01em;
+  }
+  /* Wrapped row of word tags (adverbs / time expressions). */
+  .sum-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .sum-chip {
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    font-family: var(--font-en);
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--color-text-2);
+  }
+  /* Example line — neutral, with a teal accent bar. */
+  .sum-ex {
+    border-inline-start: 3px solid var(--color-primary);
+    padding-inline-start: var(--space-3);
+    font-family: var(--font-en);
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--color-text-1);
+  }
+  .sum-examples {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  /* Person → pattern + example rows (Structure recap). */
+  .sum-rows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .sum-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .sum-row-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .sum-person {
+    font-family: var(--font-en);
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--color-text-2);
+  }
+  /* Spelling transforms — reuse the Notes look (teal arrow, bold target). */
+  .sum-transforms {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .sum-transforms li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-en);
+    font-size: 15px;
+  }
+  .sum-transforms .tf-from {
+    color: var(--color-text-2);
+  }
+  .sum-transforms .tf-arrow {
+    color: var(--color-primary);
+    font-weight: 900;
+  }
+  .sum-transforms .tf-to {
+    font-weight: 800;
+    color: var(--color-text-1);
+  }
+}
+
 /* ─── Phase 6 — route fade + lesson-complete confetti ─── */
 @layer components {
   /* Per-navigation fade-up (app/template.tsx re-mounts this on every route). */
