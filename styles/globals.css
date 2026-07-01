@@ -4731,9 +4731,12 @@
   }
   .notes-illus img {
     display: block;
-    block-size: 128px;
     inline-size: auto;
-    max-inline-size: 90%;
+    block-size: auto;
+    /* Cap both dimensions so the wide frequency chart stays legible while the
+       taller character illustrations don't overpower the card. */
+    max-inline-size: 100%;
+    max-block-size: 150px;
     object-fit: contain;
   }
   .notes-caption {

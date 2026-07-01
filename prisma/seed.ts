@@ -597,6 +597,7 @@ const notesSection: SectionSeed = {
                 'They play tennis <b>on Saturdays</b>.',
               ],
             },
+            { kind: 'image', src: '/illustrations/notes/schedule.svg' },
           ],
         },
         {
@@ -611,6 +612,7 @@ const notesSection: SectionSeed = {
                 'We watch TV <b>after dinner</b>.',
               ],
             },
+            { kind: 'image', src: '/illustrations/notes/evening.svg' },
           ],
         },
         {
@@ -709,6 +711,7 @@ const notesSection: SectionSeed = {
                 '<b>Doesn\'t</b> she live near here?',
               ],
             },
+            { kind: 'image', src: '/illustrations/notes/questions.svg' },
           ],
         },
       ],
