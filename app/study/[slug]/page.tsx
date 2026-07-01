@@ -5,6 +5,7 @@ import type { SectionContent } from '@/lib/lesson-content';
 import { getLearnPath, getLessonWithExercises } from '@/lib/learn-data';
 import { StudyReader, type ReaderSection } from './_reader';
 import { UsageGuide } from './_usage-guide';
+import { StructureGuide } from './_structure-guide';
 
 /*
  * Learn-stage page (Phase 5B) — server wrapper for the sectioned reader. Keeps
@@ -28,16 +29,26 @@ export default async function StudyPage({ params }: { params: Promise<{ slug: st
   const node = path.flatMap((u) => u.lessons).find((l) => l.slug === slug);
   if (!node?.unlocked) redirect('/learn');
 
-  // A Usage guide owns the whole screen (its own scrollable illustrated view),
+  // A Usage / Structure guide owns the whole screen (its own scrollable view),
   // so it short-circuits the paged reader.
-  const usage = (lesson.sections[0]?.content as SectionContent | undefined)?.usage;
-  if (usage) {
+  const firstContent = lesson.sections[0]?.content as SectionContent | undefined;
+  if (firstContent?.usage) {
     return (
       <UsageGuide
         slug={slug}
         unitTitle={lesson.unit.title}
         completed={node.completed}
-        guide={usage}
+        guide={firstContent.usage}
+      />
+    );
+  }
+  if (firstContent?.structure) {
+    return (
+      <StructureGuide
+        slug={slug}
+        unitTitle={lesson.unit.title}
+        completed={node.completed}
+        guide={firstContent.structure}
       />
     );
   }
