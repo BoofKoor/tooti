@@ -38,6 +38,31 @@ export type SectionContent = {
   // A LESSON whose section carries a `structure` guide renders the sentence-
   // pattern reference (StructureGuide) instead of the paged reader.
   structure?: StructureGuide;
+  // A LESSON whose section carries a `notes` guide renders the illustrated
+  // "important notes" reference (NotesGuide) instead of the paged reader.
+  notes?: NotesGuide;
+};
+
+/**
+ * "Important Notes" reference (e.g. "Present Simple: Important Notes") — a single
+ * scrollable screen of themed sections. Each section is a card with a green title
+ * and an ordered list of content blocks (prose, gold-labelled examples, spelling
+ * transformations, a pattern/formula, an illustration, or nested numbered rules).
+ * English-only. Inline `<b>…</b>` marks a highlighted span in any text/example.
+ */
+export type NoteTransform = { from: string; to: string }; // `from` may carry <b>
+export type NoteBlock =
+  | { kind: 'text'; text: string } // a paragraph (supports <b> highlights)
+  | { kind: 'examples'; items: string[] } // gold "Examples:" + bullet list
+  | { kind: 'transforms'; items: NoteTransform[] } // gold "Examples:" + "a → b" rows
+  | { kind: 'formula'; label?: string; text: string } // a labelled pattern box
+  | { kind: 'image'; src: string; caption?: string; alt?: string } // themed illustration; alt defaults to decorative
+  | { kind: 'steps'; items: NoteStep[] }; // nested numbered sub-rules
+export type NoteStep = { title: string; blocks: NoteBlock[] };
+export type NoteSection = { title: string; blocks: NoteBlock[] };
+export type NotesGuide = {
+  heading: string;
+  sections: NoteSection[];
 };
 
 /**
