@@ -4352,6 +4352,222 @@
   }
 }
 
+/* ─── Structure stage — sentence-pattern reference (single scroll) ─── */
+@layer components {
+  .struct-guide {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    max-inline-size: 40rem;
+    margin-inline: auto;
+  }
+  .struct-heading {
+    font-family: var(--font-en);
+    font-weight: 900;
+    font-size: 22px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--color-text-1);
+  }
+  .struct-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .struct-group-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  /* Solid polarity badge: green (+), coral (−), teal (?). */
+  .struct-badge {
+    flex: none;
+    inline-size: 30px;
+    block-size: 30px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-md);
+    font-family: var(--font-en);
+    font-weight: 900;
+    font-size: 18px;
+    line-height: 1;
+    color: #fff;
+  }
+  .struct-badge.pol-plus {
+    background: var(--color-correct);
+  }
+  .struct-badge.pol-minus {
+    background: var(--color-error);
+  }
+  .struct-badge.pol-quest {
+    background: var(--color-primary);
+  }
+  /* Group title — green. */
+  .struct-title {
+    font-family: var(--font-en);
+    font-weight: 800;
+    font-size: 18px;
+    line-height: 1.2;
+    color: var(--color-correct);
+  }
+  /* One person-block card. */
+  .struct-block {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-1);
+  }
+  .struct-person {
+    align-self: flex-start;
+    padding: 3px 12px;
+    border-radius: var(--radius-pill);
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    font-family: var(--font-en);
+    font-weight: 800;
+    font-size: 13px;
+    color: var(--color-text-2);
+  }
+  /* Formula "bricks" — tinted grammar slots joined by muted connectors. */
+  .struct-formula {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-2);
+  }
+  .struct-formula .brick {
+    padding: 5px 11px;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    font-family: var(--font-en);
+    font-weight: 800;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .brick-subject {
+    background: var(--color-primary-tint);
+    border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
+    color: var(--color-primary-ink);
+  }
+  .brick-verb {
+    background: var(--color-correct-tint);
+    border-color: color-mix(in srgb, var(--color-correct) 30%, transparent);
+    color: var(--color-correct-ink);
+  }
+  .brick-aux {
+    background: var(--color-error-tint);
+    border-color: color-mix(in srgb, var(--color-error) 30%, transparent);
+    color: var(--color-error-ink);
+  }
+  .brick-suffix {
+    background: var(--color-xp-tint);
+    border-color: color-mix(in srgb, var(--color-xp) 35%, transparent);
+    color: var(--color-xp-ink);
+  }
+  .struct-formula .struct-conn {
+    font-family: var(--font-en);
+    font-weight: 900;
+    font-size: 14px;
+    color: var(--color-text-3);
+  }
+  /* Examples — gold label (mirrors Usage), neutral sentences, teal bold verbs. */
+  .struct-ex-label {
+    font-family: var(--font-en);
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    color: var(--color-xp);
+  }
+  .struct-examples {
+    display: flex;
+    flex-direction: column;
+    /* Wide row gap so a braced label above a line never crowds the line above. */
+    gap: var(--space-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .struct-ex {
+    position: relative;
+    padding-inline-start: var(--space-4);
+    font-family: var(--font-en);
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--color-text-1);
+  }
+  .struct-ex::before {
+    content: '•';
+    position: absolute;
+    inset-inline-start: 0;
+    color: var(--color-primary);
+    font-weight: 900;
+  }
+  .struct-verb {
+    font-weight: 800;
+    color: var(--color-primary-ink);
+  }
+  /* A short/long-answer span: the phrase with a labelled bracket above it. The
+     inline-block reserves the label+bracket height so nothing overlaps. */
+  .struct-ann {
+    position: relative;
+    display: inline-block;
+    padding-top: 20px;
+    margin-top: 2px;
+    font-weight: 700;
+    vertical-align: bottom;
+  }
+  .struct-ann::before {
+    /* the label — kept on one line and centred over the phrase even when it is
+       a touch wider than a short phrase like "Yes, I do". */
+    content: attr(data-label);
+    position: absolute;
+    inset-block-start: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .struct-ann::after {
+    /* the ⌐¬ bracket under the label, spanning the phrase */
+    content: '';
+    position: absolute;
+    inset-block-start: 14px;
+    inset-inline: 1px;
+    block-size: 5px;
+    border: 1.5px solid;
+    border-block-end: none;
+    border-radius: 3px 3px 0 0;
+  }
+  .struct-ann.ann-short {
+    color: var(--color-xp-ink);
+  }
+  .struct-ann.ann-short::before {
+    color: var(--color-xp-ink);
+  }
+  .struct-ann.ann-short::after {
+    border-color: var(--color-xp);
+  }
+  .struct-ann.ann-long {
+    color: var(--color-primary-ink);
+  }
+  .struct-ann.ann-long::before {
+    color: var(--color-primary-ink);
+  }
+  .struct-ann.ann-long::after {
+    border-color: var(--color-primary);
+  }
+}
+
 /* ─── Phase 6 — route fade + lesson-complete confetti ─── */
 @layer components {
   /* Per-navigation fade-up (app/template.tsx re-mounts this on every route). */

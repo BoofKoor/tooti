@@ -208,7 +208,11 @@ function buildLayout(units: LearnUnit[]): {
         glyph: glyphForKind(lesson.kind),
         state: lesson.completed ? 'done' : isCurrent ? 'current' : 'locked',
         boss: lesson.kind === 'SECTION_TEST',
-        crown: lesson.completed && lesson.crownLevel > 0 ? lesson.crownLevel : null,
+        // Only badge a *number* once the lesson has actually been levelled up
+        // (crown 2+). Content lessons and stories can't gain levels — they land
+        // at crown 1 on first completion — so a "1" on every finished node just
+        // read as noise; the done state (check + gold) already means "done".
+        crown: lesson.completed && lesson.crownLevel > 1 ? lesson.crownLevel : null,
         top,
         left,
         href: hrefForKind(lesson.kind, lesson.slug),

@@ -35,6 +35,40 @@ export type SectionContent = {
   // A LESSON whose section carries a `usage` guide renders the scrollable
   // illustrated reference (UsageGuide) instead of the paged reader.
   usage?: UsageGuide;
+  // A LESSON whose section carries a `structure` guide renders the sentence-
+  // pattern reference (StructureGuide) instead of the paged reader.
+  structure?: StructureGuide;
+};
+
+/**
+ * Sentence-structure reference (e.g. "Simple Present: Structure") — affirmative /
+ * negative / interrogative groups, each split by person, each showing a colour-
+ * coded formula of grammar "bricks" plus worked examples. English-only.
+ *
+ * Example strings carry light inline markup the renderer expands:
+ *   <b>…</b>  → the highlighted verb/auxiliary
+ *   <i>…</i>  → a span braced + labelled "Short answer"
+ *   <u>…</u>  → a span braced + labelled "Long answer"
+ */
+export type FormulaToken = {
+  text: string;
+  // 'plain' renders as a muted connector (+, ?); the rest render as coloured
+  // bricks: subject=teal, verb=green, aux=coral (do/does/not), suffix=gold.
+  kind: 'subject' | 'verb' | 'aux' | 'suffix' | 'plain';
+};
+export type StructureBlock = {
+  person: string; // e.g. 'I / You / We / They' (shown as a pill)
+  formula: FormulaToken[];
+  examples: string[]; // authored with <b>/<i>/<u> markup
+};
+export type StructureGroup = {
+  title: string; // rendered green, e.g. 'Affirmative Sentences'
+  polarity: '+' | '-' | '?'; // drives the group badge (green / coral / blue)
+  blocks: StructureBlock[];
+};
+export type StructureGuide = {
+  heading: string;
+  groups: StructureGroup[];
 };
 
 /**

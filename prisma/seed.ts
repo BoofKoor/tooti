@@ -48,6 +48,12 @@ const lessons = [
     order: 2,
     kind: LessonKind.LESSON,
   },
+  {
+    slug: 'present-simple-structure',
+    title: 'Structure',
+    order: 3,
+    kind: LessonKind.LESSON,
+  },
 ];
 
 // ── Learn-stage sections (present-simple-learn) — content shapes are the
@@ -418,13 +424,140 @@ const usageSection: SectionSeed = {
   },
 };
 
+// ── Structure stage (present-simple-structure) — Stage 3: a single scrollable
+// reference of sentence patterns (affirmative / negative / interrogative), each
+// split by person with a colour-coded formula of grammar "bricks" and worked
+// examples. English-only; rendered by the dedicated StructureGuide view. In the
+// examples <b> marks the verb/auxiliary, <i> a short answer and <u> a long
+// answer (both drawn as a braced, labelled span). ──
+const structureSection: SectionSeed = {
+  order: 1,
+  kind: SectionKind.READING,
+  titleEn: 'Structure',
+  titleFa: '',
+  content: {
+    structure: {
+      heading: 'Simple Present: Structure',
+      groups: [
+        {
+          title: 'Affirmative Sentences',
+          polarity: '+',
+          blocks: [
+            {
+              person: 'I / You / We / They',
+              formula: [
+                { text: 'S', kind: 'subject' },
+                { text: '+', kind: 'plain' },
+                { text: 'V (base form)', kind: 'verb' },
+              ],
+              examples: [
+                'I <b>play</b> football twice a week.',
+                'We <b>study</b> English every day.',
+                'They <b>live</b> in a small town.',
+              ],
+            },
+            {
+              person: 'He / She / It',
+              formula: [
+                { text: 'S', kind: 'subject' },
+                { text: '+', kind: 'plain' },
+                { text: 'V-s / es', kind: 'verb' },
+              ],
+              examples: [
+                'Tom <b>works</b> at a sports club.',
+                'She <b>reads</b> a book every evening.',
+                'My father <b>drives</b> to work every day.',
+              ],
+            },
+          ],
+        },
+        {
+          title: 'Negative Sentences',
+          polarity: '-',
+          blocks: [
+            {
+              person: 'I / You / We / They',
+              formula: [
+                { text: 'S', kind: 'subject' },
+                { text: '+', kind: 'plain' },
+                { text: "do not (don't)", kind: 'aux' },
+                { text: '+', kind: 'plain' },
+                { text: 'V (base form)', kind: 'verb' },
+              ],
+              examples: [
+                "I <b>don't like</b> basketball.",
+                "We <b>don't eat</b> fast food every day.",
+                "They <b>don't watch</b> TV in the morning.",
+              ],
+            },
+            {
+              person: 'He / She / It',
+              formula: [
+                { text: 'S', kind: 'subject' },
+                { text: '+', kind: 'plain' },
+                { text: "does not (doesn't)", kind: 'aux' },
+                { text: '+', kind: 'plain' },
+                { text: 'V (base form)', kind: 'verb' },
+              ],
+              examples: [
+                "He <b>doesn't drink</b> coffee.",
+                "She <b>doesn't work</b> on Saturdays.",
+                "My brother <b>doesn't play</b> tennis.",
+              ],
+            },
+          ],
+        },
+        {
+          title: 'Interrogative Sentences',
+          polarity: '?',
+          blocks: [
+            {
+              person: 'I / You / We / They',
+              formula: [
+                { text: 'Do', kind: 'aux' },
+                { text: '+', kind: 'plain' },
+                { text: 'S', kind: 'subject' },
+                { text: '+', kind: 'plain' },
+                { text: 'V (base form)', kind: 'verb' },
+                { text: '?', kind: 'plain' },
+              ],
+              examples: [
+                '<b>Do</b> you <b>play</b> football? <i>Yes, I do</i>. <u>I play football</u>.',
+                "<b>Do</b> they <b>live</b> near here? <i>No, they don't</i>. <u>They don’t live near here</u>.",
+                '<b>Do</b> you <b>study</b> English every day? Yes, I do. I study for one hour every evening.',
+              ],
+            },
+            {
+              person: 'He / She / It',
+              formula: [
+                { text: 'Does', kind: 'aux' },
+                { text: '+', kind: 'plain' },
+                { text: 'S', kind: 'subject' },
+                { text: '+', kind: 'plain' },
+                { text: 'V (base form)', kind: 'verb' },
+                { text: '?', kind: 'plain' },
+              ],
+              examples: [
+                '<b>Does</b> Ben <b>like</b> football? <i>Yes, he does</i>. <u>He likes football</u>.',
+                "<b>Does</b> she <b>work</b> at a hospital? <i>No, she doesn't</i>. <u>She doesn't work at a hospital</u>.",
+                '<b>Does</b> your brother <b>drive</b> to work? Yes, he does. He drives to work every day.',
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  },
+};
+
 // Sections by lesson — the Learn stage's teaching sections, the Story stage's
-// single narrative section and the Usage stage's illustrated reference. The main
-// loop creates whatever a lesson lists here (practice/test/listening have none).
+// narrative and the Usage / Structure references. The main loop creates whatever
+// a lesson lists here (practice/test/listening lessons have none).
 const sectionsByLesson: Record<string, SectionSeed[]> = {
   'present-simple-learn': learnSections,
   'present-simple-story': [storySection],
   'present-simple-usage': [usageSection],
+  'present-simple-structure': [structureSection],
 };
 
 type ExerciseSeed = {
@@ -545,6 +678,7 @@ const exercisesByLesson: Record<string, ExerciseSeed[]> = {
   'present-simple-learn': [],
   'present-simple-story': [],
   'present-simple-usage': [],
+  'present-simple-structure': [],
   'present-simple-listening': listenItems(1, [
     {
       sentence: 'She drinks a glass of milk.',
