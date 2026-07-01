@@ -60,6 +60,12 @@ const lessons = [
     order: 4,
     kind: LessonKind.LESSON,
   },
+  {
+    slug: 'present-simple-summary',
+    title: 'Summary',
+    order: 5,
+    kind: LessonKind.LESSON,
+  },
 ];
 
 // ── Learn-stage sections (present-simple-learn) — content shapes are the
@@ -719,15 +725,113 @@ const notesSection: SectionSeed = {
   },
 };
 
+// ── Summary stage (present-simple-summary) — Stage 5: the end-of-unit recap.
+// Three green-titled sections (Uses / Structure / Key Notes) of orange-labelled
+// entries that condense the whole unit, with a themed recap illustration under
+// the heading. English-only; rendered by the dedicated SummaryGuide view. ──
+const summarySection: SectionSeed = {
+  order: 1,
+  kind: SectionKind.READING,
+  titleEn: 'Summary',
+  titleFa: '',
+  content: {
+    summary: {
+      heading: 'Present Simple: Summary',
+      image: '/illustrations/summary/recap.svg',
+      sections: [
+        {
+          title: 'Uses',
+          entries: [
+            { label: 'Habits and routines', examples: ['Tom usually gets up at 6:00 a.m.'] },
+            { label: 'Facts and general truths', examples: ['The sun rises in the east.'] },
+            {
+              label: 'Feelings, states, and opinions',
+              examples: ['He likes his job because he loves sports.'],
+            },
+            {
+              label: 'Schedules and timetables',
+              examples: ['Football practice starts at 4:00 p.m. every day.'],
+            },
+          ],
+        },
+        {
+          title: 'Structure',
+          entries: [
+            {
+              label: 'Affirmative (+)',
+              rows: [
+                { person: 'I / You / We / They', pattern: 'S + V', example: 'I play football.' },
+                { person: 'He / She / It', pattern: 'S + V-s/es', example: 'Tom works at a sports club.' },
+              ],
+            },
+            {
+              label: 'Negative (−)',
+              rows: [
+                {
+                  person: 'I / You / We / They',
+                  pattern: "S + don't + V",
+                  example: "I don't like basketball.",
+                },
+                { person: 'He / She / It', pattern: "S + doesn't + V", example: "He doesn't drink coffee." },
+              ],
+            },
+            {
+              label: 'Interrogative (?)',
+              rows: [
+                { person: 'I / You / We / They', pattern: 'Do + S + V?', example: 'Do you play football?' },
+                {
+                  person: 'He / She / It',
+                  pattern: 'Does + S + V?',
+                  example: 'Does Tom work at a sports club?',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          title: 'Key Notes',
+          entries: [
+            {
+              label: 'Adverbs of Frequency',
+              chips: ['always', 'usually', 'often', 'sometimes', 'rarely', 'never'],
+              examples: ['Tom usually gets up at 6:00 a.m.'],
+            },
+            {
+              label: 'Common Time Expressions',
+              chips: ['every day', 'every week', 'on Mondays', 'in the morning', 'twice a week'],
+              examples: ['I play football twice a week.'],
+            },
+            {
+              label: 'Spelling Rules (He / She / It)',
+              rows: [
+                { person: 'Add -s', pattern: 'work → works' },
+                { person: 'Add -es', pattern: 'go → goes' },
+                { person: 'Change y → ies', pattern: 'study → studies' },
+                { person: 'Vowel + y → add -s', pattern: 'play → plays' },
+              ],
+            },
+            {
+              label: 'Negative Questions',
+              pattern: "Don't / Doesn't + S + V?",
+              examples: ["Don't you play football?", "Doesn't Tom work at a sports club?"],
+            },
+          ],
+        },
+      ],
+    },
+  },
+};
+
 // Sections by lesson — the Learn stage's teaching sections, the Story stage's
-// narrative and the Usage / Structure / Notes references. The main loop creates
-// whatever a lesson lists here (practice/test/listening lessons have none).
+// narrative and the Usage / Structure / Notes / Summary references. The main loop
+// creates whatever a lesson lists here (practice/test/listening lessons have none).
 const sectionsByLesson: Record<string, SectionSeed[]> = {
   'present-simple-learn': learnSections,
   'present-simple-story': [storySection],
   'present-simple-usage': [usageSection],
   'present-simple-structure': [structureSection],
   'present-simple-notes': [notesSection],
+  'present-simple-summary': [summarySection],
 };
 
 type ExerciseSeed = {
@@ -850,6 +954,7 @@ const exercisesByLesson: Record<string, ExerciseSeed[]> = {
   'present-simple-usage': [],
   'present-simple-structure': [],
   'present-simple-notes': [],
+  'present-simple-summary': [],
   'present-simple-listening': listenItems(1, [
     {
       sentence: 'She drinks a glass of milk.',

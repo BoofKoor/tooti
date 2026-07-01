@@ -7,6 +7,7 @@ import { StudyReader, type ReaderSection } from './_reader';
 import { UsageGuide } from './_usage-guide';
 import { StructureGuide } from './_structure-guide';
 import { NotesGuide } from './_notes-guide';
+import { SummaryGuide } from './_summary-guide';
 
 /*
  * Learn-stage page (Phase 5B) — server wrapper for the sectioned reader. Keeps
@@ -60,6 +61,16 @@ export default async function StudyPage({ params }: { params: Promise<{ slug: st
         unitTitle={lesson.unit.title}
         completed={node.completed}
         guide={firstContent.notes}
+      />
+    );
+  }
+  if (firstContent?.summary) {
+    return (
+      <SummaryGuide
+        slug={slug}
+        unitTitle={lesson.unit.title}
+        completed={node.completed}
+        guide={firstContent.summary}
       />
     );
   }

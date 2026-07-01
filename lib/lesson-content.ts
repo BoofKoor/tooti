@@ -41,6 +41,31 @@ export type SectionContent = {
   // A LESSON whose section carries a `notes` guide renders the illustrated
   // "important notes" reference (NotesGuide) instead of the paged reader.
   notes?: NotesGuide;
+  // A LESSON whose section carries a `summary` guide renders the end-of-unit
+  // recap (SummaryGuide) instead of the paged reader.
+  summary?: SummaryGuide;
+};
+
+/**
+ * End-of-unit recap (e.g. "Present Simple: Summary") — a single scrollable screen
+ * of green-titled sections, each holding orange-labelled entries that condense
+ * what was taught: a use + example, a person → pattern + example row, a chip row
+ * of words, spelling transforms, or a pattern line. English-only.
+ */
+export type SummaryRow = { person?: string; pattern?: string; example?: string };
+export type SummaryEntry = {
+  label: string; // orange sub-heading
+  pattern?: string; // a single pattern line (e.g. "Don't/Doesn't + S + V?")
+  chips?: string[]; // a wrapped row of word tags (adverbs, time expressions)
+  transforms?: NoteTransform[]; // spelling "a → b" rows (reuses the Notes shape)
+  rows?: SummaryRow[]; // person → pattern + example rows (Structure recap)
+  examples?: string[]; // example sentence(s)
+};
+export type SummarySection = { title: string; image?: string; entries: SummaryEntry[] };
+export type SummaryGuide = {
+  heading: string;
+  image?: string; // optional themed hero illustration under the heading
+  sections: SummarySection[];
 };
 
 /**
