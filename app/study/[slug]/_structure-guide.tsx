@@ -49,14 +49,23 @@ function ExampleLine({ text }: { text: string }) {
       {parseExample(text).map((seg, i) => {
         if (seg.kind === 'bold') return <strong key={i} className="struct-verb">{seg.text}</strong>;
         if (seg.kind === 'short' || seg.kind === 'long') {
-          return (
+          const ann = (
             <span
-              key={i}
               className={cn('struct-ann', seg.kind === 'short' ? 'ann-short' : 'ann-long')}
               data-label={seg.kind === 'short' ? 'Short answer' : 'Long answer'}
             >
               {seg.text}
             </span>
+          );
+          // The long answer starts on its own line so its braced label never
+          // collides with the short-answer label sitting on the same row.
+          return seg.kind === 'long' && i > 0 ? (
+            <Fragment key={i}>
+              <br />
+              {ann}
+            </Fragment>
+          ) : (
+            <Fragment key={i}>{ann}</Fragment>
           );
         }
         return <Fragment key={i}>{seg.text}</Fragment>;
